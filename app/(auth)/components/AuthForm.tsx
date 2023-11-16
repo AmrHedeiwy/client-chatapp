@@ -9,7 +9,7 @@ import { Button } from '@/app/components/Button';
 import Input from '@/app/components/inputs/Input';
 import { notify } from '@/app/utils/notifications';
 
-import { useSession } from '@/app/context/AuthContext';
+import { useSession } from '@/app/hooks/useSession';
 import { useRouter } from 'next/navigation';
 import { ErrorProps, FormErrorProps, ResponseProps } from '@/app/types/Axios';
 import Link from '@/app/components/Link';
@@ -25,7 +25,7 @@ export default function AuthForm() {
 
   useEffect(() => {
     if (session.user && session.user.IsVerified) router.push('/users');
-    if (session.user && !session.user.IsVerified) router.push('/email-verification');
+    if (session.user && !session.user.IsVerified) router.push('/email/verify');
   }, [session.user, router]);
 
   const {
@@ -62,7 +62,17 @@ export default function AuthForm() {
     };
 
     axios
-      .post(url, data, options)
+      .post(
+        url,
+        {
+          Username: 'Emna',
+          Email: 'amr.hedeiwy@gmail.com',
+          Password: 'amr@AMR123',
+          ConfirmPassword: 'amr@AMR123',
+          RememberMe: true
+        },
+        options
+      )
       .then((res: AxiosResponse<ResponseProps>) => {
         const { message, redirect } = res.data;
 
@@ -106,6 +116,7 @@ export default function AuthForm() {
           setIsLoading(false);
           const res = localStorage.getItem(action);
 
+          console.log(res);
           if (res === 'success') router.push('/users');
           if (res === 'error') {
             notify(

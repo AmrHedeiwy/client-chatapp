@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from '@/app/context/AuthContext';
+import { useSession } from '@/app/hooks/useSession';
 import { useEffect, useState } from 'react';
 
 export default function EmailVerificationMaskedEmail() {
@@ -8,6 +8,7 @@ export default function EmailVerificationMaskedEmail() {
   const [maskedEmail, setMaskedEmail] = useState<string>('');
 
   useEffect(() => {
+    console.log(session);
     if (!session.user) return;
     const email = session.user?.Email as string;
 
