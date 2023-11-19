@@ -13,7 +13,7 @@ interface InputProps {
   disabled?: boolean;
 }
 
-const Input: React.FC<InputProps> = ({
+const FormInput: React.FC<InputProps> = ({
   id,
   type,
   placeholder,
@@ -35,8 +35,9 @@ const Input: React.FC<InputProps> = ({
           py-3 
           px-6 
           ring-1 
+          rounded-xl
+          outline-none
           text-black 
-          rounded-xl 
           placeholder-gray-600 
           bg-transparent 
           transition`,
@@ -53,4 +54,4 @@ const Input: React.FC<InputProps> = ({
   );
 };
 
-export default Input;
+export default FormInput;

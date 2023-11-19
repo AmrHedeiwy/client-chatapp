@@ -3,6 +3,7 @@
 import clsx from 'clsx';
 import Link from 'next/link';
 import React from 'react';
+import { RxDividerVertical } from 'react-icons/rx';
 
 interface DesktopItemProps {
   label: string;
@@ -29,22 +30,20 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
         href={href}
         className={clsx(
           `
-          group
           flex
           gap-x-3
           rounded-md
-          p-3
+          p-4
           text-sm
           leading-6
           font-semibold
           text-gray-500
-          hover:text-black
-          hover:bg-gray-100
+          hover:bg-neutral-700
           `,
-          active && 'bg-gray-100 text-black'
+          active && ' text-green-600 '
         )}
       >
-        <Icon className="h-6 w-6 shrink-0" />
+        <Icon className="h-7 w-7 shrink-0" />
         <span className="sr-only">{label}</span>
       </Link>
     </li>

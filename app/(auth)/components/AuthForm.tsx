@@ -6,25 +6,25 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import AuthSocialButton from '@/app/(auth)/components/AuthSocialButton';
 import { Button } from '@/app/components/Button';
-import Input from '@/app/components/inputs/Input';
+import FormInput from '@/app/components/inputs/FormInput';
 import { notify } from '@/app/utils/notifications';
 
 import { useSession } from '@/app/hooks/useSession';
 import { useRouter } from 'next/navigation';
 import { ErrorProps, FormErrorProps, ResponseProps } from '@/app/types/Axios';
 import Link from '@/app/components/Link';
-import Checkbox from '@/app/components/inputs/AuthCheckbox';
+import Checkbox from '@/app/components/inputs/Checkbox';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
 export default function AuthForm() {
   const router = useRouter();
-  const [vairant, setVariant] = useState<Variant>('LOGIN');
+  const [variant, setVariant] = useState<Variant>('LOGIN');
   const [isLoading, setIsLoading] = useState(false);
   const session = useSession();
 
   useEffect(() => {
-    if (session.user && session.user.IsVerified) router.push('/users');
+    if (session.user && session.user.IsVerified) router.push('/search'); // change to conversations later
     if (session.user && !session.user.IsVerified) router.push('/email/verify');
   }, [session.user, router]);
 
@@ -46,15 +46,15 @@ export default function AuthForm() {
 
   const toggleVariant = useCallback(() => {
     reset();
-    if (vairant === 'LOGIN') setVariant('REGISTER');
+    if (variant === 'LOGIN') setVariant('REGISTER');
     else setVariant('LOGIN');
-  }, [vairant, reset]);
+  }, [variant, reset]);
 
   const onSumbit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
     const url: string = `http://localhost:5000/auth/${
-      vairant === 'LOGIN' ? 'sign-in' : 'register'
+      variant === 'LOGIN' ? 'sign-in' : 'register'
     }`;
     const options: AxiosRequestConfig = {
       withCredentials: true,
@@ -144,8 +144,8 @@ export default function AuthForm() {
           Or
         </span>
       </div>
-      {vairant === 'REGISTER' && (
-        <Input
+      {variant === 'REGISTER' && (
+        <FormInput
           id="Username"
           placeholder="Your spiecy username"
           type="text"
@@ -153,22 +153,22 @@ export default function AuthForm() {
           errors={errors}
         />
       )}
-      <Input
+      <FormInput
         id="Email"
         placeholder="Your Email"
         type="email"
         register={register}
         errors={errors}
       />
-      <Input
+      <FormInput
         id="Password"
         placeholder="what's the secret word?"
         type="password"
         register={register}
         errors={errors}
       />
-      {vairant === 'REGISTER' && (
-        <Input
+      {variant === 'REGISTER' && (
+        <FormInput
           id="ConfirmPassword"
           placeholder="Confirm the secret word"
           type="password"
@@ -177,7 +177,7 @@ export default function AuthForm() {
         />
       )}
 
-      {vairant === 'LOGIN' && (
+      {variant === 'LOGIN' && (
         <div className="flex w-full">
           <div className="flex-1">
             <label className="inline-flex items-center ml-1 space-x-2">
@@ -195,7 +195,7 @@ export default function AuthForm() {
       )}
 
       <Button type="submit" disabled={isLoading} fullwidth>
-        {vairant === 'LOGIN' ? 'Sign in' : 'Register'}
+        {variant === 'LOGIN' ? 'Sign in' : 'Register'}
       </Button>
       <div
         className="
@@ -208,9 +208,9 @@ export default function AuthForm() {
         text-gray-500
       "
       >
-        <div>{vairant === 'LOGIN' ? 'New to APP_NAME?' : 'Already have an account?'}</div>
+        <div>{variant === 'LOGIN' ? 'New to APP_NAME?' : 'Already have an account?'}</div>
         <div onClick={toggleVariant} className="underline cursor-pointer">
-          {vairant === 'LOGIN' ? 'Create an account' : 'Login'}
+          {variant === 'LOGIN' ? 'Create an account' : 'Login'}
         </div>
       </div>
     </form>

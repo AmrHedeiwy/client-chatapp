@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
 
-const getCurrentUser = async () => {
+const getContacts = async () => {
   try {
     const cookie = cookies().get('connect.sid');
-    if (!cookie) return null;
+    if (!cookie) return [];
 
-    const url = 'http://localhost:5000/user/current';
+    const url = 'http://localhost:5000/user/contacts';
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -14,12 +14,12 @@ const getCurrentUser = async () => {
     };
 
     const res = await fetch(url, config);
-    const { curentUser } = await res.json();
+    const { users } = await res.json();
 
-    return curentUser;
-  } catch (error: any) {
-    return null;
+    return users;
+  } catch (error) {
+    return [];
   }
 };
 
-export default getCurrentUser;
+export default getContacts;

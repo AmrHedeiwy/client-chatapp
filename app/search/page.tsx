@@ -1,7 +1,7 @@
 import React from 'react';
 import EmptyState from '../components/EmptyState';
 
-const Users = () => {
+const Search = () => {
   return (
     <div className="hidden lg:block lg:pl-80 h-full">
       <EmptyState />
@@ -9,4 +9,4 @@ const Users = () => {
   );
 };
 
-export default Users;
+export default Search;

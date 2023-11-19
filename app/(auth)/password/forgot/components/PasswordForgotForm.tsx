@@ -2,7 +2,7 @@
 
 import { Button } from '@/app/components/Button';
 import Link from '@/app/components/Link';
-import Input from '@/app/components/inputs/Input';
+import FormInput from '@/app/components/inputs/FormInput';
 import { FormErrorProps, ResponseProps, ErrorProps } from '@/app/types/Axios';
 import { notify } from '@/app/utils/notifications';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
@@ -61,7 +61,7 @@ export default function PasswordForgotForm() {
   return (
     <form onSubmit={handleSubmit(onSumbit)} noValidate>
       <div className="grid gap-y-4">
-        <Input
+        <FormInput
           id="Email"
           placeholder="Email"
           type="email"

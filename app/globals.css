@@ -3,6 +3,10 @@
   appearance: none;
 }
 
+.sidebar-menu-bg {
+  background-color: #2e2e2e;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

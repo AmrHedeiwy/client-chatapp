@@ -3,6 +3,7 @@ export interface User {
   GoogleID: string | null;
   FacebookID: string | null;
   Username: string;
+  Name: string;
   Email: string;
   Image: string | null;
   IsVerified: boolean;

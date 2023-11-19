@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/app/components/Button';
-import Input from '@/app/components/inputs/Input';
+import FormInput from '@/app/components/inputs/FormInput';
 import { ErrorProps, FormErrorProps, ResponseProps } from '@/app/types/Axios';
 import { notify } from '@/app/utils/notifications';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
@@ -88,14 +88,14 @@ export default function PasswordResetForm() {
   return (
     <form onSubmit={handleSubmit(onSumbit)} noValidate>
       <div className="grid gap-y-4">
-        <Input
+        <FormInput
           id="Password"
           placeholder="Your new password"
           type="password"
           register={register}
           errors={errors}
         />
-        <Input
+        <FormInput
           id="ConfirmPassword"
           placeholder="Confirm your new password"
           type="password"
