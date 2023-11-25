@@ -3,12 +3,8 @@
 import { User } from '@/app/types/User';
 import React, { ElementRef, Fragment, useEffect, useRef } from 'react';
 import UserBox from './UserBox';
-import {
-  InfiniteData,
-  InfiniteQueryObserverResult,
-  useInfiniteQuery
-} from '@tanstack/react-query';
-import { BsCircleFill } from 'react-icons/bs';
+import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
+import { BsCircleFill, BsExclamationCircle } from 'react-icons/bs';
 import Link from '@/app/components/Link';
 
 interface UserListProps {
@@ -18,6 +14,7 @@ interface UserListProps {
   hasNextPage: boolean | undefined;
   fetchNextPage: () => Promise<InfiniteQueryObserverResult<any, unknown>>;
   isFetchingNextPage: boolean;
+  isError: boolean;
 }
 
 const UserList: React.FC<UserListProps> = ({
@@ -26,7 +23,8 @@ const UserList: React.FC<UserListProps> = ({
   isFetching,
   hasNextPage,
   fetchNextPage,
-  isFetchingNextPage
+  isFetchingNextPage,
+  isError
 }) => {
   const topRef = useRef<ElementRef<'div'>>(null);
 
@@ -84,6 +82,13 @@ const UserList: React.FC<UserListProps> = ({
               Load more
             </Link>
           )}
+        </div>
+      )}
+
+      {isError && (
+        <div className="flex flex-col flex-1 justify-center items-center">
+          <BsExclamationCircle className="h-6 w-6 text-rose-400 my-4" />
+          <p className="text-xs text-rose-400">Somthing went wrong!</p>
         </div>
       )}
     </div>
