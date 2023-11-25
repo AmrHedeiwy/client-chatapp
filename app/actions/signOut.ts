@@ -17,7 +17,7 @@ const signOut = async () => {
       console.error(e);
       notify(
         'error',
-        "'Oops, something went wrong. Please try again later or contact support if the problem persists.'"
+        'Oops, something went wrong. Please try again later or contact support if the problem persists.'
       );
     });
 };

@@ -4,7 +4,7 @@ import Avatar from '@/app/components/Avatar';
 import { User } from '@/app/types/User';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 
 interface UserBoxProps {
   data: User;
@@ -12,15 +12,11 @@ interface UserBoxProps {
 
 const UserBox: React.FC<UserBoxProps> = ({ data }) => {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = useCallback(() => {
-    setIsLoading(true);
-
     axios
       .post('/', { UserID: data.UserID })
-      .then((data) => router.push(`/conversatoins/${data.data.id}`))
-      .finally(() => setIsLoading(false));
+      .then((data) => router.push(`/conversatoins/${data.data.id}`));
   }, [data, router]);
 
   return (

@@ -25,17 +25,16 @@ const MobileItem: React.FC<MobileItemProps> = ({ href, icon: Icon, active, onCli
         group
         flex
         gap-x-3
-        text-sm
+        text-lg
         leading-6
         font-semibold
         w-full
         justify-center
         p-4
-        text-gray-500
-        hover:text-black
-        hover:bg-gray-100
+        text-gray-400
+        hover:bg-neutral-700
      `,
-        active && 'bg-gray-100 text-black'
+        active && 'text-green-500'
       )}
     >
       <Icon />

@@ -14,10 +14,10 @@ const EmptyState = () => {
         flex
         justify-center
         items-center
-        bg-gray-100
+        bg-green-50
         "
     >
-      <div className="text-center items-center flex flex-col">
+      <div className="text-center items-center flex flex-col ">
         <h3 className="mt-2 text-xl font-semibold text-gray-900">
           Select a chat or start a new conversation
         </h3>

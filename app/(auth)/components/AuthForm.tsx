@@ -65,8 +65,8 @@ export default function AuthForm() {
       .post(
         url,
         {
-          Username: 'Emna',
-          Email: 'amr.hedeiwy@gmail.com',
+          Username: 'aasFsddsddad',
+          Email: 'amr.hdsesassa@gmail.com',
           Password: 'amr@AMR123',
           ConfirmPassword: 'amr@AMR123',
           RememberMe: true

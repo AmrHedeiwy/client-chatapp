@@ -8,7 +8,6 @@ export default function EmailVerificationMaskedEmail() {
   const [maskedEmail, setMaskedEmail] = useState<string>('');
 
   useEffect(() => {
-    console.log(session);
     if (!session.user) return;
     const email = session.user?.Email as string;
 

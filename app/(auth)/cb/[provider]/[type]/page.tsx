@@ -13,7 +13,7 @@ export default function CallBackPage() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch('http://localhost:5000/auth/info/authorisation', {
+      const res = await fetch(`${process.env.SERVER_URL}/auth/info/authorisation`, {
         credentials: 'include'
       });
 

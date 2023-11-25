@@ -20,10 +20,13 @@ const Link: React.FC<LinkProps> = ({ onClick, disabled, children, withButton }) 
         flex 
         flex-row 
         items-center 
-        border-none 
+        border-none
+        my-4 
+        text-xs
+        hover:text-blue-600
         bg-transparent 
         p-0`,
-          disabled ? 'text-blue-300 cursor-default' : ' text-blue-600 cursor-pointer'
+          disabled ? 'text-blue-300 cursor-default' : ' text-blue-500 cursor-pointer'
         )}
         onClick={onClick}
         disabled={disabled}

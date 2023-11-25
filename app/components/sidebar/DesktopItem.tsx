@@ -3,8 +3,6 @@
 import clsx from 'clsx';
 import Link from 'next/link';
 import React from 'react';
-import { RxDividerVertical } from 'react-icons/rx';
-
 interface DesktopItemProps {
   label: string;
   icon: any;
@@ -25,27 +23,27 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
   };
 
   return (
-    <li onClick={handleClick}>
+    <li onClick={handleClick} className="flex flex-row">
       <Link
         href={href}
         className={clsx(
           `
-          flex
-          gap-x-3
           rounded-md
-          p-4
+          px-6
+          py-4
           text-sm
           leading-6
           font-semibold
-          text-gray-500
+          text-gray-400
           hover:bg-neutral-700
           `,
-          active && ' text-green-600 '
+          active && ' text-green-500'
         )}
       >
-        <Icon className="h-7 w-7 shrink-0" />
+        <Icon className="h-7 w-7 shrink-0 " />
         <span className="sr-only">{label}</span>
       </Link>
+      {active && <div className="border-r-2 border-green-500" />}
     </li>
   );
 };

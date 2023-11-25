@@ -25,7 +25,7 @@ const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ currentUser }) => {
         lg:w-20
         xl:px-6
         lg:overflow-y-auto
-        sidebar-menu-bg
+        menu-bg
         lg:pb-4
         lg:flex
         lg:flex-col
