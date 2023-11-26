@@ -6,7 +6,7 @@ import UserList from './UserList';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 const fetchUsers = async ({ pageParam = 0, searchQuery = '' }) => {
-  const url: string = `https://localhost:5000/user/search?search=${searchQuery}&page=${pageParam}`;
+  const url: string = `http://localhost:5000/user/search?search=${searchQuery}&page=${pageParam}`;
   const config: RequestInit = {
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include'

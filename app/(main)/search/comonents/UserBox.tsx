@@ -31,6 +31,9 @@ const UserBox: React.FC<UserBoxProps> = ({ data }) => {
         bg-white
         p-3
         hover:bg-neutral-100
+        hover:border
+        hover:p-4
+        hover:border-black
         rounded-lg
         transition
         cursor-pointer

@@ -28,6 +28,18 @@ const UserList: React.FC<UserListProps> = ({
 }) => {
   const topRef = useRef<ElementRef<'div'>>(null);
 
+  const calculateMaxScrollHeight = () => {
+    const windowHeight = window?.innerHeight;
+    const screenWidth = window.screen.width;
+    const topRefOffset = topRef?.current?.offsetTop;
+
+    if (!topRefOffset) return;
+
+    const maxHeight = windowHeight - topRefOffset - (screenWidth < 1024 ? 50 : 0);
+
+    topRef.current.style.maxHeight = `${maxHeight}px`;
+  };
+
   useEffect(() => {
     const topDiv = topRef?.current;
 
@@ -42,27 +54,35 @@ const UserList: React.FC<UserListProps> = ({
     };
 
     topDiv?.addEventListener('scroll', handleScroll);
+    window?.addEventListener('resize', calculateMaxScrollHeight);
 
-    return () => topDiv?.removeEventListener('scroll', handleScroll);
+    return () => {
+      topDiv?.removeEventListener('scroll', handleScroll);
+      window?.removeEventListener('resize', calculateMaxScrollHeight);
+    };
   }, [hasNextPage, fetchNextPage, topRef]);
 
+  useEffect(() => calculateMaxScrollHeight, []);
+
   return (
-    <div
-      ref={topRef}
-      className="overflow-y-auto scrollable-content pl-2"
-      style={{ maxHeight: 'calc(100vh - 110px)' }}
-    >
-      {data?.pages.map((group) => {
-        return !!group?.users ? (
-          (group.users as User[]).map((user, i) => {
-            return (
-              <Fragment key={i}>
-                <UserBox data={user} />
-              </Fragment>
-            );
-          })
-        ) : (
-          <p className="flex justify-center items-center text-xs my-4">No users found</p>
+    <div ref={topRef} className="overflow-y-auto scrollable-content px-2">
+      {data?.pages.map((group, i) => {
+        return (
+          <Fragment key={i}>
+            {!!group?.users ? (
+              (group.users as User[]).map((user, i) => {
+                return (
+                  <Fragment key={i}>
+                    <UserBox data={user} />
+                  </Fragment>
+                );
+              })
+            ) : (
+              <p className="flex justify-center items-center text-xs my-4">
+                No users found
+              </p>
+            )}
+          </Fragment>
         );
       })}
 
