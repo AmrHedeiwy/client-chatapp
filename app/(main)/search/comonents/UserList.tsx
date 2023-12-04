@@ -1,7 +1,7 @@
 'use client';
 
 import { User } from '@/app/types/User';
-import React, { ElementRef, Fragment, useEffect, useRef } from 'react';
+import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
 import UserBox from './UserBox';
 import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
 import { BsCircleFill, BsExclamationCircle } from 'react-icons/bs';
@@ -27,18 +27,28 @@ const UserList: React.FC<UserListProps> = ({
   isError
 }) => {
   const topRef = useRef<ElementRef<'div'>>(null);
+  const [activeIndex, setActiveIndex] = useState<string | null>(null);
+
+  const onInput = (index: string) => {
+    if (index === activeIndex) return setActiveIndex(null);
+    setActiveIndex(index);
+  };
 
   const calculateMaxScrollHeight = () => {
     const windowHeight = window?.innerHeight;
-    const screenWidth = window.screen.width;
+    const screenWidth = window.innerWidth;
     const topRefOffset = topRef?.current?.offsetTop;
 
     if (!topRefOffset) return;
 
-    const maxHeight = windowHeight - topRefOffset - (screenWidth < 1024 ? 50 : 0);
+    const maxHeight = windowHeight - topRefOffset - (screenWidth < 1024 ? 50 : 5);
 
     topRef.current.style.maxHeight = `${maxHeight}px`;
   };
+
+  useEffect(() => calculateMaxScrollHeight(), []);
+
+  useEffect(() => setActiveIndex(null), [searchQuery]);
 
   useEffect(() => {
     const topDiv = topRef?.current;
@@ -60,20 +70,25 @@ const UserList: React.FC<UserListProps> = ({
       topDiv?.removeEventListener('scroll', handleScroll);
       window?.removeEventListener('resize', calculateMaxScrollHeight);
     };
-  }, [hasNextPage, fetchNextPage, topRef]);
-
-  useEffect(() => calculateMaxScrollHeight, []);
+  }, [hasNextPage, fetchNextPage, isFetchingNextPage, topRef]);
 
   return (
     <div ref={topRef} className="overflow-y-auto scrollable-content px-2">
       {data?.pages.map((group, i) => {
+        let i_group = i.toString();
         return (
-          <Fragment key={i}>
+          <Fragment key={i_group}>
             {!!group?.users ? (
               (group.users as User[]).map((user, i) => {
+                let i_user = i.toString();
+                let uniqueIndex = i_group + i_user;
                 return (
-                  <Fragment key={i}>
-                    <UserBox data={user} />
+                  <Fragment key={i_user}>
+                    <UserBox
+                      data={user}
+                      isActive={uniqueIndex === activeIndex}
+                      onInput={() => onInput(uniqueIndex)}
+                    />
                   </Fragment>
                 );
               })
@@ -88,7 +103,7 @@ const UserList: React.FC<UserListProps> = ({
 
       {isFetching && !isFetchingNextPage && (
         <div className="flex flex-col flex-1 justify-center items-center">
-          <BsCircleFill className="h-4 w-4 text-gray-400 animate-ping my-4" />
+          <span className="loading loading-ring loading-md my-2"></span>
           <p className="text-xs text-blue-400">Searching for {searchQuery}...</p>
         </div>
       )}
@@ -96,7 +111,7 @@ const UserList: React.FC<UserListProps> = ({
       {!!hasNextPage && (
         <div className="flex justify-center">
           {isFetchingNextPage ? (
-            <BsCircleFill className="h-4 w-4 text-gray-400 animate-ping my-4 mx-1" />
+            <span className="loading loading-ring loading-md my-4"></span>
           ) : (
             <Link onClick={() => fetchNextPage()} withButton>
               Load more

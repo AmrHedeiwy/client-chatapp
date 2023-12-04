@@ -35,20 +35,27 @@ export const Button: React.FC<ButtonProps> = ({
         rounded-xl 
         font-semibold
         text-sm
+        select-none
         focus-visible:outline
         focus-visible:outline-2
         focus-visible:outline-offset-2`,
         disabled && 'opacity-50 cursor-default',
         fullwidth && 'w-full',
         secondary ? 'text-gray-900' : 'text-white',
-        danger &&
-          'bg-rose-500 hover:bg-rose-600 focus-visible:outline-rose-600',
+        danger && 'bg-rose-500 hover:bg-rose-600 focus-visible:outline-rose-600',
         !secondary &&
           !danger &&
           'bg-sky-500 hover:bg-sky-600 focus-visible:outline-sky-600'
       )}
     >
-      {children}
+      {disabled ? (
+        <div className="flex items-center space-x-2">
+          <span className="loading loading-spinner"></span>
+          <p>loading...</p>
+        </div>
+      ) : (
+        children
+      )}
     </button>
   );
 };

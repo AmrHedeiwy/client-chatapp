@@ -25,7 +25,7 @@ export default function PasswordResetForm() {
 
       if (!isPasswordReset) router.replace('/password/forgot');
     })();
-  }, []);
+  }, [router]);
 
   const {
     register,
@@ -68,7 +68,6 @@ export default function PasswordResetForm() {
         if (redirect) router.push(redirect);
       })
       .catch((e: AxiosError<ErrorProps>) => {
-        console.log(e.response?.data);
         const error = e.response?.data.error;
         if (error && error.name === 'JoiValidationError') {
           (error.message as FormErrorProps[]).forEach(({ fieldName, fieldMessage }) => {
@@ -80,9 +79,7 @@ export default function PasswordResetForm() {
           if (error?.redirect) router.replace(error.redirect);
         }
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .finally(() => setTimeout(() => setIsLoading(false), 1000));
   };
 
   return (

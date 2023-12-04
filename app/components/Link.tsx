@@ -41,7 +41,7 @@ const Link: React.FC<LinkProps> = ({ onClick, disabled, children, withButton }) 
       type="button"
       className={clsx(
         `
-        text-base
+        text-sm
         select-none
         `,
         disabled ? 'text-blue-300 cursor-default' : ' text-blue-600 cursor-pointer'

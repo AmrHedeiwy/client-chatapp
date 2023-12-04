@@ -3,12 +3,12 @@ export interface User {
   GoogleID: string | null;
   FacebookID: string | null;
   Username: string;
-  Name: string;
   Email: string;
-  Image: string | null;
+  Image: string | undefined;
   IsVerified: boolean;
   LastVerifiedAt: Date | null;
   CreatedAt: Date;
   ConversationIDs: [];
-  SeenMessageIDs: [];
+  followers: object[];
+  IsFollowingCurrentUser?: boolean;
 }

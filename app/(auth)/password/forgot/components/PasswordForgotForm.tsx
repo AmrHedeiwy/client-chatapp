@@ -53,9 +53,7 @@ export default function PasswordForgotForm() {
           notify('error', error?.message as string);
         }
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .finally(() => setIsLoading(false));
   };
 
   return (

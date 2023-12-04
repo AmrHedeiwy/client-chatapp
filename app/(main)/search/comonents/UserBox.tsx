@@ -2,65 +2,49 @@
 
 import Avatar from '@/app/components/Avatar';
 import { User } from '@/app/types/User';
-import axios from 'axios';
+import React, { FormEventHandler, useState } from 'react';
+import clsx from 'clsx';
+import { BsChatDots, BsInfoCircle, BsPersonAdd, BsPersonFillCheck } from 'react-icons/bs';
 import { useRouter } from 'next/navigation';
-import React, { useCallback } from 'react';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { notify } from '@/app/utils/notifications';
+import { ErrorProps, ResponseProps } from '@/app/types/Axios';
 
 interface UserBoxProps {
   data: User;
+  isActive: boolean;
+  onInput: FormEventHandler<HTMLInputElement>;
 }
 
-const UserBox: React.FC<UserBoxProps> = ({ data }) => {
-  const router = useRouter();
+const UserBox: React.FC<UserBoxProps> = ({ data, isActive, onInput }) => {
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleClick = useCallback(() => {
-    axios
-      .post('/', { UserID: data.UserID })
-      .then((data) => router.push(`/conversatoins/${data.data.id}`));
-  }, [data, router]);
+  const toggleModal = () => setIsOpen((val) => !val);
 
   return (
     <div
-      onClick={handleClick}
-      className="
+      className={clsx(
+        `
         w-full
         relative
-        flex
-        items-center
-        space-x-3
-        bg-white
-        p-3
-        hover:bg-neutral-100
-        hover:border
-        hover:p-4
-        hover:border-black
+        collapse
         rounded-lg
+        cursor-default
+        select-none
         transition
-        cursor-pointer
-    "
+        hover:border
+        hover:p-1
+        hover:bg-slate-100
+        focus-within:bg-slate-100`,
+        isActive && 'collapse-open',
+        !isActive && 'collapse-close'
+      )}
     >
-      <Avatar user={data} />
-      <div className="min-w-0 flex-1">
-        <div className="focus:outline-none">
-          <div
-            className="
-                flex
-                justify-between
-                items-center
-                mb-1
-            "
-          >
-            <p
-              className="
-                text-sm
-                font-medium
-                text-gray-900
-               "
-            >
-              {data.Name}
-            </p>
-          </div>
-        </div>
+      <input type="checkbox" onInput={onInput} />
+
+      <div className="flex items-center space-x-3 collapse-title">
+        <Avatar user={data} />
+        <p className="text-sm font-medium text-gray-900">{data.Username}</p>
       </div>
     </div>
   );

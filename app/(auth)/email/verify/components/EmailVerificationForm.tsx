@@ -101,7 +101,7 @@ export default function EmailVerificationForm() {
       .catch((e: AxiosError<ErrorProps>) => {
         notify('error', e.response?.data.error.message as string);
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => setTimeout(() => setIsLoading(false), 1000));
   };
 
   const handleOnClick = () => {

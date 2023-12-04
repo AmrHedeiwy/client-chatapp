@@ -1,6 +1,7 @@
 export interface ResponseProps {
   message?: string;
   redirect?: string;
+  isFollowed: boolean;
 }
 
 export interface ErrorProps {

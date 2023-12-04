@@ -65,8 +65,8 @@ export default function AuthForm() {
       .post(
         url,
         {
-          Username: 'aasFsddsddad',
-          Email: 'amr.hdsesassa@gmail.com',
+          Username: 'Emna',
+          Email: 'amr.hedeiwy@gmail.com',
           Password: 'amr@AMR123',
           ConfirmPassword: 'amr@AMR123',
           RememberMe: true
@@ -90,9 +90,7 @@ export default function AuthForm() {
           notify('error', error?.message as string);
         }
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .finally(() => setTimeout(() => setIsLoading(false), 1000));
   };
 
   const socialAction = (action: 'google' | 'facebook') => {

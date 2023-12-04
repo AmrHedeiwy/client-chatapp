@@ -34,10 +34,11 @@ const FormInput: React.FC<InputProps> = ({
           w-full 
           py-3 
           px-6 
-          ring-1 
+          ring-1
           rounded-xl
           outline-none
           text-black 
+          text-sm
           placeholder-gray-600 
           bg-transparent 
           transition`,

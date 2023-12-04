@@ -23,15 +23,15 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
   };
 
   return (
-    <li onClick={handleClick} className="flex flex-row">
+    <li onClick={handleClick}>
       <Link
         href={href}
         className={clsx(
           `
-          rounded-md
           px-6
           py-4
           text-sm
+          rounded-md
           leading-6
           font-semibold
           text-gray-400
