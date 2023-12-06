@@ -29,12 +29,6 @@ const useRoutes = () => {
         active: pathname === '/search'
       },
       {
-        label: 'Contacts',
-        href: '/contacts',
-        icon: HiUsers,
-        active: pathname === '/contacts'
-      },
-      {
         label: 'Logout',
         href: '#',
         onClick: () => signOut(),

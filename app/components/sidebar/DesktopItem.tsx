@@ -21,14 +21,12 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
   const handleClick = () => {
     if (onClick) return onClick();
   };
-
   return (
-    <li onClick={handleClick}>
+    <li onClick={handleClick} className="flex flex-row">
       <Link
         href={href}
         className={clsx(
           `
-          flex
           rounded-md
           px-6
           py-4

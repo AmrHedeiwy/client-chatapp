@@ -14,29 +14,31 @@ const MobileFooter = () => {
   return (
     <div
       className="
-            fixed
-            justify-between
-            w-full
-            bottom-0
-            z-40
-            flex
-            items-center
-            menu-bg
-            border-t-[1px]
-            lg:hidden
-        "
+        flex
+        fixed
+        justify-between
+        w-full
+        bottom-0
+        z-40
+        items-center
+        menu-bg
+        border-t-[1px]
+        lg:hidden
+      "
     >
-      {routes.map((route) => {
-        return (
-          <MobileItem
-            key={route.href}
-            href={route.href}
-            icon={route.icon}
-            active={route.active}
-            onClick={route.onClick}
-          />
-        );
-      })}
+      <ul role="list" className="flex items-center w-full">
+        {routes.map((route) => {
+          return (
+            <MobileItem
+              key={route.href}
+              href={route.href}
+              icon={route.icon}
+              active={route.active}
+              onClick={route.onClick}
+            />
+          );
+        })}
+      </ul>
     </div>
   );
 };

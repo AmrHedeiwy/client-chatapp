@@ -17,28 +17,29 @@ const MobileItem: React.FC<MobileItemProps> = ({ href, icon: Icon, active, onCli
   };
 
   return (
-    <Link
-      onClick={handleClick}
-      href={href}
-      className={clsx(
-        `
-        group
-        flex
-        gap-x-3
-        text-lg
-        leading-6
-        font-semibold
-        w-full
-        justify-center
-        p-4
+    <li className="flex flex-col w-full">
+      {active && <div className="border-t-2 border-green-500" />}
+      <Link
+        onClick={handleClick}
+        href={href}
+        className={clsx(
+          `
+          flex
+          justify-center
+          rounded-md
+          text-lg
+          leading-6
+          font-semibold
+          p-4
         text-gray-400
         hover:bg-neutral-700
      `,
-        active && 'text-green-500'
-      )}
-    >
-      <Icon />
-    </Link>
+          active && 'text-green-500'
+        )}
+      >
+        <Icon />
+      </Link>
+    </li>
   );
 };
 
