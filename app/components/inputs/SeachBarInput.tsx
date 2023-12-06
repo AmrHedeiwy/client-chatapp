@@ -11,8 +11,7 @@ import {
 import { HiOutlineArrowRight, HiSearch } from 'react-icons/hi';
 
 interface SearchBarInputProps {
-  inputRef?: RefObject<any>;
-  type?: string;
+  inputRef: RefObject<any>;
   placeholder?: string;
   disabled?: boolean;
   onChange?: ChangeEventHandler<HTMLInputElement>;
@@ -21,7 +20,6 @@ interface SearchBarInputProps {
 type Variant = 'SEARCH' | 'RIGHTARROW';
 
 const SearchBarInput: React.FC<SearchBarInputProps> = ({
-  type,
   placeholder,
   disabled,
   onChange,
@@ -29,7 +27,7 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
 }) => {
   const [variant, setVariant] = useState<Variant>('SEARCH');
 
-  const onClickIconButton: MouseEventHandler<HTMLButtonElement> = async (e) => {
+  const onClickIconButton: MouseEventHandler<HTMLButtonElement> = async () => {
     if (variant === 'SEARCH') {
       inputRef?.current?.focus();
       setVariant('RIGHTARROW');
@@ -53,8 +51,9 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
   return (
     <div className="flex justify-center items-center">
       <input
+        id={'search_bar'}
         ref={inputRef}
-        type={type}
+        type="text"
         placeholder={placeholder}
         disabled={disabled}
         onChange={onChange}
@@ -74,7 +73,6 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
           bg-gray-100
           outline-none
           `,
-
           disabled && 'opacity-50 cursor-default'
         )}
       />

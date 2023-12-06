@@ -8,18 +8,22 @@ import Image from 'next/image';
 interface AvatarProps {
   user?: User;
   withStatus?: boolean;
+  customSize?: string;
 }
 
-const Avatar: React.FC<AvatarProps> = ({ user, withStatus }) => {
+const Avatar: React.FC<AvatarProps> = ({ user, withStatus, customSize }) => {
   return (
     <div className="avatar">
       <div
         className={clsx(
           `
-          w-12 
-          rounded-full 
-          `,
-          withStatus && 'ring ring-green-400 ring-offset-base-100 ring-offset-2'
+          relative
+          inline-block
+          rounded-full
+          overflow-hidden
+         `,
+          withStatus && 'ring ring-green-400',
+          customSize ? customSize : 'h-10 w-10 md:h-12 md:w-12'
         )}
       >
         <Image alt="Avatar" src={user?.Image || '/images/default_pfp.png'} fill />

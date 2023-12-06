@@ -28,10 +28,11 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
         href={href}
         className={clsx(
           `
+          flex
+          rounded-md
           px-6
           py-4
           text-sm
-          rounded-md
           leading-6
           font-semibold
           text-gray-400

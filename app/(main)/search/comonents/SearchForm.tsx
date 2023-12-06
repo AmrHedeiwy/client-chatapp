@@ -58,18 +58,8 @@ const SearchForm = () => {
     >
       <div className="flex-col px-5">
         <div className="py-4">
-          <h3
-            className=" 
-          text-lg 
-          font-bold 
-        text-neutral-600 
-          pb-4
-        "
-          >
-            Find new friends!
-          </h3>
+          <h3 className="text-lg font-bold text-neutral-600 pb-4">Find new friends!</h3>
           <SearchBarInput
-            type="text"
             inputRef={inputRef}
             onChange={onChange}
             placeholder="Seacrh here..."

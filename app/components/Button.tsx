@@ -5,21 +5,27 @@ import clsx from 'clsx';
 interface ButtonProps {
   type?: 'button' | 'submit' | 'reset' | undefined;
   fullwidth?: boolean;
+  staticwidth?: boolean;
   children?: React.ReactNode;
   onClick?: () => void;
   secondary?: boolean;
   danger?: boolean;
   disabled?: boolean;
+  fullcurve?: boolean;
+  customColor?: string;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   type,
   fullwidth,
+  staticwidth,
   children,
   onClick,
   secondary,
   danger,
-  disabled
+  disabled,
+  fullcurve,
+  customColor
 }) => {
   return (
     <button
@@ -32,7 +38,6 @@ export const Button: React.FC<ButtonProps> = ({
         justify-center
         px-6 
         py-3
-        rounded-xl 
         font-semibold
         text-sm
         select-none
@@ -41,10 +46,13 @@ export const Button: React.FC<ButtonProps> = ({
         focus-visible:outline-offset-2`,
         disabled && 'opacity-50 cursor-default',
         fullwidth && 'w-full',
+        staticwidth && 'w-24',
+        fullcurve ? 'rounded-full' : 'rounded-xl',
         secondary ? 'text-gray-900' : 'text-white',
+        customColor,
         danger && 'bg-rose-500 hover:bg-rose-600 focus-visible:outline-rose-600',
-        !secondary &&
-          !danger &&
+        !danger &&
+          !customColor &&
           'bg-sky-500 hover:bg-sky-600 focus-visible:outline-sky-600'
       )}
     >

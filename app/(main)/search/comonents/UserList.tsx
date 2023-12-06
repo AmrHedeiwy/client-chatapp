@@ -85,6 +85,7 @@ const UserList: React.FC<UserListProps> = ({
                 return (
                   <Fragment key={i_user}>
                     <UserBox
+                      index={uniqueIndex}
                       data={user}
                       isActive={uniqueIndex === activeIndex}
                       onInput={() => onInput(uniqueIndex)}
