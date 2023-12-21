@@ -1,7 +1,7 @@
 'use client';
 
 import SearchBarInput from '@/app/components/inputs/SeachBarInput';
-import React, { ChangeEvent, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import UserList from './UserList';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
@@ -27,14 +27,13 @@ const SearchForm = () => {
       queryKey: ['search', searchQuery],
       queryFn: ({ pageParam }) => fetchUsers({ pageParam, searchQuery }),
       getNextPageParam: (lastPage) => lastPage.nextPage,
-      enabled: searchQuery.length != 0,
+      enabled: searchQuery.length > 0,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60
     });
 
   const onChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-
     if (!value) return;
     setSearchQuery(value);
   };
@@ -42,19 +41,19 @@ const SearchForm = () => {
   return (
     <aside
       className="
-      fixed
-      inset-y-0
-      pb-20
-      lg:pb-0
-      lg:left-20
-      lg:w-80
-      lg:block
-      border-r
+        fixed
+        inset-y-0
+        pb-20
+        lg:pb-0
+        lg:left-20
+        lg:w-80
+        lg:block
+        border-r
       border-gray-200
-      block
-      w-full
-      left-0
-     "
+        block
+        w-full
+        left-0
+      "
     >
       <div className="flex-col px-5">
         <div className="py-4">

@@ -1,14 +1,14 @@
 import React from 'react';
 import Sidebar from '@/app/components/sidebar/Sidebar';
 import { QueryProvider } from '@/app/provider/QueryProvider';
+import SearchMain from './comonents/SearchMain';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import SearchForm from './comonents/SearchForm';
 
-export default async function UsersLayout({ children }: { children: React.ReactNode }) {
+export default function UsersLayout({ children }: { children: React.ReactNode }) {
   return (
     <Sidebar>
       <QueryProvider>
-        <SearchForm />
+        <SearchMain />
         <ReactQueryDevtools />
       </QueryProvider>
       <div className="h-full">{children}</div>

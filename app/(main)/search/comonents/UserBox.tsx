@@ -1,7 +1,7 @@
 'use client';
 
 import Avatar from '@/app/components/Avatar';
-import { User } from '@/app/types/User';
+import { User } from '@/app/types/index';
 import React, { FormEventHandler, useState } from 'react';
 import clsx from 'clsx';
 import { BsChatDots, BsInfoCircle, BsPersonAdd, BsPersonFillCheck } from 'react-icons/bs';
@@ -22,15 +22,18 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
   const [isFollowing, setIsFollowing] = useState(data.IsFollowingCurrentUser);
   const router = useRouter();
 
-  // Will be implemented later on the backend
   const onClickChat = () => {
-    axios
-      .post(`http://localhost:5000/user/conversations/${data.UserID}`)
-      .then(async (res) => {
-        const conversationID = res.data.conversationID;
+    const url = `http://localhost:5000/user/conversation/create`;
+    const options: AxiosRequestConfig = {
+      withCredentials: true,
+      headers: { 'Content-Type': 'application/json' }
+    };
 
-        router.push(`/conversations/${conversationID}`);
-      });
+    axios.post(url, { OtherUserID: data.UserID }, options).then(async (res) => {
+      const conversationID = res.data.conversation.ConversationID;
+
+      router.push(`/conversations/${conversationID}`);
+    });
   };
 
   const onClickFriend = (action: 'add' | 'remove') => {

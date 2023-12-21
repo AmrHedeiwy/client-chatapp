@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User } from '../types/User';
+import { User } from '../types/index';
 import clsx from 'clsx';
 import Image from 'next/image';
 
@@ -23,10 +23,13 @@ const Avatar: React.FC<AvatarProps> = ({ user, withStatus, customSize }) => {
           overflow-hidden
          `,
           withStatus && 'ring ring-green-400',
-          customSize ? customSize : 'h-10 w-10 md:h-12 md:w-12'
+          customSize ? customSize : 'h-12 w-12',
+          !user && 'skeleton shrink-0'
         )}
       >
-        <Image alt="Avatar" src={user?.Image || '/images/default_pfp.png'} fill />
+        {user && (
+          <Image alt="Avatar" src={user?.Image || '/images/default_pfp.png'} fill />
+        )}
       </div>
     </div>
   );

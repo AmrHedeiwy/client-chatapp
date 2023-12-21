@@ -1,11 +1,12 @@
 'use client';
 
-import { User } from '@/app/types/User';
+import { User } from '@/app/types/index';
 import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
 import UserBox from './UserBox';
 import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
-import { BsCircleFill, BsExclamationCircle } from 'react-icons/bs';
+import { BsExclamationCircle } from 'react-icons/bs';
 import Link from '@/app/components/Link';
+import useScroll from '@/app/hooks/useScroll';
 
 interface UserListProps {
   searchQuery: string;
@@ -34,43 +35,9 @@ const UserList: React.FC<UserListProps> = ({
     setActiveIndex(index);
   };
 
-  const calculateMaxScrollHeight = () => {
-    const windowHeight = window?.innerHeight;
-    const screenWidth = window.innerWidth;
-    const topRefOffset = topRef?.current?.offsetTop;
-
-    if (!topRefOffset) return;
-
-    const maxHeight = windowHeight - topRefOffset - (screenWidth < 1024 ? 50 : 5);
-
-    topRef.current.style.maxHeight = `${maxHeight}px`;
-  };
-
-  useEffect(() => calculateMaxScrollHeight(), []);
-
   useEffect(() => setActiveIndex(null), [searchQuery]);
 
-  useEffect(() => {
-    const topDiv = topRef?.current;
-
-    const handleScroll = () => {
-      if (!topDiv) return;
-      const distanceFromBottom =
-        topDiv?.scrollHeight - topDiv?.scrollTop - topDiv?.clientHeight;
-
-      if (distanceFromBottom === 0 && !isFetchingNextPage && hasNextPage) {
-        fetchNextPage();
-      }
-    };
-
-    topDiv?.addEventListener('scroll', handleScroll);
-    window?.addEventListener('resize', calculateMaxScrollHeight);
-
-    return () => {
-      topDiv?.removeEventListener('scroll', handleScroll);
-      window?.removeEventListener('resize', calculateMaxScrollHeight);
-    };
-  }, [hasNextPage, fetchNextPage, isFetchingNextPage, topRef]);
+  useScroll(topRef, { fetchNextPage, isFetchingNextPage, hasNextPage });
 
   return (
     <div ref={topRef} className="overflow-y-auto scrollable-content px-2">

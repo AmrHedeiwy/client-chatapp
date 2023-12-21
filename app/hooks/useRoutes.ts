@@ -1,12 +1,8 @@
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import useConversation from './useConversation';
-import { HiChat, HiSearch } from 'react-icons/hi';
-import {
-  HiArrowLeftOnRectangle,
-  HiOutlineChatBubbleLeftRight,
-  HiUsers
-} from 'react-icons/hi2';
+import { HiSearch } from 'react-icons/hi';
+import { HiArrowLeftOnRectangle, HiOutlineChatBubbleLeftRight } from 'react-icons/hi2';
 import signOut from '../actions/signOut';
 
 const useRoutes = () => {
@@ -20,7 +16,7 @@ const useRoutes = () => {
         label: 'Chat',
         href: '/conversations',
         icon: HiOutlineChatBubbleLeftRight,
-        active: pathname === 'conversations' || !!conversationId
+        active: pathname === '/conversations' || !!conversationId
       },
       {
         label: 'Search',
