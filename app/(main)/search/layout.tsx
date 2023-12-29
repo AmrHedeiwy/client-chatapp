@@ -6,12 +6,12 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 export default function UsersLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Sidebar>
+    <>
       <QueryProvider>
         <SearchMain />
         <ReactQueryDevtools />
       </QueryProvider>
       <div className="h-full">{children}</div>
-    </Sidebar>
+    </>
   );
 }

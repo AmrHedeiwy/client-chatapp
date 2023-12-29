@@ -8,13 +8,14 @@ interface LinkProps {
   disabled?: boolean;
   children?: React.ReactNode;
   withButton?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 }
 
-const Link: React.FC<LinkProps> = ({ onClick, disabled, children, withButton }) => {
+const Link: React.FC<LinkProps> = ({ onClick, disabled, children, withButton, type }) => {
   if (withButton) {
     return (
       <button
-        type="button"
+        type={type}
         className={clsx(
           `
         flex 
@@ -38,7 +39,7 @@ const Link: React.FC<LinkProps> = ({ onClick, disabled, children, withButton }) 
 
   return (
     <a
-      type="button"
+      type={type}
       className={clsx(
         `
         text-sm

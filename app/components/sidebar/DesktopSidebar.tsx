@@ -54,7 +54,7 @@ const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ currentUser }) => {
           onClick={() => setIsOpen(true)}
           className="cursor-pointer hover:opacity-75 transition"
         >
-          <Avatar user={currentUser} withStatus />
+          <Avatar user={currentUser} current />
         </div>
       </nav>
     </div>

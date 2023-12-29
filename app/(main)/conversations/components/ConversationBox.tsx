@@ -5,7 +5,7 @@ import { Conversation, User } from '@/app/types';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 interface ConversationBoxProps {
   data: Conversation;
@@ -69,15 +69,14 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected }) => 
         cursor-pointer
         p-4
         hover:border
-        hover:bg-slate-100
-        focus-within:bg-slate-100`,
-        selected ? 'bg-neutral' : 'bg-white'
+        hover:bg-slate-100`,
+        selected ? 'bg-slate-100' : 'bg-white'
       )}
     >
       {data.IsGroup ? (
         'Grouped Avatar (Implement later)'
       ) : (
-        <Avatar user={otherUser as User} />
+        <Avatar user={otherUser as User} withStatus />
       )}
       <div className="min-w-0 flex-1">
         <div className="focus:outline-none">
@@ -111,7 +110,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected }) => 
               text-sm
               `,
               hasSeen ? 'text-gray-500' : 'text-black font-medium',
-              !data.IsGroup && !otherUser && 'skeleton h-4 w-25'
+              !data.IsGroup && !otherUser && 'skeleton h-4 w-11/12'
             )}
           >
             {(data.IsGroup || otherUser) && lastMessageText}

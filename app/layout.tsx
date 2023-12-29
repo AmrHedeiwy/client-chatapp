@@ -7,7 +7,7 @@ import AuthProvider from './provider/AuthProvider';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
-// const inter = Inter({ subsets: ['latin'] });
+// const inter = Inter({ subsets: ['greek'] });
 
 // export const metadata: Metadata = {
 //   title: 'Create Next App',

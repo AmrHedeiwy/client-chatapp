@@ -54,6 +54,7 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
         id={'search_bar'}
         ref={inputRef}
         type="text"
+        autoComplete="off"
         placeholder={placeholder}
         disabled={disabled}
         onChange={onChange}

@@ -5,7 +5,7 @@ import clsx from 'clsx';
 interface ButtonProps {
   type?: 'button' | 'submit' | 'reset' | undefined;
   fullwidth?: boolean;
-  staticwidth?: boolean;
+  customWidth?: string;
   children?: React.ReactNode;
   onClick?: () => void;
   secondary?: boolean;
@@ -18,7 +18,7 @@ interface ButtonProps {
 export const Button: React.FC<ButtonProps> = ({
   type,
   fullwidth,
-  staticwidth,
+  customWidth,
   children,
   onClick,
   secondary,
@@ -45,8 +45,7 @@ export const Button: React.FC<ButtonProps> = ({
         focus-visible:outline-2
         focus-visible:outline-offset-2`,
         disabled && 'opacity-50 cursor-default',
-        fullwidth && 'w-full',
-        staticwidth && 'w-24',
+        fullwidth ? 'w-full' : customWidth,
         fullcurve ? 'rounded-full' : 'rounded-xl',
         secondary ? 'text-gray-900' : 'text-white',
         customColor,

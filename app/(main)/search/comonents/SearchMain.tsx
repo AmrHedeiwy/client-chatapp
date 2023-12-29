@@ -11,6 +11,7 @@ const fetchUsers = async ({ pageParam = 0, searchQuery = '' }) => {
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include'
   };
+
   const res = await fetch(url, config);
   const data = await res.json();
 
@@ -19,7 +20,6 @@ const fetchUsers = async ({ pageParam = 0, searchQuery = '' }) => {
 
 const SearchForm = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { data, isFetching, fetchNextPage, hasNextPage, isFetchingNextPage, isError } =
@@ -35,6 +35,7 @@ const SearchForm = () => {
   const onChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     if (!value) return;
+
     setSearchQuery(value);
   };
 

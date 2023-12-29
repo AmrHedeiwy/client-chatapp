@@ -78,15 +78,19 @@ const ConversationList: React.FC<ConversationListProps> = ({ intialItems }) => {
       </div>
 
       <div ref={topRef} className="overflow-y-auto scrollable-content px-2">
-        {filteredItems?.map((item) => {
-          return (
-            <ConversationBox
-              key={item.ConversationID}
-              data={item}
-              selected={conversationId === item.ConversationID}
-            />
-          );
-        })}
+        {filteredItems?.length != 0 ? (
+          filteredItems?.map((item) => {
+            return (
+              <ConversationBox
+                key={item.ConversationID}
+                data={item}
+                selected={conversationId === item.ConversationID}
+              />
+            );
+          })
+        ) : (
+          <p className="flex justify-center items-center text-xs my-4">No chats found</p>
+        )}
       </div>
     </aside>
   );

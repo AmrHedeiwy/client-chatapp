@@ -23,7 +23,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
   const router = useRouter();
 
   const onClickChat = () => {
-    const url = `http://localhost:5000/user/conversation/create`;
+    const url = `http://localhost:5000/user/conversation`;
     const options: AxiosRequestConfig = {
       withCredentials: true,
       headers: { 'Content-Type': 'application/json' }
@@ -72,9 +72,8 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
         transition
         hover:border
         hover:p-1
-        hover:bg-slate-100
-        focus-within:bg-slate-100`,
-        isActive && 'collapse-open',
+        hover:bg-slate-100`,
+        isActive && 'collapse-open bg-slate-100',
         !isActive && 'collapse-close'
       )}
     >

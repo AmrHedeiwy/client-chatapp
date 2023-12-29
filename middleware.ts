@@ -23,5 +23,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/email/verify', '/search']
+  matcher: ['/email/verify', '/search', '/conversation', '/conversation/:id']
 };
