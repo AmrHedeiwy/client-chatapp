@@ -5,10 +5,16 @@ import Link from '@/app/components/Link';
 import FormInput from '@/app/components/inputs/FormInput';
 import { FormErrorProps, ResponseProps, ErrorProps } from '@/app/types/Axios';
 import { notify } from '@/app/utils/notifications';
+import { yupResolver } from '@hookform/resolvers/yup';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import * as y from 'yup';
+
+const formSchema = y.object<FieldValues>({
+  Email: y.string().trim().email('Invalid email').required('Email is required')
+});
 
 export default function PasswordForgotForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +26,7 @@ export default function PasswordForgotForm() {
     setError,
     formState: { errors }
   } = useForm<FieldValues>({
+    resolver: yupResolver(formSchema),
     defaultValues: {
       Email: ''
     }
@@ -69,7 +76,12 @@ export default function PasswordForgotForm() {
 
         <div className="inline-flex justify-center items-center space-x-1 text-sm">
           <p>Remember your password?</p>
-          <Link withButton disabled={isLoading} onClick={() => router.replace('/')}>
+          <Link
+            withButton
+            disabled={isLoading}
+            type="button"
+            onClick={() => router.replace('/')}
+          >
             Login here
           </Link>
         </div>

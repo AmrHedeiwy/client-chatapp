@@ -4,10 +4,28 @@ import { Button } from '@/app/components/Button';
 import FormInput from '@/app/components/inputs/FormInput';
 import { ErrorProps, FormErrorProps, ResponseProps } from '@/app/types/Axios';
 import { notify } from '@/app/utils/notifications';
+import { yupResolver } from '@hookform/resolvers/yup';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import * as y from 'yup';
+
+const formSchema = y.object<FieldValues>({
+  Password: y
+    .string()
+    .trim()
+    .matches(
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
+    )
+    .required('Password is required'),
+  ConfirmPassword: y
+    .string()
+    .trim()
+    .oneOf([y.ref('Password')], 'Passwords must match')
+    .required('Confirm Password is required')
+});
 
 export default function PasswordResetForm() {
   const { token } = useParams<{ token: string }>();
@@ -33,6 +51,7 @@ export default function PasswordResetForm() {
     setError,
     formState: { errors }
   } = useForm<FieldValues>({
+    resolver: yupResolver(formSchema),
     defaultValues: {
       Password: '',
       ConfirmPassword: '',

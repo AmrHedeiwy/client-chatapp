@@ -12,7 +12,8 @@ export default function Home() {
           py-12
           sm:px-6
           lg:px-8
-          bg-gray-50"
+          bg-gray-50
+          "
     >
       <div className="container bg-gray-100 flex rounded-2xl shadow-lg max-w-lg">
         <div className="p-8 w-full">

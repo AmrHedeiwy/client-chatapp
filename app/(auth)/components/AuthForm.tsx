@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import * as y from 'yup';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import AuthSocialButton from '@/app/(auth)/components/AuthSocialButton';
@@ -14,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { ErrorProps, FormErrorProps, ResponseProps } from '@/app/types/Axios';
 import Link from '@/app/components/Link';
 import Checkbox from '@/app/components/inputs/Checkbox';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
@@ -28,6 +30,39 @@ export default function AuthForm() {
     if (session.user && !session.user.IsVerified) router.push('/email/verify');
   }, [session.user, router]);
 
+  const formSchema = y.object<FieldValues>({
+    ...(variant === 'REGISTER' && {
+      Username: y
+        .string()
+        .trim()
+        .required('Username is required')
+        .matches(/^[A-Za-z\d_-]{3,20}$/, 'Invalid username')
+    }),
+    Email: y.string().trim().email('Invalid email').required('Email is required'),
+    Password:
+      variant === 'REGISTER'
+        ? y
+            .string()
+            .trim()
+            .matches(
+              /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+              'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
+            )
+            .required('Password is required')
+        : y.string().trim().required('Password is required'),
+    ...(variant === 'REGISTER' && {
+      ConfirmPassword: y
+        .string()
+        .trim()
+        .oneOf([y.ref('Password')], 'Passwords must match')
+        .required('Confirm Password is required')
+    }),
+    ...(variant === 'LOGIN' && { RememberMe: y.boolean() }),
+    ...(variant === 'REGISTER' && {
+      TermsOfAgreement: y.boolean().oneOf([true], 'You must agree before submitting.')
+    })
+  });
+
   const {
     register,
     handleSubmit,
@@ -40,8 +75,11 @@ export default function AuthForm() {
       Email: '',
       Password: '',
       ConfirmPassword: '',
-      RememberMe: false
-    }
+      RememberMe: false,
+      TermsOfAgreement: false
+    },
+
+    resolver: yupResolver(formSchema)
   });
 
   const toggleVariant = useCallback(() => {
@@ -132,7 +170,7 @@ export default function AuthForm() {
   };
 
   return (
-    <form className="space-y-6 py-6" onSubmit={handleSubmit(onSumbit)} noValidate>
+    <form className="space-y-6 py-1" onSubmit={handleSubmit(onSumbit)} noValidate>
       <div className="grid gap-6 sm:grid-cols-2 mb-10">
         <AuthSocialButton provider="Google" onClick={() => socialAction('google')} />
         <AuthSocialButton provider="Facebook" onClick={() => socialAction('facebook')} />
@@ -175,12 +213,26 @@ export default function AuthForm() {
         />
       )}
 
+      {variant === 'REGISTER' && (
+        <label className="flex items-center justify-center">
+          <Checkbox
+            id="TermsOfAgreement"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+          >
+            <Link>Accept terms and conditions</Link>
+          </Checkbox>
+        </label>
+      )}
+
       {variant === 'LOGIN' && (
         <div className="flex w-full">
           <div className="flex-1">
-            <label className="inline-flex items-center ml-1 space-x-2">
-              <Checkbox id="RememberMe" disabled={isLoading} register={register} />
-              <Link>Remember me?</Link>
+            <label className="inline-flex items-center ml-1">
+              <Checkbox id="RememberMe" disabled={isLoading} register={register}>
+                <Link>Remember me?</Link>
+              </Checkbox>
             </label>
           </div>
 

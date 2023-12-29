@@ -1,12 +1,16 @@
 'use client';
 
-import { HiPaperAirplane, HiPhoto } from 'react-icons/hi2';
+import * as y from 'yup';
+import { HiPaperAirplane } from 'react-icons/hi2';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import axios from 'axios';
 import useConversation from '@/app/hooks/useConversation';
 import MessageInput from './MessageInput';
-import { Button } from '@/app/components/Button';
 import Link from '@/app/components/Link';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+const formSchema = y.object({
+  Content: y.string().min(1)
+});
 
 const Form = () => {
   const { conversationId } = useConversation();
@@ -16,6 +20,7 @@ const Form = () => {
     handleSubmit,
     formState: { errors }
   } = useForm<FieldValues>({
+    resolver: yupResolver(formSchema),
     defaultValues: {
       Content: ''
     }
