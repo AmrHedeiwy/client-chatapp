@@ -4,20 +4,21 @@ import useConversation from '@/app/hooks/useConversation';
 import { Conversation, User } from '@/app/types';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
-import React, { ChangeEvent, ElementRef, useRef, useState } from 'react';
+import React, { ChangeEvent, ElementRef, useEffect, useRef, useState } from 'react';
 import ConversationBox from './ConversationBox';
 import SearchBarInput from '@/app/components/inputs/SeachBarInput';
 import useScroll from '@/app/hooks/useScroll';
 import { useSession } from '@/app/hooks/useSession';
+import { useSocket } from '@/app/hooks/useSocket';
 
 interface ConversationListProps {
   intialItems: Conversation[] | null;
 }
 
 const ConversationList: React.FC<ConversationListProps> = ({ intialItems }) => {
-  const router = useRouter();
   const session = useSession();
 
+  const { socket, onlineUsers } = useSocket();
   const { conversationId, isOpen } = useConversation();
 
   const [items, setItems] = useState<Conversation[] | null>(intialItems);
@@ -85,6 +86,9 @@ const ConversationList: React.FC<ConversationListProps> = ({ intialItems }) => {
                 key={item.ConversationID}
                 data={item}
                 selected={conversationId === item.ConversationID}
+                {...(!item.IsGroup && {
+                  isOnline: onlineUsers.includes(item.OtherUser?.UserID as string)
+                })}
               />
             );
           })

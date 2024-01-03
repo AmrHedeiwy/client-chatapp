@@ -70,6 +70,7 @@ export default function AuthForm() {
     reset,
     formState: { errors }
   } = useForm<FieldValues>({
+    // resolver: yupResolver(formSchema),
     defaultValues: {
       Username: '',
       Email: '',
@@ -77,9 +78,7 @@ export default function AuthForm() {
       ConfirmPassword: '',
       RememberMe: false,
       TermsOfAgreement: false
-    },
-
-    resolver: yupResolver(formSchema)
+    }
   });
 
   const toggleVariant = useCallback(() => {

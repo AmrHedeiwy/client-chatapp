@@ -10,9 +10,16 @@ interface AvatarProps {
   withStatus?: boolean;
   current?: boolean;
   customSize?: string;
+  isOnline?: boolean;
 }
 
-const Avatar: React.FC<AvatarProps> = ({ user, withStatus, current, customSize }) => {
+const Avatar: React.FC<AvatarProps> = ({
+  user,
+  withStatus,
+  current,
+  customSize,
+  isOnline
+}) => {
   return (
     <div className="avatar">
       <div
@@ -34,11 +41,11 @@ const Avatar: React.FC<AvatarProps> = ({ user, withStatus, current, customSize }
       </div>
       {user && withStatus && (
         <span
-          className="
+          className={clsx(
+            `
             absolute 
             block 
             rounded-full 
-            bg-green-500 
             ring-2 
             ring-white 
             bottom-1 
@@ -46,8 +53,9 @@ const Avatar: React.FC<AvatarProps> = ({ user, withStatus, current, customSize }
             h-1 
             w-1 
             md:h-2 
-            md:w-2
-          "
+            md:w-2`,
+            isOnline ? 'bg-green-500' : 'bg-gray-400'
+          )}
         />
       )}
     </div>

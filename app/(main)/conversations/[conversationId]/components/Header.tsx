@@ -1,29 +1,35 @@
 'use client';
 
 import { HiChevronLeft } from 'react-icons/hi';
-import { HiEllipsisHorizontal, HiEllipsisVertical } from 'react-icons/hi2';
-import { useMemo, useState } from 'react';
+import { HiEllipsisVertical } from 'react-icons/hi2';
+import { useMemo } from 'react';
 import Link from 'next/link';
-
-import useOtherUser from '@/app/hooks/useOtherUser';
 
 import Avatar from '@/app/components/Avatar';
 import { Conversation } from '@/app/types';
+import { useSocket } from '@/app/hooks/useSocket';
 
 interface HeaderProps {
   conversation: Conversation;
 }
 
 const Header: React.FC<HeaderProps> = ({ conversation }) => {
-  const otherUser = useOtherUser(conversation.Users);
+  const { onlineUsers } = useSocket();
+
+  const isOnline = !conversation.IsGroup
+    ? useMemo(
+        () => onlineUsers.includes(conversation.OtherUser?.UserID as string),
+        [onlineUsers]
+      )
+    : null;
 
   const statusText = useMemo(() => {
     if (conversation.IsGroup) {
       return `${conversation.Users.length} members`;
     }
 
-    return 'Active';
-  }, [conversation]);
+    return isOnline ? 'active' : 'offline';
+  }, [conversation, isOnline]);
 
   return (
     <>
@@ -60,15 +66,11 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
             // Group avatar
             <div></div>
           ) : (
-            <Avatar user={otherUser} withStatus />
+            <Avatar user={conversation.OtherUser} withStatus isOnline={!!isOnline} />
           )}
           <div className="flex flex-col">
-            <div className="text-zinc-700">
-              {conversation.Name || otherUser?.Username}
-            </div>
-            <div className="text-sm font-light text-neutral-500">
-              {otherUser && statusText}
-            </div>
+            <div className="text-zinc-700">{conversation.Name}</div>
+            <div className="text-sm font-light text-neutral-500">{statusText}</div>
           </div>
         </div>
         <HiEllipsisVertical

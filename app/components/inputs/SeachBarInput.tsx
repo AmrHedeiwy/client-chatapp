@@ -60,6 +60,7 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
         onChange={onChange}
         onClick={onClickInput}
         onBlur={onBlurInput}
+        maxLength={30}
         className={clsx(
           ` 
           w-full

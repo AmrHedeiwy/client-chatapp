@@ -19,9 +19,10 @@ export interface Conversation {
   CreatedAt: string;
   LastMessageAt: string;
   Name: string | null;
-  IsGroup: boolean | null;
+  IsGroup: boolean;
   Users: User[];
   Messages: Message[];
+  OtherUser?: User;
 }
 
 export interface Message {

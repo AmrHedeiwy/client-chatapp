@@ -12,7 +12,12 @@ export async function middleware(req: NextRequest) {
 
     const { isAuth, isVerified } = await res.json();
 
-    if (pathname === '/search' && isAuth && isVerified) return NextResponse.next();
+    if (
+      (pathname === '/search' || pathname.startsWith('/conversation')) &&
+      isAuth &&
+      isVerified
+    )
+      return NextResponse.next();
 
     if (pathname === '/email/verify' && isAuth && !isVerified) return NextResponse.next();
 
@@ -23,5 +28,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/email/verify', '/search', '/conversation', '/conversation/:id']
+  matcher: ['/email/verify', '/search', '/conversations', '/conversations/:id*']
 };

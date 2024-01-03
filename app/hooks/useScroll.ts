@@ -23,16 +23,16 @@ const useScroll = (
     topRef.current.style.maxHeight = `${maxHeight}px`;
   };
 
-  useEffect(() => calculateMaxScrollHeight(), []);
+  useEffect(() => calculateMaxScrollHeight(), [calculateMaxScrollHeight]);
 
-  if (fetchOnScroll) {
-    const { fetchNextPage, isFetchingNextPage, hasNextPage } = fetchOnScroll;
-
-    useEffect(() => {
+  useEffect(() => {
+    if (fetchOnScroll) {
       const topDiv = topRef?.current;
 
       const handleScroll = () => {
+        const { fetchNextPage, isFetchingNextPage, hasNextPage } = fetchOnScroll;
         if (!topDiv) return;
+
         const distanceFromBottom =
           topDiv?.scrollHeight - topDiv?.scrollTop - topDiv?.clientHeight;
 
@@ -48,15 +48,19 @@ const useScroll = (
         topDiv?.removeEventListener('scroll', handleScroll);
         window?.removeEventListener('resize', calculateMaxScrollHeight);
       };
-    }, [hasNextPage, fetchNextPage, isFetchingNextPage, topRef]);
-  } else {
-    useEffect(() => {
-      window?.addEventListener('resize', calculateMaxScrollHeight);
-      return () => {
-        window?.removeEventListener('resize', calculateMaxScrollHeight);
-      };
-    }, [topRef]);
-  }
+    }
+
+    window?.addEventListener('resize', calculateMaxScrollHeight);
+
+    return () => {
+      window?.removeEventListener('resize', calculateMaxScrollHeight);
+    };
+  }, [
+    fetchOnScroll?.hasNextPage,
+    fetchOnScroll?.fetchNextPage,
+    fetchOnScroll?.isFetchingNextPage,
+    topRef
+  ]);
 };
 
 export default useScroll;

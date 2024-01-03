@@ -5,17 +5,22 @@ import { Conversation, User } from '@/app/types';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 interface ConversationBoxProps {
   data: Conversation;
   selected: boolean;
+  isOnline?: boolean;
 }
 
-const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected }) => {
+const ConversationBox: React.FC<ConversationBoxProps> = ({
+  data,
+  selected,
+  isOnline
+}) => {
   const router = useRouter();
   const session = useSession();
-  const otherUser = !data.IsGroup ? useOtherUser(data.Users as User[]) : null;
+  const otherUser = !data.IsGroup ? data.OtherUser : null;
 
   const handleClick = useCallback(() => {
     router.push(`/conversations/${data.ConversationID}`);
@@ -76,7 +81,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected }) => 
       {data.IsGroup ? (
         'Grouped Avatar (Implement later)'
       ) : (
-        <Avatar user={otherUser as User} withStatus />
+        <Avatar user={otherUser as User} withStatus isOnline={isOnline} />
       )}
       <div className="min-w-0 flex-1">
         <div className="focus:outline-none">
@@ -88,7 +93,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ data, selected }) => 
                 !otherUser && 'skeleton h-4 w-20'
               )}
             >
-              {data.Name || otherUser?.Username}
+              {data.Name}
             </p>
 
             {lastMessage?.CreatedAt && (

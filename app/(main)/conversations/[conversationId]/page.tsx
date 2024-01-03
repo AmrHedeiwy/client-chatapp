@@ -10,7 +10,6 @@ interface IParams {
 
 const ConversationId = async ({ params }: { params: IParams }) => {
   const conversation = await getSingleConversation(params.conversationId);
-  console.log(conversation);
 
   if (!conversation) {
     return (

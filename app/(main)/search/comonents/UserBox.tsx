@@ -10,6 +10,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { notify } from '@/app/utils/notifications';
 import { ErrorProps, ResponseProps } from '@/app/types/Axios';
 import ActionModal from '@/app/components/modals/ActionModal';
+import { useSocket } from '@/app/hooks/useSocket';
 
 interface UserBoxProps {
   index: string;
@@ -21,6 +22,7 @@ interface UserBoxProps {
 const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => {
   const [isFollowing, setIsFollowing] = useState(data.IsFollowingCurrentUser);
   const router = useRouter();
+  const { socket } = useSocket();
 
   const onClickChat = () => {
     const url = `http://localhost:5000/user/conversation`;
@@ -32,6 +34,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
     axios.post(url, { OtherUserID: data.UserID }, options).then(async (res) => {
       const conversationID = res.data.conversation.ConversationID;
 
+      socket.emit('convo', conversationID);
       router.push(`/conversations/${conversationID}`);
     });
   };

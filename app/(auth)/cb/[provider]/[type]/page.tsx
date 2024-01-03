@@ -23,9 +23,11 @@ export default function CallBackPage() {
       // @ts-ignore
       if (!isCallbackProvider) window.close() || window.history.back();
 
-      setTimeout(() => {
+      const timeOut = setTimeout(() => {
         localStorage.setItem(provider, type);
         window.close();
+
+        clearTimeout(timeOut);
       }, 1000);
     })();
   }, [provider, type]);
