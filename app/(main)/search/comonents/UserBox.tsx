@@ -1,16 +1,24 @@
 'use client';
 
 import Avatar from '@/app/components/Avatar';
-import { User } from '@/app/types/index';
+import { Conversation, User } from '@/app/types/index';
 import React, { FormEventHandler, useState } from 'react';
 import clsx from 'clsx';
-import { BsChatDots, BsInfoCircle, BsPersonAdd, BsPersonFillCheck } from 'react-icons/bs';
+import {
+  HiOutlineUserPlus,
+  HiUserMinus,
+  HiOutlineChatBubbleLeft,
+  HiCalendarDays
+} from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { notify } from '@/app/utils/notifications';
 import { ErrorProps, ResponseProps } from '@/app/types/Axios';
 import ActionModal from '@/app/components/modals/ActionModal';
 import { useSocket } from '@/app/hooks/useSocket';
+import { format, parse } from 'date-fns';
+import { useQueryClient } from '@tanstack/react-query';
+import { useActiveConversationState } from '@/app/hooks/useActiveConversationState';
 
 interface UserBoxProps {
   index: string;
@@ -20,38 +28,63 @@ interface UserBoxProps {
 }
 
 const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => {
-  const [isFollowing, setIsFollowing] = useState(data.IsFollowingCurrentUser);
+  // Indicates whether this user is a contact of the logged-in user
+  const [isContact, setIsContact] = useState(data.isContact);
   const router = useRouter();
-  const { socket } = useSocket();
+  const queryClient = useQueryClient();
+  const { dispatch } = useActiveConversationState();
 
   const onClickChat = () => {
-    const url = `http://localhost:5000/user/conversation`;
-    const options: AxiosRequestConfig = {
-      withCredentials: true,
-      headers: { 'Content-Type': 'application/json' }
-    };
-
-    axios.post(url, { OtherUserID: data.UserID }, options).then(async (res) => {
-      const conversationID = res.data.conversation.ConversationID;
-
-      socket.emit('convo', conversationID);
-      router.push(`/conversations/${conversationID}`);
-    });
-  };
-
-  const onClickFriend = (action: 'add' | 'remove') => {
-    const url = `http://localhost:5000/user/friend/${action}?friendId=${data.UserID}`;
+    const url = `http://localhost:5000/conversations/create`;
     const options: AxiosRequestConfig = {
       withCredentials: true,
       headers: { 'Content-Type': 'application/json' }
     };
 
     axios
-      .post(url, { FriendID: data.UserID }, options)
-      .then((res: AxiosResponse<ResponseProps>) => {
-        const { isFollowed } = res.data;
+      .post(url, { otherUserId: data.userId }, options)
+      .then(async (res) => {
+        const conversation = res.data.conversation as Conversation;
 
-        setIsFollowing(isFollowed);
+        // Set the active conversation to the newly created conversation
+        dispatch({ conversation });
+
+        // Add the conversation to the top of the conversations list
+        queryClient.setQueryData(['conversations'], (prevData: any) => {
+          return [conversation, ...prevData];
+        });
+
+        // Initialize the messages for the conversation in the user's cache
+        queryClient.setQueryData(['messages', conversation.conversationId], {
+          pages: [{ items: [], nextPage: 0 }],
+          pageParams: 0,
+          unseenMessagesCount: 0
+        });
+
+        router.push(`/conversations/${conversation.conversationId}`);
+      })
+      .catch((e: AxiosError<ErrorProps>) => {
+        const error = e.response?.data.error;
+
+        notify('error', error?.message as string);
+
+        if (error?.redirect) router.push(error.redirect);
+      });
+  };
+
+  const onClickFriend = (action: 'add' | 'remove') => {
+    const url = `http://localhost:5000/contacts/manage`;
+    const options: AxiosRequestConfig = {
+      withCredentials: true,
+      headers: { 'Content-Type': 'application/json' }
+    };
+
+    axios
+      .post(url, { contactId: data.userId, action }, options)
+      .then((res: AxiosResponse) => {
+        const { isContact } = res.data;
+
+        setIsContact(isContact);
       })
       .catch((e: AxiosError<ErrorProps>) => {
         const error = e.response?.data.error;
@@ -84,24 +117,24 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
 
       <div className="flex items-center space-x-3 collapse-title">
         <Avatar user={data} />
-        <p className="text-sm font-medium text-gray-900">{data.Username}</p>
+        <p className="text-sm font-medium text-gray-900">{data.username}</p>
       </div>
 
-      <div className="flex justify-center items-center text-xl space-x-4 collapse-content">
-        <div onClick={onClickChat} className="tooltip cursor-pointer" data-tip="chat">
-          <BsChatDots className="text-sky-500" />
-        </div>
+      <div className="flex justify-center text-xl space-x-3 collapse-content">
+        <button onClick={onClickChat} className="tooltip cursor-pointer" data-tip="chat">
+          <HiOutlineChatBubbleLeft className="text-sky-500" />
+        </button>
 
-        <div className="pt-1 tooltip" data-tip={isFollowing ? 'following' : 'follow'}>
+        <button className="tooltip" data-tip={isContact ? 'remove' : 'add'}>
           <label className="swap swap-flip">
-            <input type="checkbox" checked={isFollowing} readOnly />
+            <input type="checkbox" checked={isContact} readOnly />
 
-            <BsPersonAdd
+            <HiOutlineUserPlus
               className="text-green-500 tooltip cursor-pointer swap-off"
               onClick={() => onClickFriend('add')}
             />
 
-            <BsPersonFillCheck
+            <HiUserMinus
               className="text-gray-500 swap-on"
               onClick={() =>
                 // @ts-expect-error
@@ -109,11 +142,16 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
               }
             />
           </label>
-        </div>
+        </button>
 
-        <div className="tooltip " data-tip="comming soon">
-          <BsInfoCircle className="text-blue-800" />
-        </div>
+        <button
+          className="tooltip cursor-pointer pb-1"
+          data-tip={`Joined ${
+            data.createdAt && format(new Date(data.createdAt), 'MMMM d, yyyy')
+          }`}
+        >
+          <HiCalendarDays className="text-zinc-900" />
+        </button>
       </div>
 
       <ActionModal
@@ -124,7 +162,12 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
         onClickConfirm={() => {
           onClickFriend('remove');
         }}
-        content={`Are you sure you want to unfollow ${data.Username}?`}
+        content={
+          <p className="py-4">
+            Are you sure you want to remove <strong>{data.username}</strong> from your
+            contacts?
+          </p>
+        }
       />
     </div>
   );

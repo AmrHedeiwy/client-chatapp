@@ -36,7 +36,14 @@ const Avatar: React.FC<AvatarProps> = ({
         )}
       >
         {user && (
-          <Image alt="Avatar" src={user?.Image || '/images/default_pfp.png'} fill />
+          <Image
+            alt="Avatar"
+            src={user?.image || '/images/default_pfp.png'}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            blurDataURL="/images/default_pfp.png"
+            placeholder="blur"
+          />
         )}
       </div>
       {user && withStatus && (

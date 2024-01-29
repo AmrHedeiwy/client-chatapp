@@ -1,42 +1,49 @@
 'use client';
 
-import useConversation from '@/app/hooks/useConversation';
-import { Conversation, User } from '@/app/types';
+import useConversationParams from '@/app/hooks/useConversationParams';
+import { Conversation } from '@/app/types';
 import clsx from 'clsx';
-import { useRouter } from 'next/navigation';
 import React, { ChangeEvent, ElementRef, useEffect, useRef, useState } from 'react';
 import ConversationBox from './ConversationBox';
 import SearchBarInput from '@/app/components/inputs/SeachBarInput';
 import useScroll from '@/app/hooks/useScroll';
 import { useSession } from '@/app/hooks/useSession';
 import { useSocket } from '@/app/hooks/useSocket';
+import { useQuery } from '@tanstack/react-query';
 
-interface ConversationListProps {
-  intialItems: Conversation[] | null;
-}
-
-const ConversationList: React.FC<ConversationListProps> = ({ intialItems }) => {
+const ConversationList = () => {
   const session = useSession();
 
-  const { socket, onlineUsers } = useSocket();
-  const { conversationId, isOpen } = useConversation();
+  const { onlineUsers } = useSocket();
+  const { isOpen } = useConversationParams();
 
-  const [items, setItems] = useState<Conversation[] | null>(intialItems);
-  const [filteredItems, setFilteredItems] = useState<Conversation[] | null>(items);
+  const { data } = useQuery({
+    queryKey: ['conversations'],
+    enabled: false,
+    staleTime: Infinity
+  });
+
+  const [filteredItems, setFilteredItems] = useState<Conversation[] | null>(
+    data as Conversation[] | null
+  );
 
   const topRef = useRef<ElementRef<'div'>>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!!data) setFilteredItems(data as Conversation[]);
+  }, [data]);
 
   const onChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
 
     setFilteredItems(() => {
       return (
-        items?.filter((conversation) => {
+        (data as Conversation[])?.filter((conversation) => {
           const conversationName = (
-            conversation.Name ??
-            conversation.Users.filter((user) => user.UserID != session.user?.UserID)[0]
-              .Username
+            conversation.name ??
+            conversation.users.filter((user) => user.userId != session.user?.userId)[0]
+              .username
           ).toLowerCase();
 
           return conversationName.startsWith(value.toLowerCase());
@@ -83,11 +90,10 @@ const ConversationList: React.FC<ConversationListProps> = ({ intialItems }) => {
           filteredItems?.map((item) => {
             return (
               <ConversationBox
-                key={item.ConversationID}
-                data={item}
-                selected={conversationId === item.ConversationID}
-                {...(!item.IsGroup && {
-                  isOnline: onlineUsers.includes(item.OtherUser?.UserID as string)
+                key={item.conversationId}
+                conversation={item}
+                {...(!item.isGroup && {
+                  isOnline: onlineUsers.includes(item.otherUser?.userId as string)
                 })}
               />
             );

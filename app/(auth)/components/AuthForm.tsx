@@ -26,20 +26,20 @@ export default function AuthForm() {
   const session = useSession();
 
   useEffect(() => {
-    if (session.user && session.user.IsVerified) router.push('/search'); // change to conversations later
-    if (session.user && !session.user.IsVerified) router.push('/email/verify');
+    if (session.user && session.user.isVerified) router.push('/conversations');
+    if (session.user && !session.user.isVerified) router.push('/email/verify');
   }, [session.user, router]);
 
   const formSchema = y.object<FieldValues>({
     ...(variant === 'REGISTER' && {
-      Username: y
+      username: y
         .string()
         .trim()
         .required('Username is required')
         .matches(/^[A-Za-z\d_-]{3,20}$/, 'Invalid username')
     }),
-    Email: y.string().trim().email('Invalid email').required('Email is required'),
-    Password:
+    email: y.string().trim().email('Invalid email').required('Email is required'),
+    password:
       variant === 'REGISTER'
         ? y
             .string()
@@ -51,15 +51,15 @@ export default function AuthForm() {
             .required('Password is required')
         : y.string().trim().required('Password is required'),
     ...(variant === 'REGISTER' && {
-      ConfirmPassword: y
+      confirmPassword: y
         .string()
         .trim()
         .oneOf([y.ref('Password')], 'Passwords must match')
         .required('Confirm Password is required')
     }),
-    ...(variant === 'LOGIN' && { RememberMe: y.boolean() }),
+    ...(variant === 'LOGIN' && { rememberMe: y.boolean() }),
     ...(variant === 'REGISTER' && {
-      TermsOfAgreement: y.boolean().oneOf([true], 'You must agree before submitting.')
+      termsOfAgreement: y.boolean().oneOf([true], 'You must agree before submitting.')
     })
   });
 
@@ -72,12 +72,12 @@ export default function AuthForm() {
   } = useForm<FieldValues>({
     // resolver: yupResolver(formSchema),
     defaultValues: {
-      Username: '',
-      Email: '',
-      Password: '',
-      ConfirmPassword: '',
-      RememberMe: false,
-      TermsOfAgreement: false
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      rememberMe: false,
+      termsOfAgreement: false
     }
   });
 
@@ -102,11 +102,12 @@ export default function AuthForm() {
       .post(
         url,
         {
-          Username: 'Emna',
-          Email: 'amr.hedeiwy@gmail.com',
-          Password: 'amr@AMR123',
-          ConfirmPassword: 'amr@AMR123',
-          RememberMe: true
+          username: 'Emna',
+          email: 'amr.hedaaaaaaeiwaassssy@gmail.com',
+          password: 'amr@AMR123',
+          confirmPassword: 'amr@AMR123',
+          rememberMe: true,
+          termsOfAgreement: true
         },
         options
       )
@@ -115,6 +116,7 @@ export default function AuthForm() {
 
         notify('success', message as string);
 
+        console.log(redirect);
         if (redirect) router.push(redirect);
       })
       .catch((e: AxiosError<ErrorProps>) => {
@@ -181,7 +183,7 @@ export default function AuthForm() {
       </div>
       {variant === 'REGISTER' && (
         <FormInput
-          id="Username"
+          id="username"
           placeholder="Your spiecy username"
           type="text"
           register={register}
@@ -189,14 +191,14 @@ export default function AuthForm() {
         />
       )}
       <FormInput
-        id="Email"
+        id="email"
         placeholder="Your Email"
         type="email"
         register={register}
         errors={errors}
       />
       <FormInput
-        id="Password"
+        id="password"
         placeholder="what's the secret word?"
         type="password"
         register={register}
@@ -204,7 +206,7 @@ export default function AuthForm() {
       />
       {variant === 'REGISTER' && (
         <FormInput
-          id="ConfirmPassword"
+          id="confirmPassword"
           placeholder="Confirm the secret word"
           type="password"
           register={register}
@@ -215,7 +217,7 @@ export default function AuthForm() {
       {variant === 'REGISTER' && (
         <label className="flex items-center justify-center">
           <Checkbox
-            id="TermsOfAgreement"
+            id="termsOfAgreement"
             disabled={isLoading}
             register={register}
             errors={errors}
@@ -229,7 +231,7 @@ export default function AuthForm() {
         <div className="flex w-full">
           <div className="flex-1">
             <label className="inline-flex items-center ml-1">
-              <Checkbox id="RememberMe" disabled={isLoading} register={register}>
+              <Checkbox id="rememberMe" disabled={isLoading} register={register}>
                 <Link>Remember me?</Link>
               </Checkbox>
             </label>

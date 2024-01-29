@@ -8,12 +8,12 @@ import { notify } from '@/app/utils/notifications';
 import { yupResolver } from '@hookform/resolvers/yup';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import * as y from 'yup';
 
 const formSchema = y.object<FieldValues>({
-  Email: y.string().trim().email('Invalid email').required('Email is required')
+  email: y.string().trim().email('Invalid email').required('Email is required')
 });
 
 export default function PasswordForgotForm() {
@@ -28,10 +28,11 @@ export default function PasswordForgotForm() {
   } = useForm<FieldValues>({
     resolver: yupResolver(formSchema),
     defaultValues: {
-      Email: ''
+      email: ''
     }
   });
 
+  useEffect(() => console.log(isLoading), [isLoading]);
   const onSumbit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
@@ -67,7 +68,7 @@ export default function PasswordForgotForm() {
     <form onSubmit={handleSubmit(onSumbit)} noValidate>
       <div className="grid gap-y-4">
         <FormInput
-          id="Email"
+          id="email"
           placeholder="Email"
           type="email"
           register={register}

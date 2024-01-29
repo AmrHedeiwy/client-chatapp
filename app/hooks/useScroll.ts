@@ -1,5 +1,5 @@
 import { InfiniteQueryObserverResult } from '@tanstack/react-query';
-import { RefObject, useEffect } from 'react';
+import { RefObject, useCallback, useEffect } from 'react';
 
 interface fetchOnScrollProps {
   hasNextPage?: boolean;
@@ -11,7 +11,7 @@ const useScroll = (
   topRef: RefObject<HTMLDivElement>,
   fetchOnScroll?: fetchOnScrollProps
 ) => {
-  const calculateMaxScrollHeight = () => {
+  const calculateMaxScrollHeight = useCallback(() => {
     const windowHeight = window?.innerHeight;
     const screenWidth = window.innerWidth;
     const topRefOffset = topRef?.current?.offsetTop;
@@ -21,7 +21,7 @@ const useScroll = (
     const maxHeight = windowHeight - topRefOffset - (screenWidth < 1024 ? 50 : 0);
 
     topRef.current.style.maxHeight = `${maxHeight}px`;
-  };
+  }, [topRef]);
 
   useEffect(() => calculateMaxScrollHeight(), [calculateMaxScrollHeight]);
 
@@ -59,7 +59,9 @@ const useScroll = (
     fetchOnScroll?.hasNextPage,
     fetchOnScroll?.fetchNextPage,
     fetchOnScroll?.isFetchingNextPage,
-    topRef
+    topRef,
+    calculateMaxScrollHeight,
+    fetchOnScroll
   ]);
 };
 

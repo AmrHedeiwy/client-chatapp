@@ -5,7 +5,7 @@ const getCurrentUser = async () => {
     const cookie = cookies().get('connect.sid');
     if (!cookie) return null;
 
-    const url = 'http://localhost:5000/user/current';
+    const url = 'http://localhost:5000/users/current';
     const config = {
       headers: {
         'Content-Type': 'application/json',

@@ -16,16 +16,15 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ conversation }) => {
   const { onlineUsers } = useSocket();
 
-  const isOnline = !conversation.IsGroup
-    ? useMemo(
-        () => onlineUsers.includes(conversation.OtherUser?.UserID as string),
-        [onlineUsers]
-      )
-    : null;
+  // Check if the other user is online, ignored if the conversation is a group
+  const isOnline = useMemo(
+    () => onlineUsers?.includes(conversation.otherUser?.userId as string),
+    [onlineUsers, conversation.otherUser]
+  );
 
   const statusText = useMemo(() => {
-    if (conversation.IsGroup) {
-      return `${conversation.Users.length} members`;
+    if (conversation.isGroup) {
+      return `${conversation.users.length} members`;
     }
 
     return isOnline ? 'active' : 'offline';
@@ -62,14 +61,14 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
           >
             <HiChevronLeft size={32} />
           </Link>
-          {conversation.IsGroup ? (
+          {conversation.isGroup ? (
             // Group avatar
             <div></div>
           ) : (
-            <Avatar user={conversation.OtherUser} withStatus isOnline={!!isOnline} />
+            <Avatar user={conversation.otherUser} withStatus isOnline={!!isOnline} />
           )}
           <div className="flex flex-col">
-            <div className="text-zinc-700">{conversation.Name}</div>
+            <div className="text-zinc-700">{conversation.name}</div>
             <div className="text-sm font-light text-neutral-500">{statusText}</div>
           </div>
         </div>

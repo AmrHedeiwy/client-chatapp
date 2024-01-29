@@ -19,7 +19,6 @@ export default function CallBackPage() {
 
       const { isCallbackProvider } = await res.json();
 
-      console.log(isCallbackProvider);
       // @ts-ignore
       if (!isCallbackProvider) window.close() || window.history.back();
 

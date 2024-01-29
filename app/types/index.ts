@@ -1,36 +1,47 @@
 export interface User {
-  UserID: string;
-  GoogleID?: string | null;
-  FacebookID?: string | null;
-  Username: string;
-  Email: string;
-  Image?: string | null;
-  IsVerified: boolean;
-  LastVerifiedAt?: string | null;
-  CreatedAt?: string;
-  Conversations?: [];
+  userId: string;
+  googleId?: string | null;
+  facebookId?: string | null;
+  username: string;
+  email: string;
+  image?: string | null;
+  isVerified: boolean;
+  lastVerifiedAt?: string | null;
+  createdAt?: string;
+  conversations?: [];
   followers?: object[];
-  IsFollowingCurrentUser?: boolean;
-  Messages?: Message[];
+  isContact?: boolean;
+  messages?: Message[];
 }
 
 export interface Conversation {
-  ConversationID: string;
-  CreatedAt: string;
-  LastMessageAt: string;
-  Name: string | null;
-  IsGroup: boolean;
-  Users: User[];
-  Messages: Message[];
-  OtherUser?: User;
+  conversationId: string;
+  createdAt: string;
+  lastMessageAt: string;
+  name: string | null;
+  isGroup: boolean;
+  users: User[];
+  messages: Message[];
+  otherUser?: User;
+  otherUsers?: User[];
+  unseenMessagesCount: number;
 }
 
 export interface Message {
-  MessageID: string;
-  ConversationID: string;
-  SenderID: string;
-  Body?: string;
-  Image: string | null;
-  CreatedAt: string;
-  SeenUsers?: User[];
+  messageId: string;
+  conversationId: string;
+  senderId: string;
+  body?: string;
+  image?: string;
+  createdAt: string;
+  seenStatus: MessageStatus[];
+  deliverStatus: MessageStatus[];
+  received?: boolean;
+  user: User;
+}
+
+interface MessageStatus {
+  seenAt: string;
+  deliveredAt: string;
+  user: User;
 }

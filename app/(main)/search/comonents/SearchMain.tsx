@@ -1,26 +1,26 @@
 'use client';
 
 import SearchBarInput from '@/app/components/inputs/SeachBarInput';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useRef, useState } from 'react';
 import UserList from './UserList';
 import { useInfiniteQuery } from '@tanstack/react-query';
-
-const fetchUsers = async ({ pageParam = 0, searchQuery = '' }) => {
-  const url: string = `http://localhost:5000/user/search?search=${searchQuery}&page=${pageParam}`;
-  const config: RequestInit = {
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include'
-  };
-
-  const res = await fetch(url, config);
-  const data = await res.json();
-
-  return data;
-};
 
 const SearchForm = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const fetchUsers = async ({ pageParam = 0, searchQuery = '' }) => {
+    const url: string = `http://localhost:5000/contacts/search?search=${searchQuery}&page=${pageParam}`;
+    const config: RequestInit = {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include'
+    };
+
+    const res = await fetch(url, config);
+    const data = await res.json();
+
+    return data;
+  };
 
   const { data, isFetching, fetchNextPage, hasNextPage, isFetchingNextPage, isError } =
     useInfiniteQuery({
@@ -29,7 +29,8 @@ const SearchForm = () => {
       getNextPageParam: (lastPage) => lastPage.nextPage,
       enabled: searchQuery.length > 0,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60
+      staleTime: 1000 * 60,
+      initialPageParam: 0
     });
 
   const onChange = async (e: ChangeEvent<HTMLInputElement>) => {

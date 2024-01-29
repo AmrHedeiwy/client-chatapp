@@ -1,7 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { Conversation } from '../types';
 
-const useConversation = () => {
+const useConversationParams = () => {
   const params = useParams();
 
   const conversationId = useMemo(() => {
@@ -23,4 +25,4 @@ const useConversation = () => {
   );
 };
 
-export default useConversation;
+export default useConversationParams;

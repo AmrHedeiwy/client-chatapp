@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Button } from '../Button';
 interface ActionModalProps {
   id: string;
   title?: string;
-  content?: string;
+  content?: ReactElement;
   buttonClose?: string;
   buttonConfirm?: string;
   onClickConfirm?: () => void;
@@ -21,7 +21,7 @@ const ActionModal: React.FC<ActionModalProps> = ({
     <dialog id={id} className="modal">
       <div className="modal-box">
         <h3 className="font-bold text-lg">{title}</h3>
-        <p className="py-4">{content}</p>
+        {content}
         <div className="modal-action">
           <form method="dialog" className="flex space-x-2 ">
             {buttonClose && (

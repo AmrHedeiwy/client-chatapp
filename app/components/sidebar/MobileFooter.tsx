@@ -1,12 +1,13 @@
 'use client';
-import useConversation from '@/app/hooks/useConversation';
+
+import useConversationParams from '@/app/hooks/useConversationParams';
 import useRoutes from '@/app/hooks/useRoutes';
 import React from 'react';
 import MobileItem from './MobileItem';
 
 const MobileFooter = () => {
   const routes = useRoutes();
-  const { isOpen } = useConversation();
+  const { isOpen } = useConversationParams();
 
   if (isOpen) {
     return null;

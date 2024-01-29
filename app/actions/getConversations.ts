@@ -1,11 +1,17 @@
 import { cookies } from 'next/headers';
-import { Conversation } from '../types';
+import { Conversation, Message } from '../types';
+
+type ConversationMessages = {
+  conversationId: string;
+  messages: Message[];
+  unseenMessagesCount: number;
+};
 
 const getConversations = async () => {
   const cookie = cookies().get('connect.sid');
   if (!cookie) return null;
 
-  const url = 'http://localhost:5000/user/conversations';
+  const url = 'http://localhost:5000/conversations/fetchAll';
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -15,11 +21,14 @@ const getConversations = async () => {
 
   try {
     const res = await fetch(url, config);
-    const { conversations } = await res.json();
+    const { conversations = [], allConversationsMessages = [] } = await res.json();
 
-    return conversations as Conversation[];
+    return {
+      conversations: conversations as Conversation[],
+      allConversationsMessages: allConversationsMessages as ConversationMessages[]
+    };
   } catch (error: any) {
-    return [];
+    return { conversations: [], allConversationsMessages: [] };
   }
 };
 

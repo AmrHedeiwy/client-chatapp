@@ -81,7 +81,7 @@ export default function EmailVerificationForm() {
     }
 
     const url = 'http://localhost:5000/auth/verify-email';
-    const body: object = { VerificationCode: OTP.toString().replaceAll(',', '') };
+    const body: object = { verificationCode: OTP.toString().replaceAll(',', '') };
     const config: AxiosRequestConfig = {
       headers: {
         'Content-Type': 'application/json'

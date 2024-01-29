@@ -2,6 +2,10 @@
 
 import { createContext, useEffect, useState } from 'react';
 import { Socket, io } from 'socket.io-client';
+import { Message, User } from '../types';
+import useConversationParams from '../hooks/useConversationParams';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 type SocketContextType = {
   socket: any | null;
@@ -11,10 +15,20 @@ type SocketContextType = {
 
 export const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
-export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
+type SocketProviderProps = {
+  children: React.ReactNode;
+};
+
+export const SocketProvider = ({ children }: SocketProviderProps) => {
+  const { conversationId } = useConversationParams();
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
   useEffect(() => {
     const socketInstance = new (io as any)('http://localhost:5000', {
@@ -42,29 +56,40 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     setSocket(socketInstance);
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
+    // document.addEventListener('visibilitychange', handleVisibilityChange);
     function handleVisibilityChange() {
       if (document.visibilityState === 'hidden') {
         const timeOut = setTimeout(() => {
           if (document.visibilityState === 'hidden') {
             socketInstance.disconnect();
           }
+          if (document.visibilityState === 'visible' && !isConnected) {
+            socketInstance.connect();
+          }
           clearTimeout(timeOut);
-        }, 1000 * 30);
+        }, 1000 * 5);
       } else {
-        if (socketInstance.disconnected) socketInstance.connect();
+        if (!isConnected) {
+          socketInstance.connect();
+          router.refresh();
+        }
       }
     }
 
     return () => {
       socketInstance.disconnect();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [router]);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected, onlineUsers }}>
+    <SocketContext.Provider
+      value={{
+        socket,
+        isConnected,
+        onlineUsers
+      }}
+    >
       {children}
     </SocketContext.Provider>
   );

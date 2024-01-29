@@ -1,14 +1,15 @@
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
-import useConversation from './useConversation';
-import { HiSearch } from 'react-icons/hi';
+import useConversationParams from './useConversationParams';
 import { HiArrowLeftOnRectangle, HiOutlineChatBubbleLeftRight } from 'react-icons/hi2';
+import { RiContactsLine } from 'react-icons/ri';
 import signOut from '../actions/signOut';
+import { useActiveConversationState } from './useActiveConversationState';
 
 const useRoutes = () => {
   const pathname = usePathname();
 
-  const { conversationId } = useConversation();
+  const { conversationId } = useConversationParams();
 
   const routes = useMemo(
     () => [
@@ -21,7 +22,7 @@ const useRoutes = () => {
       {
         label: 'Search',
         href: '/search',
-        icon: HiSearch,
+        icon: RiContactsLine,
         active: pathname === '/search'
       },
       {

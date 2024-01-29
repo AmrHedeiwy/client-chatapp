@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
     const { isAuth, isVerified } = await res.json();
 
     if (
-      (pathname === '/search' || pathname.startsWith('/conversation')) &&
+      (pathname === '/search' || pathname.startsWith('/conversations')) &&
       isAuth &&
       isVerified
     )

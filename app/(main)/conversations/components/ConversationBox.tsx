@@ -1,63 +1,82 @@
+'use client';
+
 import Avatar from '@/app/components/Avatar';
-import useOtherUser from '@/app/hooks/useOtherUser';
+import { useActiveConversationState } from '@/app/hooks/useActiveConversationState';
+import useConversationParams from '@/app/hooks/useConversationParams';
 import { useSession } from '@/app/hooks/useSession';
-import { Conversation, User } from '@/app/types';
+import { useSocket } from '@/app/hooks/useSocket';
+import { Conversation, Message, User } from '@/app/types';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { cache, useCallback, useEffect, useMemo, useState } from 'react';
 
 interface ConversationBoxProps {
-  data: Conversation;
-  selected: boolean;
+  conversation: Conversation;
   isOnline?: boolean;
 }
 
-const ConversationBox: React.FC<ConversationBoxProps> = ({
-  data,
-  selected,
-  isOnline
-}) => {
+const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnline }) => {
   const router = useRouter();
   const session = useSession();
-  const otherUser = !data.IsGroup ? data.OtherUser : null;
+  const otherUser = !conversation.isGroup ? conversation.otherUser : null;
+  const { conversationId: activeConversationId } = useConversationParams();
+  const { dispatch } = useActiveConversationState();
+  const { socket, isConnected } = useSocket();
 
-  const handleClick = useCallback(() => {
-    router.push(`/conversations/${data.ConversationID}`);
-  }, [data.ConversationID, router]);
+  const { data } = useQuery({
+    queryKey: ['messages', conversation.conversationId],
+    enabled: false
+  });
 
   const lastMessage = useMemo(() => {
-    const messages = data.Messages || [];
+    return (data as any)?.pages[0].items[0] as Message;
+  }, [data]);
 
-    return messages[messages.length - 1];
-  }, [data.Messages]);
+  const unseenMessagesCount = useMemo(() => {
+    return (data as any)?.unseenMessagesCount as number;
+  }, [data]);
 
-  const userUserID = useMemo(() => session?.user?.UserID, [session.user?.UserID]);
+  // Sets the selected conversation as the active conversation
+  useEffect(() => {
+    if (activeConversationId === conversation.conversationId) {
+      dispatch({
+        conversation,
+        unseenMessagesCount,
+        messages: (data as any)?.pages[0].items
+      });
+    }
+  }, [activeConversationId, conversation]);
+
+  const handleClick = useCallback(() => {
+    router.push(`/conversations/${conversation.conversationId}`);
+  }, [conversation, router, socket, unseenMessagesCount]);
+
+  const userUserId = useMemo(() => session?.user?.userId, [session.user?.userId]);
 
   const hasSeen = useMemo(() => {
     if (!lastMessage) {
       return false;
     }
 
-    const seenArray = lastMessage.SeenUsers || [];
-
-    if (!userUserID) {
+    if (!userUserId) {
       return false;
     }
 
-    return seenArray.filter((user: User) => user.UserID === userUserID).length !== 0;
-  }, [userUserID, lastMessage]);
+    return unseenMessagesCount === 0 || lastMessage.senderId === userUserId;
+  }, [userUserId, lastMessage]);
 
   const lastMessageText = useMemo(() => {
-    if (lastMessage?.Image) {
+    if (lastMessage?.image) {
       return 'Sent an image';
     }
 
-    if (lastMessage?.Body) {
-      return lastMessage?.Body;
+    if (lastMessage?.body) {
+      return lastMessage?.body;
     }
 
-    return 'Started a conversation';
+    return `Say hi to ${otherUser?.username}🫶🏼`;
   }, [lastMessage]);
 
   return (
@@ -75,10 +94,10 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({
         p-4
         hover:border
         hover:bg-slate-100`,
-        selected ? 'bg-slate-100' : 'bg-white'
+        activeConversationId === conversation.conversationId ? 'bg-slate-100' : 'bg-white'
       )}
     >
-      {data.IsGroup ? (
+      {conversation.isGroup ? (
         'Grouped Avatar (Implement later)'
       ) : (
         <Avatar user={otherUser as User} withStatus isOnline={isOnline} />
@@ -87,16 +106,11 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({
         <div className="focus:outline-none">
           <span className="absolute inset-0" aria-hidden="true" />
           <div className="flex justify-between items-center mb-1">
-            <p
-              className={clsx(
-                `text-md font-medium text-gray-900`,
-                !otherUser && 'skeleton h-4 w-20'
-              )}
-            >
-              {data.Name}
+            <p className={clsx(`text-md font-medium text-gray-900`)}>
+              {conversation.name}
             </p>
 
-            {lastMessage?.CreatedAt && (
+            {lastMessage?.createdAt && (
               <p
                 className="
                   text-xs 
@@ -104,22 +118,32 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({
                   font-light
                 "
               >
-                {format(new Date(lastMessage.CreatedAt), 'p')}
+                {format(
+                  new Date(lastMessage.createdAt).toString() === 'Invalid Date'
+                    ? parse(lastMessage.createdAt, 'dd/MM/yyyy, HH:mm:ss', new Date())
+                    : new Date(lastMessage.createdAt),
+                  'p'
+                )}
               </p>
             )}
           </div>
-          <p
-            className={clsx(
-              `
-              truncate 
-              text-sm
-              `,
-              hasSeen ? 'text-gray-500' : 'text-black font-medium',
-              !data.IsGroup && !otherUser && 'skeleton h-4 w-11/12'
+          <div className="flex justify-between">
+            <p
+              className={clsx(
+                `truncate text-sm`,
+                !isConnected || hasSeen ? 'text-gray-500' : 'text-black font-medium'
+              )}
+            >
+              {conversation.isGroup
+                ? lastMessage?.senderId !== userUserId
+                  ? lastMessage?.user.username + ' ' + lastMessageText
+                  : 'You: ' + lastMessageText
+                : lastMessageText}
+            </p>
+            {unseenMessagesCount > 0 && (
+              <p className="font-semibold text-xs">{unseenMessagesCount}</p>
             )}
-          >
-            {(data.IsGroup || otherUser) && lastMessageText}
-          </p>
+          </div>
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import * as y from 'yup';
 
 const formSchema = y.object<FieldValues>({
-  Password: y
+  password: y
     .string()
     .trim()
     .matches(
@@ -20,10 +20,10 @@ const formSchema = y.object<FieldValues>({
       'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
     )
     .required('Password is required'),
-  ConfirmPassword: y
+  confirmPassword: y
     .string()
     .trim()
-    .oneOf([y.ref('Password')], 'Passwords must match')
+    .oneOf([y.ref('password')], 'Passwords must match')
     .required('Confirm Password is required')
 });
 
@@ -51,16 +51,15 @@ export default function PasswordResetForm() {
     setError,
     formState: { errors }
   } = useForm<FieldValues>({
-    resolver: yupResolver(formSchema),
+    // resolver: yupResolver(formSchema),
     defaultValues: {
-      Password: '',
-      ConfirmPassword: '',
-      Token: token
+      password: '',
+      confirmPassword: '',
+      token: token
     }
   });
 
   const onSumbit: SubmitHandler<FieldValues> = (data) => {
-    console.log(data);
     setIsLoading(true);
 
     const url: string = `http://localhost:5000/auth/reset-password`;
@@ -73,9 +72,9 @@ export default function PasswordResetForm() {
       .post(
         url,
         {
-          Password: 'amr@AMR123',
-          ConfirmPassword: 'amr@AMR123',
-          Token: token
+          password: 'amr@AMR123',
+          confirmPassword: 'amr@AMR123',
+          token
         },
         options
       )
@@ -105,14 +104,14 @@ export default function PasswordResetForm() {
     <form onSubmit={handleSubmit(onSumbit)} noValidate>
       <div className="grid gap-y-4">
         <FormInput
-          id="Password"
+          id="password"
           placeholder="Your new password"
           type="password"
           register={register}
           errors={errors}
         />
         <FormInput
-          id="ConfirmPassword"
+          id="confirmPassword"
           placeholder="Confirm your new password"
           type="password"
           register={register}

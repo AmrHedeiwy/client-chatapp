@@ -28,6 +28,8 @@ const UserList: React.FC<UserListProps> = ({
   isError
 }) => {
   const topRef = useRef<ElementRef<'div'>>(null);
+
+  // Indicates which user box is selected
   const [activeIndex, setActiveIndex] = useState<string | null>(null);
 
   const onInput = (index: string) => {
@@ -45,8 +47,8 @@ const UserList: React.FC<UserListProps> = ({
         let i_group = i.toString();
         return (
           <Fragment key={i_group}>
-            {!!group?.users ? (
-              (group.users as User[]).map((user, i) => {
+            {!!group?.items ? (
+              (group.items as User[]).map((user, i) => {
                 let i_user = i.toString();
                 let uniqueIndex = i_group + i_user;
                 return (
