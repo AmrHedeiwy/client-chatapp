@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import React, { ChangeEvent, ElementRef, useEffect, useRef, useState } from 'react';
 import ConversationBox from './ConversationBox';
 import SearchBarInput from '@/app/components/inputs/SeachBarInput';
-import useScroll from '@/app/hooks/useScroll';
+import useListScroll from '@/app/hooks/useListScroll';
 import { useSession } from '@/app/hooks/useSession';
 import { useSocket } from '@/app/hooks/useSocket';
 import { useQuery } from '@tanstack/react-query';
@@ -52,7 +52,7 @@ const ConversationList = () => {
     });
   };
 
-  useScroll(topRef);
+  useListScroll(topRef);
 
   return (
     <aside

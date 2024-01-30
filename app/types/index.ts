@@ -25,6 +25,7 @@ export interface Conversation {
   otherUser?: User;
   otherUsers?: User[];
   unseenMessagesCount: number;
+  hasInitialNextPage: boolean;
 }
 
 export interface Message {

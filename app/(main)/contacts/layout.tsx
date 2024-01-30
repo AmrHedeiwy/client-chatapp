@@ -1,10 +1,10 @@
 import React from 'react';
-import SearchMain from './comonents/SearchMain';
+import ContactMain from './comonents/ContactMain';
 
 export default function UsersLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <SearchMain />
+      <ContactMain />
       <div className="h-full">{children}</div>
     </>
   );

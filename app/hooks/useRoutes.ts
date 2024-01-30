@@ -20,10 +20,10 @@ const useRoutes = () => {
         active: pathname === '/conversations' || !!conversationId
       },
       {
-        label: 'Search',
-        href: '/search',
+        label: 'Contact',
+        href: '/contacts',
         icon: RiContactsLine,
-        active: pathname === '/search'
+        active: pathname === '/contacts'
       },
       {
         label: 'Logout',

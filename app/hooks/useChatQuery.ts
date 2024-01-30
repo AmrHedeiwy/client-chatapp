@@ -17,7 +17,9 @@ export const useChatQuery = ({ queryKey }: ChatQueryProps) => {
     };
 
     const res = await fetch(url, config);
-    return res.json();
+    const data = await res.json();
+
+    return data;
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =

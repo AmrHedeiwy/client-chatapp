@@ -6,7 +6,7 @@ import UserBox from './UserBox';
 import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
 import { BsExclamationCircle } from 'react-icons/bs';
 import Link from '@/app/components/Link';
-import useScroll from '@/app/hooks/useScroll';
+import useListScroll from '@/app/hooks/useListScroll';
 
 interface UserListProps {
   searchQuery: string;
@@ -39,7 +39,7 @@ const UserList: React.FC<UserListProps> = ({
 
   useEffect(() => setActiveIndex(null), [searchQuery]);
 
-  useScroll(topRef, { fetchNextPage, isFetchingNextPage, hasNextPage });
+  useListScroll(topRef, { fetchNextPage, isFetchingNextPage, hasNextPage });
 
   return (
     <div ref={topRef} className="overflow-y-auto scrollable-content px-2">

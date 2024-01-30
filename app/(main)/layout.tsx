@@ -14,17 +14,18 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   const fetchData = async () => {
     const data = await getConversations();
 
-    data?.allConversationsMessages.forEach(async (conversationMessages) => {
-      const count = conversationMessages.messages.length;
-      await queryClient.setQueryData(['messages', conversationMessages.conversationId], {
+    Object.entries(data?.groupedMessages as object).forEach(async (groupedMessage) => {
+      const count = groupedMessage[1].messages.length;
+
+      await queryClient.setQueryData(['messages', groupedMessage[0]], {
         pages: [
           {
-            items: conversationMessages.messages,
+            items: groupedMessage[1].messages,
             nextPage: count
           }
         ],
-        pageParams: count,
-        unseenMessagesCount: conversationMessages.unseenMessagesCount
+        pageParams: [count],
+        unseenMessagesCount: groupedMessage[1].unseenMessagesCount
       });
     });
 

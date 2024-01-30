@@ -57,10 +57,8 @@ const Avatar: React.FC<AvatarProps> = ({
             ring-white 
             bottom-1 
             right-1
-            h-1 
-            w-1 
-            md:h-2 
-            md:w-2`,
+            h-2 
+            w-2 `,
             isOnline ? 'bg-green-500' : 'bg-gray-400'
           )}
         />

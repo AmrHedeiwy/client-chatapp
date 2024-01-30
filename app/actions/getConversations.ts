@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { Conversation, Message } from '../types';
 
-type ConversationMessages = {
+type GroupedMessages = {
   conversationId: string;
   messages: Message[];
   unseenMessagesCount: number;
@@ -21,11 +21,11 @@ const getConversations = async () => {
 
   try {
     const res = await fetch(url, config);
-    const { conversations = [], allConversationsMessages = [] } = await res.json();
+    const { conversations = [], groupedMessages = [] } = await res.json();
 
     return {
       conversations: conversations as Conversation[],
-      allConversationsMessages: allConversationsMessages as ConversationMessages[]
+      groupedMessages: groupedMessages as GroupedMessages
     };
   } catch (error: any) {
     return { conversations: [], allConversationsMessages: [] };

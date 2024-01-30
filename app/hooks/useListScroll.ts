@@ -7,7 +7,7 @@ interface fetchOnScrollProps {
   isFetchingNextPage: boolean;
 }
 
-const useScroll = (
+const useListScroll = (
   topRef: RefObject<HTMLDivElement>,
   fetchOnScroll?: fetchOnScrollProps
 ) => {
@@ -65,4 +65,4 @@ const useScroll = (
   ]);
 };
 
-export default useScroll;
+export default useListScroll;

@@ -5,7 +5,7 @@ import React, { ChangeEvent, useRef, useState } from 'react';
 import UserList from './UserList';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-const SearchForm = () => {
+const ContactForm = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -81,4 +81,4 @@ const SearchForm = () => {
   );
 };
 
-export default SearchForm;
+export default ContactForm;

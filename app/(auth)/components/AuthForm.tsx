@@ -103,7 +103,7 @@ export default function AuthForm() {
         url,
         {
           username: 'Emna',
-          email: 'amr.hedaaaaaaeiwaassssy@gmail.com',
+          email: 'amr.hedeiwy@gmail.com',
           password: 'amr@AMR123',
           confirmPassword: 'amr@AMR123',
           rememberMe: true,
