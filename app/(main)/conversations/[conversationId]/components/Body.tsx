@@ -5,18 +5,21 @@ import { useChatQuery } from '@/app/hooks/useChatQuery';
 import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
 import { LuServerCrash, LuLoader2 } from 'react-icons/lu';
 import { ChatWelcome } from './HelloChat';
-import { useActiveConversationState } from '@/app/hooks/useActiveConversationState';
 import { useChatScroll } from '@/app/hooks/useChatScroll';
+import { ChatItem } from './ChatItem';
 
-const Body = () => {
+type BodyProps = {
+  conversation: Conversation;
+};
+
+const Body = ({ conversation }: BodyProps) => {
   const chatRef = useRef<ElementRef<'div'>>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const { conversation } = useActiveConversationState();
-
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useChatQuery({
-    queryKey: (conversation as Conversation).conversationId
+    queryKey: conversation.conversationId
   });
+
   useChatScroll({
     chatRef,
     bottomRef,
@@ -79,7 +82,7 @@ const Body = () => {
                 let i_message = i.toString();
                 return (
                   <Fragment key={i_message}>
-                    <div>{message.body}</div>
+                    {/* <ChatItem timestamp={message.createdAt} sender={message.user} /> */}
                   </Fragment>
                 );
               })}

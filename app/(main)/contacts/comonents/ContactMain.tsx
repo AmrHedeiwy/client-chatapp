@@ -1,12 +1,12 @@
 'use client';
 
 import SearchBarInput from '@/app/components/inputs/SeachBarInput';
-import React, { ChangeEvent, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import UserList from './UserList';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 const ContactForm = () => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const fetchUsers = async ({ pageParam = 0, searchQuery = '' }) => {
@@ -24,21 +24,15 @@ const ContactForm = () => {
 
   const { data, isFetching, fetchNextPage, hasNextPage, isFetchingNextPage, isError } =
     useInfiniteQuery({
-      queryKey: ['search', searchQuery],
-      queryFn: ({ pageParam }) => fetchUsers({ pageParam, searchQuery }),
+      queryKey: ['search', inputRef.current?.value || ''],
+      queryFn: ({ pageParam }) =>
+        fetchUsers({ pageParam, searchQuery: inputRef.current?.value }),
       getNextPageParam: (lastPage) => lastPage.nextPage,
-      enabled: searchQuery.length > 0,
+      enabled: search.length > 0,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60,
       initialPageParam: 0
     });
-
-  const onChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    if (!value) return;
-
-    setSearchQuery(value);
-  };
 
   return (
     <aside
@@ -62,14 +56,14 @@ const ContactForm = () => {
           <h3 className="text-lg font-bold text-neutral-600 pb-4">Find new friends!</h3>
           <SearchBarInput
             inputRef={inputRef}
-            onChange={onChange}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Seacrh here..."
           />
         </div>
       </div>
 
       <UserList
-        searchQuery={searchQuery}
+        searchQuery={inputRef.current?.value || ''}
         data={data}
         isFetching={isFetching}
         hasNextPage={hasNextPage}

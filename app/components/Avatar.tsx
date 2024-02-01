@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import Image from 'next/image';
 
 interface AvatarProps {
-  user?: User;
+  user?: User | null;
   withStatus?: boolean;
   current?: boolean;
   customSize?: string;

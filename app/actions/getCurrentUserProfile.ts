@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 
-const getCurrentUser = async () => {
+const getCurrentUserProfile = async () => {
   try {
     const cookie = cookies().get('connect.sid');
     if (!cookie) return null;
@@ -16,10 +16,10 @@ const getCurrentUser = async () => {
     const res = await fetch(url, config);
     const { curentUser } = await res.json();
 
-    return curentUser;
+    return curentUser || null;
   } catch (error: any) {
     return null;
   }
 };
 
-export default getCurrentUser;
+export default getCurrentUserProfile;

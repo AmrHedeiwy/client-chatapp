@@ -3,54 +3,63 @@
 import useConversationParams from '@/app/hooks/useConversationParams';
 import { Conversation } from '@/app/types';
 import clsx from 'clsx';
-import React, { ChangeEvent, ElementRef, useEffect, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  ElementRef,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import ConversationBox from './ConversationBox';
 import SearchBarInput from '@/app/components/inputs/SeachBarInput';
 import useListScroll from '@/app/hooks/useListScroll';
 import { useSession } from '@/app/hooks/useSession';
 import { useSocket } from '@/app/hooks/useSocket';
-import { useQuery } from '@tanstack/react-query';
+import { useMain } from '@/app/hooks/useMain';
 
 const ConversationList = () => {
-  const session = useSession();
-
+  const { session } = useSession();
   const { onlineUsers } = useSocket();
   const { isOpen } = useConversationParams();
-
-  const { data } = useQuery({
-    queryKey: ['conversations'],
-    enabled: false,
-    staleTime: Infinity
-  });
-
-  const [filteredItems, setFilteredItems] = useState<Conversation[] | null>(
-    data as Conversation[] | null
-  );
+  const { conversations } = useMain();
 
   const topRef = useRef<ElementRef<'div'>>(null);
+
+  const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const conversationsArray = useMemo(() => {
+    if (!!conversations) {
+      const array = Object.values(conversations);
+      return array;
+    }
+    return null;
+  }, [conversations]);
+
+  const [filteredItems, setFilteredItems] = useState<Conversation[] | null>(
+    conversationsArray
+  );
+
   useEffect(() => {
-    if (!!data) setFilteredItems(data as Conversation[]);
-  }, [data]);
+    if (search.length > 0) {
+      setFilteredItems(() => {
+        return (
+          conversationsArray?.filter((conversation) => {
+            const conversationName = (
+              conversation.name ??
+              conversation.users.filter((user) => user.userId != session?.userId)[0]
+                .username
+            ).toLowerCase();
 
-  const onChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-
-    setFilteredItems(() => {
-      return (
-        (data as Conversation[])?.filter((conversation) => {
-          const conversationName = (
-            conversation.name ??
-            conversation.users.filter((user) => user.userId != session.user?.userId)[0]
-              .username
-          ).toLowerCase();
-
-          return conversationName.startsWith(value.toLowerCase());
-        }) ?? null
-      );
-    });
-  };
+            return conversationName.startsWith(search.toLowerCase());
+          }) ?? null
+        );
+      });
+      return;
+    }
+    if (conversationsArray) setFilteredItems(conversationsArray);
+  }, [conversationsArray, search]);
 
   useListScroll(topRef);
 
@@ -79,15 +88,15 @@ const ConversationList = () => {
           <h3 className="text-lg font-bold text-neutral-600 pb-4">Chats</h3>
           <SearchBarInput
             inputRef={inputRef}
-            onChange={onChange}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Seacrh here..."
           />
         </div>
       </div>
 
       <div ref={topRef} className="overflow-y-auto scrollable-content px-2">
-        {filteredItems?.length != 0 ? (
-          filteredItems?.map((item) => {
+        {filteredItems && filteredItems.length !== 0 ? (
+          filteredItems.map((item) => {
             return (
               <ConversationBox
                 key={item.conversationId}

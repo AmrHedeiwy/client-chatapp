@@ -6,6 +6,7 @@ import {
   FocusEventHandler,
   MouseEventHandler,
   RefObject,
+  useEffect,
   useState
 } from 'react';
 import { HiOutlineArrowRight, HiSearch } from 'react-icons/hi';

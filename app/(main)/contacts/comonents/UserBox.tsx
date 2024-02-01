@@ -18,7 +18,7 @@ import ActionModal from '@/app/components/modals/ActionModal';
 import { useSocket } from '@/app/hooks/useSocket';
 import { format, parse } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
-import { useActiveConversationState } from '@/app/hooks/useActiveConversationState';
+import { useMain } from '@/app/hooks/useMain';
 
 interface UserBoxProps {
   index: string;
@@ -32,7 +32,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
   const [isContact, setIsContact] = useState(data.isContact);
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { dispatch } = useActiveConversationState();
+  const { dispatchConversations } = useMain();
 
   const onClickChat = () => {
     const url = `http://localhost:5000/conversations/create`;
@@ -46,13 +46,8 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
       .then(async (res) => {
         const conversation = res.data.conversation as Conversation;
 
-        // Set the active conversation to the newly created conversation
-        dispatch({ conversation });
-
-        // Add the conversation to the top of the conversations list
-        queryClient.setQueryData(['conversations'], (prevData: any) => {
-          return [conversation, ...prevData];
-        });
+        // Add the conversation to the list if it does not already exist
+        dispatchConversations({ type: 'add', payload: { conversation } });
 
         // Initialize the messages for the conversation in the user's cache
         queryClient.setQueryData(['messages', conversation.conversationId], {

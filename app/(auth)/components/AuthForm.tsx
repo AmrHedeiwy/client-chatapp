@@ -23,12 +23,12 @@ export default function AuthForm() {
   const router = useRouter();
   const [variant, setVariant] = useState<Variant>('LOGIN');
   const [isLoading, setIsLoading] = useState(false);
-  const session = useSession();
+  const { session } = useSession();
 
   useEffect(() => {
-    if (session.user && session.user.isVerified) router.push('/conversations');
-    if (session.user && !session.user.isVerified) router.push('/email/verify');
-  }, [session.user, router]);
+    if (session && session.isVerified) router.push('/conversations');
+    if (session && !session.isVerified) router.push('/email/verify');
+  }, [session, router]);
 
   const formSchema = y.object<FieldValues>({
     ...(variant === 'REGISTER' && {

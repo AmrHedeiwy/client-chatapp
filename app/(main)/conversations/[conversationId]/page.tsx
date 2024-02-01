@@ -7,10 +7,17 @@ import Body from './components/Body';
 import { useQuery } from '@tanstack/react-query';
 import { Conversation, User } from '@/app/types';
 import { useEffect, useMemo } from 'react';
-import { useActiveConversationState } from '@/app/hooks/useActiveConversationState';
+import { useMain } from '@/app/hooks/useMain';
+import useConversationParams from '@/app/hooks/useConversationParams';
 
 const ConversationId = () => {
-  const { conversation } = useActiveConversationState();
+  const { conversations } = useMain();
+  const { conversationId } = useConversationParams();
+
+  const conversation = useMemo(
+    () => (conversations ? conversations[conversationId] : null),
+    [conversations, conversationId]
+  );
 
   if (!conversation) {
     return (
@@ -24,12 +31,10 @@ const ConversationId = () => {
 
   return (
     <div className="lg:pl-80 h-full ">
-      <div className="h-full flex flex-col text-black bg-emerald-900 bg-opacity-10">
+      <div className="h-full flex flex-col text-black bg-white">
         <Header conversation={conversation} />
-        <Body />
-        <Form
-          otherUsers={(conversation.otherUsers || [conversation.otherUser]) as User[]}
-        />
+        <Body conversation={conversation} />
+        <Form conversation={conversation} />
       </div>
     </div>
   );

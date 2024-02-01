@@ -1,7 +1,6 @@
 'use client';
 
 import Avatar from '@/app/components/Avatar';
-import { useActiveConversationState } from '@/app/hooks/useActiveConversationState';
 import useConversationParams from '@/app/hooks/useConversationParams';
 import { useSession } from '@/app/hooks/useSession';
 import { useSocket } from '@/app/hooks/useSocket';
@@ -19,10 +18,9 @@ interface ConversationBoxProps {
 
 const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnline }) => {
   const router = useRouter();
-  const session = useSession();
+  const { session } = useSession();
   const otherUser = !conversation.isGroup ? conversation.otherUser : null;
   const { conversationId: activeConversationId } = useConversationParams();
-  const { dispatch } = useActiveConversationState();
   const { socket, isConnected } = useSocket();
 
   const { data } = useQuery({
@@ -38,22 +36,11 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
     return (data as any)?.unseenMessagesCount as number;
   }, [data]);
 
-  // Sets the selected conversation as the active conversation
-  useEffect(() => {
-    if (activeConversationId === conversation.conversationId) {
-      dispatch({
-        conversation,
-        unseenMessagesCount,
-        messages: (data as any)?.pages[0].items
-      });
-    }
-  }, [activeConversationId, conversation]);
-
   const handleClick = useCallback(() => {
     router.push(`/conversations/${conversation.conversationId}`);
   }, [conversation, router, socket, unseenMessagesCount]);
 
-  const userUserId = useMemo(() => session?.user?.userId, [session.user?.userId]);
+  const userUserId = useMemo(() => session?.userId, [session?.userId]);
 
   const hasSeen = useMemo(() => {
     if (!lastMessage) {
@@ -68,12 +55,12 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
   }, [userUserId, lastMessage]);
 
   const lastMessageText = useMemo(() => {
-    if (lastMessage?.image) {
+    if (lastMessage?.fileUrl) {
       return 'Sent an image';
     }
 
-    if (lastMessage?.body) {
-      return lastMessage?.body;
+    if (lastMessage?.content) {
+      return lastMessage?.content;
     }
 
     return `Say hi to ${otherUser?.username}🫶🏼`;
@@ -118,12 +105,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
                   font-light
                 "
               >
-                {format(
-                  new Date(lastMessage.createdAt).toString() === 'Invalid Date'
-                    ? parse(lastMessage.createdAt, 'dd/MM/yyyy, HH:mm:ss', new Date())
-                    : new Date(lastMessage.createdAt),
-                  'p'
-                )}
+                {format(new Date(lastMessage.createdAt), 'p')}
               </p>
             )}
           </div>

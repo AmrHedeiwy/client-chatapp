@@ -6,15 +6,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSocket } from '../hooks/useSocket';
 import useConversationParams from '../hooks/useConversationParams';
 
-type MessagingProps = {
-  children: React.ReactNode;
-};
-
-type MessagingContextProps = {
-  conversation: Conversation | null;
-  dispatch: React.Dispatch<any>;
-};
-
 type StatusMessageResponse = {
   conversationId: string;
   messageId: string;
@@ -24,26 +15,12 @@ type StatusMessageResponse = {
   seenAt?: string;
 };
 
-export const MessagingContext = createContext<MessagingContextProps | undefined>(
-  undefined
-);
+export const MessagingContext = createContext(undefined);
 
-const MessagingProvider = ({ children }: MessagingProps) => {
-  function reducer(
-    state: any,
-    payload: {
-      conversation: Conversation;
-      unseenMessagesCount: number;
-      messages: Message[];
-    } | null
-  ) {
-    return payload;
-  }
+const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
   const { socket } = useSocket();
   const { conversationId: activeConversationId } = useConversationParams();
-
-  const [state, dispatch] = useReducer(reducer, null);
 
   useEffect(() => {
     if (!socket) return;
@@ -291,6 +268,28 @@ const MessagingProvider = ({ children }: MessagingProps) => {
       }
     });
 
+    if (!!activeConversationId) {
+      const data = queryClient.getQueryData(['messages', activeConversationId]) as any;
+
+      const unseenMessagesCount = data.unseenMessagesCount;
+      if (unseenMessagesCount > 0 && socket) {
+        const messages = data.pages[0].items;
+
+        socket.emit('seen_message', {
+          type: 'batch',
+          messages: messages.slice(0, unseenMessagesCount),
+          seenAt: new Date()
+        });
+
+        queryClient.setQueryData(['messages', activeConversationId], (prevData: any) => {
+          return {
+            ...prevData,
+            unseenMessagesCount: 0
+          };
+        });
+      }
+    }
+
     return () => {
       socket?.off('deliver_message');
       socket?.off('set_deliver_status');
@@ -299,36 +298,8 @@ const MessagingProvider = ({ children }: MessagingProps) => {
     };
   }, [socket, activeConversationId]);
 
-  useEffect(() => {
-    // If a conversation box is clicked with unseen messages, a seen event will be sent to the server
-    if (!!activeConversationId) {
-      if (state && state.unseenMessagesCount > 0 && socket) {
-        socket.emit('seen_message', {
-          type: 'batch',
-          messages: state.messages.slice(0, state.unseenMessagesCount),
-          seenAt: new Date()
-        });
-        queryClient.setQueryData(
-          ['messages', state.conversation.conversationId],
-          (prevData: any) => {
-            return {
-              ...prevData,
-              unseenMessagesCount: 0
-            };
-          }
-        );
-      }
-    } else {
-      dispatch(null);
-    }
-  }, [state, activeConversationId]);
-
   return (
-    <MessagingContext.Provider
-      value={{ conversation: state?.conversation || null, dispatch }}
-    >
-      {children}
-    </MessagingContext.Provider>
+    <MessagingContext.Provider value={undefined}>{children}</MessagingContext.Provider>
   );
 };
 

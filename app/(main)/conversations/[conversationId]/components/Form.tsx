@@ -7,26 +7,26 @@ import MessageInput from './MessageInput';
 import Link from '@/app/components/Link';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useSocket } from '@/app/hooks/useSocket';
-import { Message, User } from '@/app/types';
+import { Conversation, Message, User } from '@/app/types';
 import { v4 as uuidv4 } from 'uuid';
 import { useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import useConversationParams from '@/app/hooks/useConversationParams';
-import { useActiveConversationState } from '@/app/hooks/useActiveConversationState';
+import { useMain } from '@/app/hooks/useMain';
 
 const formSchema = y.object({
   Content: y.string().min(1)
 });
 
-interface FormProps {
-  otherUsers: User[];
-}
+type FormProps = {
+  conversation: Conversation;
+};
 
-const Form: React.FC<FormProps> = ({ otherUsers }) => {
+const Form: React.FC<FormProps> = ({ conversation }) => {
   const { socket } = useSocket();
   const queryClient = useQueryClient();
   const { conversationId } = useConversationParams();
-  const { conversation } = useActiveConversationState();
+  const { userProfile, dispatchConversations } = useMain();
 
   /**
    * Array of user IDs representing the other users in the chat.
@@ -35,8 +35,12 @@ const Form: React.FC<FormProps> = ({ otherUsers }) => {
    * allowing the other users to receive the message.
    */
   const userIds = useMemo<string[]>(() => {
-    return otherUsers.map((user) => user.userId);
-  }, [otherUsers]);
+    return (
+      !conversation.isGroup
+        ? [(conversation.otherUser as User).userId as string]
+        : (conversation.otherUsers as User[]).map((user) => user.userId)
+    ) as string[];
+  }, [conversation]);
 
   const {
     register,
@@ -62,7 +66,7 @@ const Form: React.FC<FormProps> = ({ otherUsers }) => {
       messageId,
       createdAt: createdAt.toLocaleString(),
       senderId: socket.id,
-      body: data.content,
+      content: data.content,
       seenStatus: [],
       deliverStatus: [],
       received: false
@@ -100,13 +104,7 @@ const Form: React.FC<FormProps> = ({ otherUsers }) => {
     });
 
     // Add the conversation to the top of the conversations list
-    queryClient.setQueryData(['conversations'], (prevData: any) => {
-      const filteredConv = prevData.filter(
-        (conversation: any) => conversation.conversationId !== conversationId
-      );
-
-      return [conversation, ...filteredConv];
-    });
+    dispatchConversations({ type: 'move', payload: { conversation } });
 
     socket.emit(
       'sendMessage',

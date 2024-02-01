@@ -5,13 +5,11 @@ import React, { useState } from 'react';
 import DesktopItem from './DesktopItem';
 import { User } from '@/app/types/index';
 import Avatar from '../Avatar';
+import { useMain } from '@/app/hooks/useMain';
 
-interface DesktopSidebarProps {
-  currentUser: User;
-}
-
-const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ currentUser }) => {
+const DesktopSidebar = () => {
   const routes = useRoutes();
+  const { userProfile } = useMain();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -54,7 +52,7 @@ const DesktopSidebar: React.FC<DesktopSidebarProps> = ({ currentUser }) => {
           onClick={() => setIsOpen(true)}
           className="cursor-pointer hover:opacity-75 transition"
         >
-          <Avatar user={currentUser} current />
+          <Avatar user={userProfile} current />
         </div>
       </nav>
     </div>

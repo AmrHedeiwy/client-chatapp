@@ -20,14 +20,11 @@ type SocketProviderProps = {
 };
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
-  const { conversationId } = useConversationParams();
-
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
-  const queryClient = useQueryClient();
   const router = useRouter();
 
   useEffect(() => {

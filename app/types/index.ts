@@ -32,8 +32,8 @@ export interface Message {
   messageId: string;
   conversationId: string;
   senderId: string;
-  body?: string;
-  image?: string;
+  content: string;
+  fileUrl?: string;
   createdAt: string;
   seenStatus: MessageStatus[];
   deliverStatus: MessageStatus[];
@@ -46,3 +46,14 @@ interface MessageStatus {
   deliveredAt: string;
   user: User;
 }
+
+export type GroupedMessages = {
+  [conversationId: string]: {
+    messages: Message[];
+    unseenMessagesCount: number;
+  };
+} | null;
+
+export type GroupedConversations = {
+  [conversationId: string]: Conversation;
+} | null;

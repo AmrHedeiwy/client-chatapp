@@ -1,11 +1,5 @@
 import { cookies } from 'next/headers';
-import { Conversation, Message } from '../types';
-
-type GroupedMessages = {
-  conversationId: string;
-  messages: Message[];
-  unseenMessagesCount: number;
-};
+import { Conversation, GroupedConversations, GroupedMessages, Message } from '../types';
 
 const getConversations = async () => {
   const cookie = cookies().get('connect.sid');
@@ -21,14 +15,14 @@ const getConversations = async () => {
 
   try {
     const res = await fetch(url, config);
-    const { conversations = [], groupedMessages = [] } = await res.json();
+    const { conversations, groupedMessages } = await res.json();
 
     return {
-      conversations: conversations as Conversation[],
+      conversations: conversations as GroupedConversations,
       groupedMessages: groupedMessages as GroupedMessages
     };
   } catch (error: any) {
-    return { conversations: [], allConversationsMessages: [] };
+    return { conversations: null, groupedMessages: null };
   }
 };
 
