@@ -1,13 +1,20 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Ubuntu_Mono, Kalam } from 'next/font/google';
 import './globals.css';
+import 'react-toastify/dist/ReactToastify.css';
+
+import type { Metadata } from 'next';
 
 import AuthProvider from './provider/AuthProvider';
-
-import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
+import ThemeProvider from './provider/ThemeProvider';
+import { cn } from '@/lib/utils';
 
-// const inter = Inter({ subsets: ['greek'] });
+const font = Ubuntu_Mono({
+  subsets: ['latin-ext'],
+  weight: ['400'],
+  display: 'swap',
+  adjustFontFallback: false
+});
 
 // export const metadata: Metadata = {
 //   title: 'Create Next App',
@@ -16,13 +23,19 @@ import { ToastContainer } from 'react-toastify';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <AuthProvider>
-          {children}
-          <ToastContainer />
-        </AuthProvider>
-      </body>
-    </html>
+    <AuthProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body className={cn(font.className, 'bg-white dark:bg-[#313338]')}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            storageKey="chatapp-theme"
+          >
+            {children}
+            <ToastContainer />
+          </ThemeProvider>
+        </body>
+      </html>
+    </AuthProvider>
   );
 }

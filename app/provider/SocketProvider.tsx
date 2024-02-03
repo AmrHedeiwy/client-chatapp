@@ -2,9 +2,6 @@
 
 import { createContext, useEffect, useState } from 'react';
 import { Socket, io } from 'socket.io-client';
-import { Message, User } from '../types';
-import useConversationParams from '../hooks/useConversationParams';
-import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
 type SocketContextType = {

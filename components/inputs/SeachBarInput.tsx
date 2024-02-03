@@ -10,6 +10,7 @@ import {
   useState
 } from 'react';
 import { HiOutlineArrowRight, HiSearch } from 'react-icons/hi';
+import { Input } from '../ui/input';
 
 interface SearchBarInputProps {
   inputRef: RefObject<any>;
@@ -51,7 +52,7 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
 
   return (
     <div className="flex justify-center items-center">
-      <input
+      <Input
         id={'search_bar'}
         ref={inputRef}
         type="text"
@@ -64,25 +65,30 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
         maxLength={30}
         className={clsx(
           ` 
-          w-full
-          h-10
-          py-3 
-          px-4 
-          rounded-l
-          text-black 
-          placeholder-gray-600 
-          placeholder:text-xs
-          placeholder:font-medium
-          bg-gray-100
-          outline-none
-          `,
+            w-full
+            h-10
+            py-3 
+            px-4 
+           text-zinc-600 
+           dark:text-zinc-100   
+           placeholder:font-medium
+           placeholder:text-xs
+           placeholder:text-zinc-400
+           dark:placeholder:text-zinc-300
+            bg-zinc-50
+            dark:bg-zinc-700
+            focus-visible:ring-0
+            border-none
+            rounded-l
+            transition
+        `,
           disabled && 'opacity-50 cursor-default'
         )}
       />
       <button
         type="button"
         onClick={onClickIconButton}
-        className="rounded-r py-2 px-4 h-10 align-middle bg-gray-100 hover:bg-gray-200"
+        className="rounded-r py-2 px-4 h-10 align-middle  bg-zinc-50 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
       >
         {variant === 'SEARCH' && <HiSearch />}
         {variant === 'RIGHTARROW' && <HiOutlineArrowRight />}

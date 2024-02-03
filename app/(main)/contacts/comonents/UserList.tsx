@@ -5,8 +5,8 @@ import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react'
 import UserBox from './UserBox';
 import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
 import { BsExclamationCircle } from 'react-icons/bs';
-import Link from '@/app/components/Link';
 import useListScroll from '@/app/hooks/useListScroll';
+import { Button } from '@/components/ui/button';
 
 interface UserListProps {
   searchQuery: string;
@@ -83,9 +83,9 @@ const UserList: React.FC<UserListProps> = ({
           {isFetchingNextPage ? (
             <span className="loading loading-ring loading-md my-4"></span>
           ) : (
-            <Link onClick={() => fetchNextPage()} withButton>
+            <Button variant={'link'} onClick={() => fetchNextPage()}>
               Load more
-            </Link>
+            </Button>
           )}
         </div>
       )}

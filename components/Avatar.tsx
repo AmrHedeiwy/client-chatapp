@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User } from '../types/index';
+import { User } from '@/app/types/index';
 import clsx from 'clsx';
 import Image from 'next/image';
 
@@ -13,7 +13,7 @@ interface AvatarProps {
   isOnline?: boolean;
 }
 
-const Avatar: React.FC<AvatarProps> = ({
+const UserAvatar: React.FC<AvatarProps> = ({
   user,
   withStatus,
   current,
@@ -21,7 +21,7 @@ const Avatar: React.FC<AvatarProps> = ({
   isOnline
 }) => {
   return (
-    <div className="avatar">
+    <div className="relative">
       <div
         className={clsx(
           `
@@ -29,10 +29,10 @@ const Avatar: React.FC<AvatarProps> = ({
           inline-block
           rounded-full
           overflow-hidden
-          bg-white`,
+          `,
           customSize ? customSize : 'h-12 w-12',
-          !user && 'skeleton shrink-0',
-          current && 'ring ring-white'
+          current && 'ring ring-white',
+          !user?.image && 'bg-white'
         )}
       >
         {user && (
@@ -55,10 +55,10 @@ const Avatar: React.FC<AvatarProps> = ({
             rounded-full 
             ring-2 
             ring-white 
-            bottom-1 
+            bottom-2 
             right-1
             h-2 
-            w-2 `,
+            w-2`,
             isOnline ? 'bg-green-500' : 'bg-gray-400'
           )}
         />
@@ -67,4 +67,4 @@ const Avatar: React.FC<AvatarProps> = ({
   );
 };
 
-export default Avatar;
+export default UserAvatar;

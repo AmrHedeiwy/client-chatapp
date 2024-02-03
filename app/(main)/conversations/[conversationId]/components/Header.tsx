@@ -5,7 +5,7 @@ import { HiEllipsisVertical } from 'react-icons/hi2';
 import { useMemo } from 'react';
 import Link from 'next/link';
 
-import Avatar from '@/app/components/Avatar';
+import Avatar from '@/components/Avatar';
 import { Conversation } from '@/app/types';
 import { useSocket } from '@/app/hooks/useSocket';
 
@@ -31,13 +31,12 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
   }, [conversation, isOnline]);
 
   return (
-    <>
-      <div
-        className="
+    <div
+      className="
         relative
         w-full 
         flex 
-        border-b-[1px] 
+        shadow-md
         sm:px-4 
         py-3 
         px-4 
@@ -46,11 +45,11 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
         items-center 
         border-gray-50
       "
-      >
-        <div className="flex gap-3 items-center">
-          <Link
-            href="/conversations"
-            className="
+    >
+      <div className="flex gap-3 items-center">
+        <Link
+          href="/conversations"
+          className="
             lg:hidden 
             block 
             text-sky-500 
@@ -58,32 +57,37 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
             transition 
             cursor-pointer
           "
-          >
-            <HiChevronLeft size={32} />
-          </Link>
-          {conversation.isGroup ? (
-            // Group avatar
-            <div></div>
-          ) : (
-            <Avatar user={conversation.otherUser} withStatus isOnline={!!isOnline} />
-          )}
-          <div className="flex flex-col">
-            <div className="text-zinc-700">{conversation.name}</div>
-            <div className="text-sm font-light text-neutral-500">{statusText}</div>
+        >
+          <HiChevronLeft size={32} />
+        </Link>
+        {conversation.isGroup ? (
+          // Group avatar
+          <div></div>
+        ) : (
+          <Avatar user={conversation.otherUser} withStatus isOnline={!!isOnline} />
+        )}
+        <div className="flex flex-col">
+          <div className="text-md font-medium text-gray-900 dark:text-gray-100 transition">
+            {conversation.name}
+          </div>
+          <div className="text-sm font-light text-neutral-500 dark:text-neutral-400">
+            {statusText}
           </div>
         </div>
-        <HiEllipsisVertical
-          size={25}
-          onClick={() => {}}
-          className="
+      </div>
+      <HiEllipsisVertical
+        size={25}
+        onClick={() => {}}
+        className="
           text-slate-600
+          dark:text-slate-100
           cursor-pointer
           hover:text-slate-800
+          dark:hover:text-slate-300
           transition
         "
-        />
-      </div>
-    </>
+      />
+    </div>
   );
 };
 

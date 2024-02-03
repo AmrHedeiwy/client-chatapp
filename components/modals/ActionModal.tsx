@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Button } from '../Button';
+import { Button } from '../ui/button';
 interface ActionModalProps {
   id: string;
   title?: string;
@@ -25,16 +25,10 @@ const ActionModal: React.FC<ActionModalProps> = ({
         <div className="modal-action">
           <form method="dialog" className="flex space-x-2 ">
             {buttonClose && (
-              <Button customColor="bg-rose-300 hover:bg-rose-400" secondary>
-                {buttonClose}
-              </Button>
+              <Button color="bg-rose-300 hover:bg-rose-400">{buttonClose}</Button>
             )}
             {buttonConfirm && (
-              <Button
-                customColor="bg-sky-300 hover:bg-sky-400"
-                secondary
-                onClick={onClickConfirm}
-              >
+              <Button color="bg-sky-300 hover:bg-sky-400" onClick={onClickConfirm}>
                 {buttonConfirm}
               </Button>
             )}

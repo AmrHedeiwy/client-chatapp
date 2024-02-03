@@ -3,9 +3,9 @@
 import useRoutes from '@/app/hooks/useRoutes';
 import React, { useState } from 'react';
 import DesktopItem from './DesktopItem';
-import { User } from '@/app/types/index';
 import Avatar from '../Avatar';
 import { useMain } from '@/app/hooks/useMain';
+import { ModeToggle } from '@/components/ModeToggle';
 
 const DesktopSidebar = () => {
   const routes = useRoutes();
@@ -15,20 +15,19 @@ const DesktopSidebar = () => {
   return (
     <div
       className="
-        hidden
+        hidden  
         lg:fixed
         lg:inset-y-0
-        lg:left-0
-        lg:z-40
-        lg:w-20
-        xl:px-6
+        lg:w-[80px] 
+        lg:z-30 
         lg:overflow-y-auto
         lg:overflow-x-hidden
-        menu-bg
         lg:pb-4
         lg:flex
         lg:flex-col
-        justify-between
+        lg:justify-between
+        dark:bg-[#1E1F22] 
+        bg-[#E3E5E8] 
      "
     >
       <nav className="mt-4 flex flex-col justify-between">
@@ -47,7 +46,8 @@ const DesktopSidebar = () => {
           })}
         </ul>
       </nav>
-      <nav className="mt-4 flex flex-col justify-between items-center">
+      <nav className="pb-3 mt-auto flex items-center flex-col gap-y-4">
+        <ModeToggle />
         <div
           onClick={() => setIsOpen(true)}
           className="cursor-pointer hover:opacity-75 transition"

@@ -21,10 +21,9 @@ const MobileFooter = () => {
         w-full
         bottom-0
         z-40
-        items-center
-        menu-bg
-        border-t-[1px]
         lg:hidden
+        dark:bg-[#1E1F22] 
+        bg-[#E3E5E8]
       "
     >
       <ul role="list" className="flex items-center w-full">

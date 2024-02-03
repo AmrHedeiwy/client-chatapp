@@ -1,31 +1,49 @@
 'use client';
 
-import { Button } from '@/app/components/Button';
-import FormInput from '@/app/components/inputs/FormInput';
+import FormInput from '@/components/inputs/FormInput';
 import { ErrorProps, FormErrorProps, ResponseProps } from '@/app/types/Axios';
 import { notify } from '@/app/utils/notifications';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import * as y from 'yup';
+import { LuLoader2 } from 'react-icons/lu';
+import { z } from 'zod';
 
-const formSchema = y.object<FieldValues>({
-  password: y
-    .string()
-    .trim()
-    .matches(
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-      'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
-    )
-    .required('Password is required'),
-  confirmPassword: y
-    .string()
-    .trim()
-    .oneOf([y.ref('password')], 'Passwords must match')
-    .required('Confirm Password is required')
-});
+const formSchema = z
+  .object<FieldValues>({
+    password: z
+      .string()
+      .trim()
+      .min(1, { message: 'Password is required' })
+      .regex(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
+        message:
+          'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one digit, and one special character'
+      }),
+    confirmPassword: z.string().trim().min(1, { message: 'Confirm Password is required' })
+  })
+  .refine(
+    (data) => {
+      // Only validate confirmPassword
+      return data.confirmPassword === data.password;
+    },
+    {
+      message: 'Passwords must match',
+      path: ['confirmPassword'] // Specify the field path for error message
+    }
+  );
 
 export default function PasswordResetForm() {
   const { token } = useParams<{ token: string }>();
@@ -45,13 +63,8 @@ export default function PasswordResetForm() {
     })();
   }, [router]);
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors }
-  } = useForm<FieldValues>({
-    // resolver: yupResolver(formSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    // resolver: zodResolver(formSchema),
     defaultValues: {
       password: '',
       confirmPassword: '',
@@ -59,7 +72,7 @@ export default function PasswordResetForm() {
     }
   });
 
-  const onSumbit: SubmitHandler<FieldValues> = (data) => {
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
     const url: string = `http://localhost:5000/auth/reset-password`;
@@ -89,7 +102,7 @@ export default function PasswordResetForm() {
         const error = e.response?.data.error;
         if (error && error.name === 'JoiValidationError') {
           (error.message as FormErrorProps[]).forEach(({ fieldName, fieldMessage }) => {
-            setError(fieldName, { message: fieldMessage, type: 'manual' });
+            form.setError(fieldName, { message: fieldMessage, type: 'manual' });
           });
         } else {
           notify('error', error?.message as string);
@@ -101,29 +114,50 @@ export default function PasswordResetForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSumbit)} noValidate>
-      <div className="grid gap-y-4">
-        <FormInput
-          id="password"
-          placeholder="Your new password"
-          type="password"
-          register={register}
-          errors={errors}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="New secret, shhhh!!" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <FormInput
-          id="confirmPassword"
-          placeholder="Confirm your new password"
-          type="password"
-          register={register}
-          errors={errors}
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm New Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="confirm the secret word" {...field} />
+              </FormControl>
+              <FormMessage />
+              <FormDescription>
+                For your security, APP_NAME will never ask for your password. Please do
+                not share your password with anyone.
+              </FormDescription>
+            </FormItem>
+          )}
         />
 
-        <div className="mt-2">
-          <Button disabled={isLoading} fullwidth>
-            Reset Password
-          </Button>
-        </div>
-      </div>
-    </form>
+        <Button className="w-full" disabled={isLoading}>
+          {!isLoading ? (
+            'Reset Password'
+          ) : (
+            <>
+              <LuLoader2 className="h-6 w-6 text-white  dark:text-black animate-spin my-4 mr-1" />
+              <p>Please wait</p>
+            </>
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }

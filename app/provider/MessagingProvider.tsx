@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useEffect, useReducer, useState } from 'react';
+import React, { createContext, useEffect } from 'react';
 import { Conversation, Message, User } from '../types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSocket } from '../hooks/useSocket';

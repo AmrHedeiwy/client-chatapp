@@ -4,7 +4,6 @@ import useConversationParams from './useConversationParams';
 import { HiArrowLeftOnRectangle, HiOutlineChatBubbleLeftRight } from 'react-icons/hi2';
 import { RiContactsLine } from 'react-icons/ri';
 import signOut from '../actions/signOut';
-import { useActiveConversationState } from './useActiveConversationState';
 
 const useRoutes = () => {
   const pathname = usePathname();

@@ -21,35 +21,29 @@ const OTPInput: React.FC<OTPInputProps> = ({
   errors
 }) => {
   return (
-    <div className="w-16 h-16">
-      <input
-        type="number"
-        value={value}
-        ref={inputRef}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-        className={clsx(
-          `
-          w-full
-          h-full
-          flex
-          flex-col
-          items-center
-          justify-center
+    <input
+      type="number"
+      value={value}
+      ref={inputRef}
+      onChange={onChange}
+      onKeyDown={onKeyDown}
+      className={clsx(
+        `
+          w-10
+          h-10
           text-center
-          px-5
           outline-none
-          rounded-xl
+          rounded-md
           border
-          text-lg
+          text-base
+          text-black
           bg-white
           focus:ring-1 
           spin-button-none`,
-          errors[index] && 'border-rose-500',
-          !errors[index] && 'ring-blue-700'
-        )}
-      />
-    </div>
+        errors[index] && 'border-rose-500',
+        !errors[index] && 'ring-blue-700'
+      )}
+    />
   );
 };
 

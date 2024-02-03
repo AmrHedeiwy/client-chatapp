@@ -1,26 +1,20 @@
 import React from 'react';
 import PasswordForgotForm from './components/PasswordForgotForm';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function PasswordForgot() {
   return (
-    <div
-      className="
-        flex
-        min-h-full
-        flex-col
-        justify-center
-        items-center
-        bg-gray-50"
-    >
-      <div className="container flex max-w-md rounded-3xl shadow-lg bg-gray-100">
-        <div className="p-5 sm:p-8 w-full">
-          <h1 className="block text-center text-2xl font-bold text-gray-800 space-y-4 mb-8">
-            Forgot password?
-          </h1>
-
+    <div className="flex min-h-full justify-center items-center">
+      <Card className=" w-11/12 md:w-[450px]">
+        <CardHeader>
+          <div className="flex justify-center text-lg ">
+            <CardTitle>Forgot password</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
           <PasswordForgotForm />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,39 +1,42 @@
 'use client';
 
-import { Button } from '@/app/components/Button';
-import Link from '@/app/components/Link';
-import FormInput from '@/app/components/inputs/FormInput';
 import { FormErrorProps, ResponseProps, ErrorProps } from '@/app/types/Axios';
 import { notify } from '@/app/utils/notifications';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import * as y from 'yup';
+import { LuLoader2 } from 'react-icons/lu';
+import { z } from 'zod';
 
-const formSchema = y.object<FieldValues>({
-  email: y.string().trim().email('Invalid email').required('Email is required')
+const formSchema = z.object<FieldValues>({
+  email: z.string().trim().min(1, { message: 'Email is required' }).email('Invalid email')
 });
 
 export default function PasswordForgotForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors }
-  } = useForm<FieldValues>({
-    resolver: yupResolver(formSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: ''
     }
   });
 
-  useEffect(() => console.log(isLoading), [isLoading]);
-  const onSumbit: SubmitHandler<FieldValues> = (data) => {
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
     const url: string = `http://localhost:5000/auth/forgot-password`;
@@ -55,7 +58,7 @@ export default function PasswordForgotForm() {
         const error = e.response?.data.error;
         if (error && error.name === 'JoiValidationError') {
           (error.message as FormErrorProps[]).forEach(({ fieldName, fieldMessage }) => {
-            setError(fieldName, { message: fieldMessage, type: 'manual' });
+            form.setError(fieldName, { message: fieldMessage, type: 'manual' });
           });
         } else {
           notify('error', error?.message as string);
@@ -65,29 +68,48 @@ export default function PasswordForgotForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSumbit)} noValidate>
-      <div className="grid gap-y-4">
-        <FormInput
-          id="email"
-          placeholder="Email"
-          type="email"
-          register={register}
-          errors={errors}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="Email" {...field} />
+              </FormControl>
+              <FormMessage />
+              <FormDescription>
+                Please enter the email address where you would like to receive the
+                reset-password link.
+              </FormDescription>
+            </FormItem>
+          )}
         />
-
-        <div className="inline-flex justify-center items-center space-x-1 text-sm">
+        <div className="flex justify-center items-center text-sm">
           <p>Remember your password?</p>
-          <Link
-            withButton
+          <Button
+            className="p-1"
+            variant={'link'}
             disabled={isLoading}
             type="button"
             onClick={() => router.replace('/')}
           >
             Login here
-          </Link>
+          </Button>
         </div>
-        <Button disabled={isLoading}>Reset Password</Button>
-      </div>
-    </form>
+        <Button className="w-full" disabled={isLoading}>
+          {!isLoading ? (
+            'Reset Password'
+          ) : (
+            <>
+              <LuLoader2 className="h-6 w-6 text-white dark:text-black animate-spin my-4 mr-1" />
+              <p>Please wait</p>
+            </>
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }

@@ -4,9 +4,9 @@ import { Conversation, Message } from '@/app/types';
 import { useChatQuery } from '@/app/hooks/useChatQuery';
 import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
 import { LuServerCrash, LuLoader2 } from 'react-icons/lu';
-import { ChatWelcome } from './HelloChat';
+import { ChatWelcome } from '@/components/chat/HelloChat';
 import { useChatScroll } from '@/app/hooks/useChatScroll';
-import { ChatItem } from './ChatItem';
+import { ChatItem } from '@/components/chat/ChatItem';
 
 type BodyProps = {
   conversation: Conversation;
@@ -82,7 +82,15 @@ const Body = ({ conversation }: BodyProps) => {
                 let i_message = i.toString();
                 return (
                   <Fragment key={i_message}>
-                    {/* <ChatItem timestamp={message.createdAt} sender={message.user} /> */}
+                    <ChatItem
+                      id={message.messageId}
+                      content={message.content}
+                      fileUrl={message.fileUrl}
+                      timestamp={message.createdAt}
+                      sender={message.sender}
+                      isGroup={conversation.isGroup}
+                      // groupCreatedBy={conversation}
+                    />
                   </Fragment>
                 );
               })}

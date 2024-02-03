@@ -1,11 +1,9 @@
 'use client';
 
-import * as y from 'yup';
-import { HiPaperAirplane } from 'react-icons/hi2';
+import { z } from 'zod';
+import { HiPaperAirplane, HiPlus } from 'react-icons/hi2';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import MessageInput from './MessageInput';
-import Link from '@/app/components/Link';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useSocket } from '@/app/hooks/useSocket';
 import { Conversation, Message, User } from '@/app/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,20 +11,26 @@ import { useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import useConversationParams from '@/app/hooks/useConversationParams';
 import { useMain } from '@/app/hooks/useMain';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
+import { EmojiPicker } from '@/components/EmojiPicker';
+import { Textarea } from '@/components/ui/textarea';
+import { useSession } from '@/app/hooks/useSession';
 
-const formSchema = y.object({
-  Content: y.string().min(1)
+const formSchema = z.object({
+  content: z.string().min(1)
 });
 
 type FormProps = {
   conversation: Conversation;
 };
 
-const Form: React.FC<FormProps> = ({ conversation }) => {
-  const { socket } = useSocket();
+const ChatInput: React.FC<FormProps> = ({ conversation }) => {
+  const { session } = useSession();
   const queryClient = useQueryClient();
   const { conversationId } = useConversationParams();
   const { userProfile, dispatchConversations } = useMain();
+  const { socket } = useSocket();
 
   /**
    * Array of user IDs representing the other users in the chat.
@@ -42,19 +46,14 @@ const Form: React.FC<FormProps> = ({ conversation }) => {
     ) as string[];
   }, [conversation]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset
-  } = useForm<FieldValues>({
-    resolver: yupResolver(formSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       content: ''
     }
   });
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
     const messageId = uuidv4();
     const createdAt = new Date();
 
@@ -65,14 +64,15 @@ const Form: React.FC<FormProps> = ({ conversation }) => {
       conversationId,
       messageId,
       createdAt: createdAt.toLocaleString(),
-      senderId: socket.id,
+      senderId: session?.userId,
+      sender: userProfile,
       content: data.content,
       seenStatus: [],
       deliverStatus: [],
       received: false
     };
 
-    reset();
+    form.reset();
 
     // Add the new message to the user's cache
     queryClient.setQueryData(['messages', newMessage.conversationId], (prevData: any) => {
@@ -148,39 +148,55 @@ const Form: React.FC<FormProps> = ({ conversation }) => {
   };
 
   return (
-    <div
-      className="
-        pt-4 
-        px-4 
-        border-t 
-        border-gray-50
-        flex
-        pb-2 
-        gap-2 
-        lg:gap-4 
-        w-full
-      "
-    >
+    <Form {...form}>
       <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex gap-2 lg:gap-4 w-full items-center"
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex justify-between items-center"
       >
-        <MessageInput
-          id="content"
-          register={register}
-          errors={errors}
-          required
-          placeholder="Type your message..."
+        <FormField
+          control={form.control}
+          name="content"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormControl>
+                <div className="relative py-4 pl-4 pb-4">
+                  <button
+                    type="button"
+                    onClick={() => {}}
+                    className="absolute top-8 left-8 bg-zinc-500 dark:bg-zinc-400 hover:bg-zinc-600 dark:hover:bg-zinc-300 transition rounded-full p-1 flex items-center justify-center"
+                  >
+                    <HiPlus className="text-white dark:text-[#313338]" />
+                  </button>
+                  <div className="absolute top-8 left-20">
+                    <EmojiPicker
+                      onChange={(emoji: string) =>
+                        field.onChange(`${field.value}${emoji}`)
+                      }
+                    />
+                  </div>
+                  <Textarea
+                    id="content"
+                    contentEditable={true}
+                    className="block pl-28 py-4 resize-none scrollable-content bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
+                    placeholder={`Type your message`}
+                    rows={1}
+                    style={{
+                      lineHeight: '20px',
+                      minHeight: '20px'
+                    }}
+                    {...field}
+                  />
+                </div>
+              </FormControl>
+            </FormItem>
+          )}
         />
-
-        <div className="">
-          <Link withButton>
-            <HiPaperAirplane size={25} className="text-green-400" />
-          </Link>
-        </div>
+        <button className="rounded-r py-4 px-4 align-middle bg-zinc-200/90 dark:bg-zinc-700/75 mr-6 ">
+          <HiPaperAirplane size={20} />
+        </button>
       </form>
-    </div>
+    </Form>
   );
 };
 
-export default Form;
+export default ChatInput;

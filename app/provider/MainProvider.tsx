@@ -1,8 +1,7 @@
 'use client';
 
-import React, { Dispatch, useMemo, useReducer } from 'react';
-import { createContext, useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import React, { Dispatch, useReducer } from 'react';
+import { createContext, useState } from 'react';
 import { Conversation, GroupedConversations, User } from '../types';
 
 type MainContextType = {

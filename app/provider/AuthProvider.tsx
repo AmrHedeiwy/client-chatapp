@@ -4,7 +4,6 @@ import React from 'react';
 import { createContext, useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import getSession from '../actions/getSession';
-import { User } from '../types/index';
 
 interface AuthContextType {
   session: { userId: string; email: string; isVerified: boolean } | null;

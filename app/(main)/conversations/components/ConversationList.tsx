@@ -3,16 +3,9 @@
 import useConversationParams from '@/app/hooks/useConversationParams';
 import { Conversation } from '@/app/types';
 import clsx from 'clsx';
-import React, {
-  ChangeEvent,
-  ElementRef,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import { ElementRef, useEffect, useMemo, useRef, useState } from 'react';
 import ConversationBox from './ConversationBox';
-import SearchBarInput from '@/app/components/inputs/SeachBarInput';
+import SearchBarInput from '@/components/inputs/SeachBarInput';
 import useListScroll from '@/app/hooks/useListScroll';
 import { useSession } from '@/app/hooks/useSession';
 import { useSocket } from '@/app/hooks/useSocket';
@@ -64,7 +57,7 @@ const ConversationList = () => {
   useListScroll(topRef);
 
   return (
-    <aside
+    <div
       className={clsx(
         `
         fixed
@@ -73,25 +66,22 @@ const ConversationList = () => {
         lg:pb-0
         lg:left-20
         lg:w-80
-        lg:block
-        border-r
-        border-gray-200
-        block
-        w-full
-        left-0
+        lg:block 
+        dark:bg-[#2B2D31] 
+        bg-[#F2F3F5]
       `,
         isOpen ? 'hidden' : 'block w-full left-0'
       )}
     >
-      <div className="flex-col px-5">
-        <div className="py-4">
-          <h3 className="text-lg font-bold text-neutral-600 pb-4">Chats</h3>
-          <SearchBarInput
-            inputRef={inputRef}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Seacrh here..."
-          />
-        </div>
+      <div className="px-3 mt-4 mb-6">
+        <h2 className="w-full text-slate-900 tracking-widest dark:text-white text-xl flex items-center h-10 mb-2">
+          Chats
+        </h2>
+        <SearchBarInput
+          inputRef={inputRef}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Seacrh here..."
+        />
       </div>
 
       <div ref={topRef} className="overflow-y-auto scrollable-content px-2">
@@ -111,7 +101,7 @@ const ConversationList = () => {
           <p className="flex justify-center items-center text-xs my-4">No chats found</p>
         )}
       </div>
-    </aside>
+    </div>
   );
 };
 

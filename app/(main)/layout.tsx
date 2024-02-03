@@ -1,4 +1,4 @@
-import Sidebar from '@/app/components/sidebar/Sidebar';
+import Sidebar from '@/components/sidebar/Sidebar';
 import React from 'react';
 import { SocketProvider } from '../provider/SocketProvider';
 
@@ -42,7 +42,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
             >
               <Sidebar>
                 {children}
-                <ReactQueryDevtools buttonPosition="bottom-left" />
+                <ReactQueryDevtools buttonPosition="top-left" />
               </Sidebar>
             </MainProvider>
           </MessagingProvider>

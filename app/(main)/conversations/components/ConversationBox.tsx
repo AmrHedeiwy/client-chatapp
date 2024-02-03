@@ -1,15 +1,15 @@
 'use client';
 
-import Avatar from '@/app/components/Avatar';
+import Avatar from '@/components/Avatar';
 import useConversationParams from '@/app/hooks/useConversationParams';
 import { useSession } from '@/app/hooks/useSession';
 import { useSocket } from '@/app/hooks/useSocket';
 import { Conversation, Message, User } from '@/app/types';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { format, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import React, { cache, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 interface ConversationBoxProps {
   conversation: Conversation;
@@ -79,9 +79,11 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
         rounded-lg
         cursor-pointer
         p-4
-        hover:border
-        hover:bg-slate-100`,
-        activeConversationId === conversation.conversationId ? 'bg-slate-100' : 'bg-white'
+        hover:bg-zinc-200
+        dark:hover:bg-zinc-700`,
+        activeConversationId === conversation.conversationId
+          ? 'bg-zinc-200 dark:bg-zinc-700 '
+          : 'bg-transparent'
       )}
     >
       {conversation.isGroup ? (
@@ -93,7 +95,11 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
         <div className="focus:outline-none">
           <span className="absolute inset-0" aria-hidden="true" />
           <div className="flex justify-between items-center mb-1">
-            <p className={clsx(`text-md font-medium text-gray-900`)}>
+            <p
+              className={clsx(
+                `text-md font-medium text-gray-900 dark:text-gray-100 transition`
+              )}
+            >
               {conversation.name}
             </p>
 
@@ -101,7 +107,8 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
               <p
                 className="
                   text-xs 
-                  text-gray-400 
+                  text-gray-400
+                  dark:text-gray-100 
                   font-light
                 "
               >
@@ -112,8 +119,10 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
           <div className="flex justify-between">
             <p
               className={clsx(
-                `truncate text-sm`,
-                !isConnected || hasSeen ? 'text-gray-500' : 'text-black font-medium'
+                `truncate text-xs`,
+                !isConnected || hasSeen
+                  ? 'text-zinc-500 dark:text-zinc-300'
+                  : 'text-black dark:text-white font-bold'
               )}
             >
               {conversation.isGroup

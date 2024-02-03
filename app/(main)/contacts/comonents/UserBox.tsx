@@ -1,24 +1,50 @@
 'use client';
 
-import Avatar from '@/app/components/Avatar';
+import Avatar from '@/components/Avatar';
 import { Conversation, User } from '@/app/types/index';
-import React, { FormEventHandler, useState } from 'react';
+import { FormEventHandler, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import {
   HiOutlineUserPlus,
   HiUserMinus,
   HiOutlineChatBubbleLeft,
-  HiCalendarDays
+  HiCalendarDays,
+  HiEllipsisVertical
 } from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { notify } from '@/app/utils/notifications';
-import { ErrorProps, ResponseProps } from '@/app/types/Axios';
-import ActionModal from '@/app/components/modals/ActionModal';
-import { useSocket } from '@/app/hooks/useSocket';
-import { format, parse } from 'date-fns';
+import { ErrorProps } from '@/app/types/Axios';
+import { format } from 'date-fns';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMain } from '@/app/hooks/useMain';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger
+} from '@/components/ui/hover-card';
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 interface UserBoxProps {
   index: string;
@@ -33,6 +59,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
   const router = useRouter();
   const queryClient = useQueryClient();
   const { dispatchConversations } = useMain();
+  const [onMount, setOnMount] = useState(false);
 
   const onClickChat = () => {
     const url = `http://localhost:5000/conversations/create`;
@@ -91,80 +118,108 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
   };
 
   return (
-    <div
-      className={clsx(
-        `
-        w-full
-        relative
-        collapse
-        rounded-lg
-        cursor-default
-        select-none
-        transition
-        hover:border
-        hover:p-1
-        hover:bg-slate-100`,
-        isActive && 'collapse-open bg-slate-100',
-        !isActive && 'collapse-close'
-      )}
-    >
-      <input type="checkbox" onInput={onInput} />
-
-      <div className="flex items-center space-x-3 collapse-title">
-        <Avatar user={data} />
-        <p className="text-sm font-medium text-gray-900">{data.username}</p>
-      </div>
-
-      <div className="flex justify-center text-xl space-x-3 collapse-content">
-        <button onClick={onClickChat} className="tooltip cursor-pointer" data-tip="chat">
-          <HiOutlineChatBubbleLeft className="text-sky-500" />
-        </button>
-
-        <button className="tooltip" data-tip={isContact ? 'remove' : 'add'}>
-          <label className="swap swap-flip">
-            <input type="checkbox" checked={isContact} readOnly />
-
-            <HiOutlineUserPlus
-              className="text-green-500 tooltip cursor-pointer swap-off"
-              onClick={() => onClickFriend('add')}
-            />
-
-            <HiUserMinus
-              className="text-gray-500 swap-on"
-              onClick={() =>
-                // @ts-expect-error
-                document?.getElementById(`unfollow_warning_${index}`)?.showModal()
-              }
-            />
-          </label>
-        </button>
-
-        <button
-          className="tooltip cursor-pointer pb-1"
-          data-tip={`Joined ${
-            data.createdAt && format(new Date(data.createdAt), 'MMMM d, yyyy')
-          }`}
+    <HoverCard>
+      <HoverCardTrigger asChild>
+        <div
+          className={clsx(
+            `
+            flex
+            justify-between
+            items-center
+            w-full
+            p-4
+            rounded-lg
+            cursor-default
+            select-none
+            bg-transparent`
+          )}
         >
-          <HiCalendarDays className="text-zinc-900" />
-        </button>
-      </div>
+          <div className="flex items-center space-x-3 collapse-title">
+            <Avatar user={data} />
+            <p className="text-sm font-medium">{data.username}</p>
+          </div>
 
-      <ActionModal
-        id={`unfollow_warning_${index}`}
-        title="WARNING"
-        buttonClose="cancle"
-        buttonConfirm="confirm"
-        onClickConfirm={() => {
-          onClickFriend('remove');
-        }}
-        content={
-          <p className="py-4">
-            Are you sure you want to remove <strong>{data.username}</strong> from your
-            contacts?
-          </p>
-        }
-      />
-    </div>
+          <AlertDialog>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <HiEllipsisVertical
+                  size={25}
+                  onClick={() => {}}
+                  className="
+                text-slate-600
+                dark:text-slate-100
+                  cursor-pointer
+                hover:text-slate-800
+                dark:hover:text-slate-300
+                  transition
+                "
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    className="flex items-center gap-x-1 cursor-pointer"
+                    onClick={onClickChat}
+                  >
+                    <HiOutlineChatBubbleLeft className="text-yellow-600" />
+                    <p className="font-bold">chat</p>
+                  </DropdownMenuItem>
+                  {!isContact && (
+                    <DropdownMenuItem
+                      className="flex items-center gap-x-1 cursor-pointer"
+                      onClick={() => onClickFriend('add')}
+                    >
+                      <HiOutlineUserPlus className="text-green-500" />
+                      <p className="font-bold">add</p>
+                    </DropdownMenuItem>
+                  )}
+                  {isContact && (
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem className="flex items-center gap-x-1 cursor-pointer">
+                        <HiUserMinus className="text-green-500" />
+                        <p className="font-bold">remove</p>
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                  )}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove {data.username} from your contacts
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onClickFriend('remove')}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-72">
+        <div className="flex justify-between space-x-4">
+          <div className="space-y-1">
+            <h4 className="text-sm font-semibold">@{data.username}</h4>
+            <p className="text-sm">Some user description.</p>
+            <div className="flex items-center pt-2">
+              <span className="flex gap-x-1 text-xs text-muted-foreground">
+                <HiCalendarDays /> Joined{' '}
+                {data.createdAt
+                  ? format(new Date(data.createdAt), 'dd MMMM yyy')
+                  : 'server is acting sus today, idk why it does not want to load the date'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 };
 

@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { Conversation, GroupedConversations, GroupedMessages, Message } from '../types';
+import { GroupedConversations, GroupedMessages } from '../types';
 
 const getConversations = async () => {
   const cookie = cookies().get('connect.sid');

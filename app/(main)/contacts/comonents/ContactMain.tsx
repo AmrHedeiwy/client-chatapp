@@ -1,7 +1,7 @@
 'use client';
 
-import SearchBarInput from '@/app/components/inputs/SeachBarInput';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import SearchBarInput from '@/components/inputs/SeachBarInput';
+import { useRef, useState } from 'react';
 import UserList from './UserList';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
@@ -43,23 +43,20 @@ const ContactForm = () => {
         lg:pb-0
         lg:left-20
         lg:w-80
-        lg:block
-        border-r
-      border-gray-200
-        block
-        w-full
-        left-0
+        lg:block 
+        dark:bg-[#2B2D31] 
+        bg-[#F2F3F5]
       "
     >
-      <div className="flex-col px-5">
-        <div className="py-4">
-          <h3 className="text-lg font-bold text-neutral-600 pb-4">Find new friends!</h3>
-          <SearchBarInput
-            inputRef={inputRef}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Seacrh here..."
-          />
-        </div>
+      <div className="px-3 mt-4 mb-6">
+        <h2 className="w-full text-slate-900 tracking-widest dark:text-white text-xl flex items-center h-10 mb-2">
+          Contacts
+        </h2>
+        <SearchBarInput
+          inputRef={inputRef}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Seacrh here..."
+        />
       </div>
 
       <UserList

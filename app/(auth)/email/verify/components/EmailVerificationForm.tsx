@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/app/components/Button';
 import React, {
   ChangeEvent,
   FormEvent,
@@ -10,12 +9,13 @@ import React, {
   useRef,
   useState
 } from 'react';
-import EmailVerificationOTPInput from '@/app/(auth)/email/verify/components/EmailVerificationOTPInput';
+import OTPInput from '@/app/(auth)/email/verify/components/OTPInput';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { notify } from '@/app/utils/notifications';
 import { useRouter } from 'next/navigation';
 import { ErrorProps, ResponseProps } from '@/app/types/Axios';
-import Link from '@/app/components/Link';
+import { Button } from '@/components/ui/button';
+import { LuLoader2 } from 'react-icons/lu';
 
 export default function EmailVerificationForm() {
   const router = useRouter();
@@ -50,10 +50,17 @@ export default function EmailVerificationForm() {
   const handleOnKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
     if (e.key === 'Backspace') {
       const newOTP: string[] = [...OTP];
+      if (newOTP[index].length !== 0) {
+        newOTP[index] = '';
+        setOTP(newOTP);
+        return;
+      }
+
       newOTP[index] = '';
+      if (index > 0) newOTP[index - 1] = '';
       setOTP(newOTP);
 
-      if (!OTP[index]) setActiveInputRef(index - 1);
+      setActiveInputRef(index - 1);
     }
   };
 
@@ -96,10 +103,13 @@ export default function EmailVerificationForm() {
 
         notify('success', message as string);
 
-        if (redirect) router.push(redirect);
+        if (redirect) router.replace(redirect);
       })
       .catch((e: AxiosError<ErrorProps>) => {
-        notify('error', e.response?.data.error.message as string);
+        const error = e.response?.data.error;
+        notify('error', error?.message as string);
+
+        if (error?.redirect) router.replace(error.redirect);
       })
       .finally(() => setTimeout(() => setIsLoading(false), 1000));
   };
@@ -119,7 +129,11 @@ export default function EmailVerificationForm() {
         notify('success', res.data.message as string);
       })
       .catch((e: AxiosError<ErrorProps>) => {
-        notify('error', e.response?.data.error.message as string);
+        const error = e.response?.data.error;
+
+        notify('error', error?.message as string);
+
+        if (error?.redirect) router.replace(error.redirect);
       })
       .finally(() => setIsLoading(false));
   };
@@ -131,11 +145,11 @@ export default function EmailVerificationForm() {
   return (
     <form method="post" onSubmit={handleOnSubmit}>
       <div className="flex flex-col space-y-16">
-        <div className="flex flex-row items-center justify-between mx-auto w-full ">
+        <div className="flex flex-row justify-center items-center gap-2">
           {OTP.map((_, index) => {
             return (
               <Fragment key={index}>
-                <EmailVerificationOTPInput
+                <OTPInput
                   index={index}
                   inputRef={index === activeInputRef ? inputRef : null}
                   value={OTP[index]}
@@ -150,16 +164,29 @@ export default function EmailVerificationForm() {
 
         <div className="flex flex-col space-y-5">
           <div>
-            <Button fullwidth disabled={isLoading}>
-              Verify Account
+            <Button className="w-full" disabled={isLoading}>
+              {!isLoading ? (
+                'Verify Account'
+              ) : (
+                <>
+                  <LuLoader2 className="h-6 w-6 text-white dark:text-black animate-spin my-4 mr-1" />
+                  <p>Please wait</p>
+                </>
+              )}
             </Button>
           </div>
 
           <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-gray-500">
-            <p>{`Didn't recieve code?`}</p>
-            <Link onClick={handleOnClick} disabled={isLoading} withButton>
+            <p className="text-gray-500 dark:text-gray-400">{`Didn't recieve code?`}</p>
+            <Button
+              className="pl-1"
+              variant={'link'}
+              type="button"
+              onClick={handleOnClick}
+              disabled={isLoading}
+            >
               Resend
-            </Link>
+            </Button>
           </div>
         </div>
       </div>

@@ -33,12 +33,12 @@ export interface Message {
   conversationId: string;
   senderId: string;
   content: string;
-  fileUrl?: string;
+  fileUrl: string;
   createdAt: string;
   seenStatus: MessageStatus[];
   deliverStatus: MessageStatus[];
   received?: boolean;
-  user: User;
+  sender: User;
 }
 
 interface MessageStatus {
