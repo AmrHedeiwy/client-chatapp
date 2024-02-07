@@ -4,7 +4,7 @@ export interface User {
   facebookId?: string | null;
   username: string;
   email: string;
-  image?: string | null;
+  image: string | null;
   isVerified: boolean;
   lastVerifiedAt?: string | null;
   createdAt?: string;
@@ -19,11 +19,13 @@ export interface Conversation {
   createdAt: string;
   lastMessageAt: string;
   name: string | null;
+  image: string | null;
   isGroup: boolean;
-  users: User[];
+  members: User[];
   messages: Message[];
-  otherUser?: User;
-  otherUsers?: User[];
+  otherMember?: User;
+  otherMembers?: User[];
+  adminIds: string[];
   unseenMessagesCount: number;
   hasInitialNextPage: boolean;
 }
@@ -31,10 +33,9 @@ export interface Conversation {
 export interface Message {
   messageId: string;
   conversationId: string;
-  senderId: string;
   content: string;
   fileUrl: string;
-  createdAt: string;
+  sentAt: string;
   seenStatus: MessageStatus[];
   deliverStatus: MessageStatus[];
   received?: boolean;
@@ -56,4 +57,8 @@ export type GroupedMessages = {
 
 export type GroupedConversations = {
   [conversationId: string]: Conversation;
-} | null;
+};
+
+export type GroupedContacts = {
+  [contactId: string]: User;
+};

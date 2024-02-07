@@ -1,13 +1,16 @@
 'use client';
 
-import SearchBarInput from '@/components/inputs/SeachBarInput';
+import SearchBarInput from '@/components/SeachBarInput';
 import { useRef, useState } from 'react';
 import UserList from './UserList';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import clsx from 'clsx';
+import useConversationParams from '@/hooks/useConversationParams';
 
 const ContactForm = () => {
   const [search, setSearch] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isOpen } = useConversationParams();
 
   const fetchUsers = async ({ pageParam = 0, searchQuery = '' }) => {
     const url: string = `http://localhost:5000/contacts/search?search=${searchQuery}&page=${pageParam}`;
@@ -36,7 +39,8 @@ const ContactForm = () => {
 
   return (
     <aside
-      className="
+      className={clsx(
+        `
         fixed
         inset-y-0
         pb-20
@@ -44,9 +48,10 @@ const ContactForm = () => {
         lg:left-20
         lg:w-80
         lg:block 
-        dark:bg-[#2B2D31] 
-        bg-[#F2F3F5]
-      "
+      dark:bg-[#2B2D31] 
+      bg-[#F2F3F5]`,
+        isOpen ? 'hidden' : 'block w-full left-0'
+      )}
     >
       <div className="px-3 mt-4 mb-6">
         <h2 className="w-full text-slate-900 tracking-widest dark:text-white text-xl flex items-center h-10 mb-2">

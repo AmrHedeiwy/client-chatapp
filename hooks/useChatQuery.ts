@@ -1,6 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useSocket } from './useSocket';
-import { useEffect } from 'react';
 
 interface ChatQueryProps {
   queryKey: string;

@@ -1,4 +1,4 @@
-import { AuthContext } from '../provider/AuthProvider';
+import { AuthContext } from '../components/provider/AuthProvider';
 import { useContext } from 'react';
 
 export const useSession = () => {

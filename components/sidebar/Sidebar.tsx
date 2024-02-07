@@ -1,4 +1,3 @@
-import React from 'react';
 import DesktopSidebar from './DesktopSidebar';
 import MobileFooter from './MobileFooter';
 

@@ -1,30 +1,29 @@
 'use client';
 
-import { HiChevronLeft } from 'react-icons/hi';
-import { HiEllipsisVertical } from 'react-icons/hi2';
 import { useMemo } from 'react';
 import Link from 'next/link';
 
 import Avatar from '@/components/Avatar';
-import { Conversation } from '@/app/types';
-import { useSocket } from '@/app/hooks/useSocket';
+import { Conversation } from '@/types';
+import { useSocket } from '@/hooks/useSocket';
+import { ArrowLeft, MoreVertical } from 'lucide-react';
 
 interface HeaderProps {
   conversation: Conversation;
 }
 
 const Header: React.FC<HeaderProps> = ({ conversation }) => {
-  const { onlineUsers } = useSocket();
+  const { onlineSockets } = useSocket();
 
   // Check if the other user is online, ignored if the conversation is a group
   const isOnline = useMemo(
-    () => onlineUsers?.includes(conversation.otherUser?.userId as string),
-    [onlineUsers, conversation.otherUser]
+    () => onlineSockets?.includes(conversation.otherMember?.userId as string),
+    [onlineSockets, conversation.otherMember]
   );
 
   const statusText = useMemo(() => {
     if (conversation.isGroup) {
-      return `${conversation.users.length} members`;
+      return `${conversation.members.length} members`;
     }
 
     return isOnline ? 'active' : 'offline';
@@ -38,7 +37,8 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
         flex 
         shadow-md
         sm:px-4 
-        py-3 
+        lg:py-3
+        py-1
         px-4 
         lg:px-6 
         justify-between 
@@ -46,26 +46,27 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
         border-gray-50
       "
     >
-      <div className="flex gap-3 items-center">
+      <div className="flex gap-2 items-center">
         <Link
           href="/conversations"
           className="
             lg:hidden 
             block 
-            text-sky-500 
-            hover:text-sky-600 
             transition 
             cursor-pointer
           "
         >
-          <HiChevronLeft size={32} />
+          <ArrowLeft size={20} />
         </Link>
-        {conversation.isGroup ? (
-          // Group avatar
-          <div></div>
-        ) : (
-          <Avatar user={conversation.otherUser} withStatus isOnline={!!isOnline} />
-        )}
+        <Avatar
+          imageUrl={
+            conversation.isGroup
+              ? conversation.image
+              : (conversation.otherMember?.image as string)
+          }
+          withStatus
+          isOnline={!!isOnline}
+        />
         <div className="flex flex-col">
           <div className="text-md font-medium text-gray-900 dark:text-gray-100 transition">
             {conversation.name}
@@ -75,8 +76,8 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
           </div>
         </div>
       </div>
-      <HiEllipsisVertical
-        size={25}
+      <MoreVertical
+        size={24}
         onClick={() => {}}
         className="
           text-slate-600

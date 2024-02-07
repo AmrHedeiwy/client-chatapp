@@ -1,30 +1,28 @@
 'use client';
 
 import Avatar from '@/components/Avatar';
-import { Conversation, User } from '@/app/types/index';
-import { FormEventHandler, useEffect, useState } from 'react';
+import { Conversation, User } from '@/types/index';
+import { FormEventHandler, useState } from 'react';
 import clsx from 'clsx';
+
 import {
-  HiOutlineUserPlus,
-  HiUserMinus,
-  HiOutlineChatBubbleLeft,
-  HiCalendarDays,
-  HiEllipsisVertical
-} from 'react-icons/hi2';
+  UserRoundPlus,
+  UserRoundMinus,
+  MessageCircle,
+  CalendarRange,
+  MoreVertical
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { notify } from '@/app/utils/notifications';
-import { ErrorProps } from '@/app/types/Axios';
+import { toast } from '@/lib/utils';
 import { format } from 'date-fns';
-import { useQueryClient } from '@tanstack/react-query';
-import { useMain } from '@/app/hooks/useMain';
+import { ErrorProps } from '@/types/Axios';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
@@ -33,18 +31,9 @@ import {
   HoverCardTrigger
 } from '@/components/ui/hover-card';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
+import { useQueryClient } from '@tanstack/react-query';
+import { useModal } from '@/hooks/useModal';
+import { useMain } from '@/hooks/useMain';
 
 interface UserBoxProps {
   index: string;
@@ -54,12 +43,13 @@ interface UserBoxProps {
 }
 
 const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => {
-  // Indicates whether this user is a contact of the logged-in user
-  const [isContact, setIsContact] = useState(data.isContact);
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const [isContact, setIsContact] = useState(data.isContact); // Indicates whether this user is a contact of the logged-in user
+
   const { dispatchConversations } = useMain();
-  const [onMount, setOnMount] = useState(false);
+  const { onOpen } = useModal();
 
   const onClickChat = () => {
     const url = `http://localhost:5000/conversations/create`;
@@ -69,7 +59,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
     };
 
     axios
-      .post(url, { otherUserId: data.userId }, options)
+      .post(url, { members: [data.userId], isGroup: false }, options)
       .then(async (res) => {
         const conversation = res.data.conversation as Conversation;
 
@@ -77,7 +67,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
         dispatchConversations({ type: 'add', payload: { conversation } });
 
         // Initialize the messages for the conversation in the user's cache
-        queryClient.setQueryData(['messages', conversation.conversationId], {
+        await queryClient.setQueryData(['messages', conversation.conversationId], {
           pages: [{ items: [], nextPage: 0 }],
           pageParams: 0,
           unseenMessagesCount: 0
@@ -88,13 +78,15 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
       .catch((e: AxiosError<ErrorProps>) => {
         const error = e.response?.data.error;
 
-        notify('error', error?.message as string);
+        toast('error', error?.message as string);
 
         if (error?.redirect) router.push(error.redirect);
       });
   };
 
-  const onClickFriend = (action: 'add' | 'remove') => {
+  const onClickFriend = (action: 'add' | 'remove', e?: any) => {
+    e?.preventDefault();
+
     const url = `http://localhost:5000/contacts/manage`;
     const options: AxiosRequestConfig = {
       withCredentials: true,
@@ -111,7 +103,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
       .catch((e: AxiosError<ErrorProps>) => {
         const error = e.response?.data.error;
 
-        notify('error', error?.message as string);
+        toast('error', error?.message as string);
 
         if (error?.redirect) router.push(error.redirect);
       });
@@ -135,17 +127,16 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
           )}
         >
           <div className="flex items-center space-x-3 collapse-title">
-            <Avatar user={data} />
+            <Avatar imageUrl={data.image} />
             <p className="text-sm font-medium">{data.username}</p>
           </div>
 
-          <AlertDialog>
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <HiEllipsisVertical
-                  size={25}
-                  onClick={() => {}}
-                  className="
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <MoreVertical
+                size={25}
+                onClick={(e) => e.preventDefault()}
+                className="
                 text-slate-600
                 dark:text-slate-100
                   cursor-pointer
@@ -153,54 +144,45 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
                 dark:hover:text-slate-300
                   transition
                 "
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>actions</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  className="flex items-center gap-x-1 cursor-pointer"
+                  onClick={onClickChat}
+                >
+                  <MessageCircle size={20} className="text-yellow-600" />
+                  <p className="font-bold">chat</p>
+                </DropdownMenuItem>
+                {!isContact && (
                   <DropdownMenuItem
                     className="flex items-center gap-x-1 cursor-pointer"
-                    onClick={onClickChat}
+                    onClick={(e) => onClickFriend('add', e)}
                   >
-                    <HiOutlineChatBubbleLeft className="text-yellow-600" />
-                    <p className="font-bold">chat</p>
+                    <UserRoundPlus size={20} className="text-green-500" />
+                    <p className="font-bold">add</p>
                   </DropdownMenuItem>
-                  {!isContact && (
-                    <DropdownMenuItem
-                      className="flex items-center gap-x-1 cursor-pointer"
-                      onClick={() => onClickFriend('add')}
-                    >
-                      <HiOutlineUserPlus className="text-green-500" />
-                      <p className="font-bold">add</p>
-                    </DropdownMenuItem>
-                  )}
-                  {isContact && (
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem className="flex items-center gap-x-1 cursor-pointer">
-                        <HiUserMinus className="text-green-500" />
-                        <p className="font-bold">remove</p>
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                  )}
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will remove {data.username} from your contacts
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onClickFriend('remove')}>
-                  Continue
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                )}
+                {isContact && (
+                  <DropdownMenuItem
+                    className="flex items-center gap-x-1 cursor-pointer"
+                    onClick={() =>
+                      onOpen('removeContact', {
+                        contact: {
+                          username: data.username,
+                          confirm: onClickFriend
+                        }
+                      })
+                    }
+                  >
+                    <UserRoundMinus size={20} className="text-green-500" />
+                    <p className="font-bold">remove</p>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </HoverCardTrigger>
       <HoverCardContent className="w-72">
@@ -210,7 +192,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
             <p className="text-sm">Some user description.</p>
             <div className="flex items-center pt-2">
               <span className="flex gap-x-1 text-xs text-muted-foreground">
-                <HiCalendarDays /> Joined{' '}
+                <CalendarRange /> Joined{' '}
                 {data.createdAt
                   ? format(new Date(data.createdAt), 'dd MMMM yyy')
                   : 'server is acting sus today, idk why it does not want to load the date'}

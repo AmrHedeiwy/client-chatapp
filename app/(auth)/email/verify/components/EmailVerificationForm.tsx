@@ -11,11 +11,11 @@ import React, {
 } from 'react';
 import OTPInput from '@/app/(auth)/email/verify/components/OTPInput';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { notify } from '@/app/utils/notifications';
+import { toast } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { ErrorProps, ResponseProps } from '@/app/types/Axios';
+import { ErrorProps, ResponseProps } from '@/types/Axios';
 import { Button } from '@/components/ui/button';
-import { LuLoader2 } from 'react-icons/lu';
+import { Loader2 } from 'lucide-react';
 
 export default function EmailVerificationForm() {
   const router = useRouter();
@@ -101,13 +101,13 @@ export default function EmailVerificationForm() {
       .then((res: AxiosResponse<ResponseProps>) => {
         const { message, redirect } = res.data;
 
-        notify('success', message as string);
+        toast('success', message as string);
 
         if (redirect) router.replace(redirect);
       })
       .catch((e: AxiosError<ErrorProps>) => {
         const error = e.response?.data.error;
-        notify('error', error?.message as string);
+        toast('error', error?.message as string);
 
         if (error?.redirect) router.replace(error.redirect);
       })
@@ -126,12 +126,12 @@ export default function EmailVerificationForm() {
     axios
       .post(url, {}, config)
       .then((res: AxiosResponse<ResponseProps>) => {
-        notify('success', res.data.message as string);
+        toast('success', res.data.message as string);
       })
       .catch((e: AxiosError<ErrorProps>) => {
         const error = e.response?.data.error;
 
-        notify('error', error?.message as string);
+        toast('error', error?.message as string);
 
         if (error?.redirect) router.replace(error.redirect);
       })
@@ -169,7 +169,7 @@ export default function EmailVerificationForm() {
                 'Verify Account'
               ) : (
                 <>
-                  <LuLoader2 className="h-6 w-6 text-white dark:text-black animate-spin my-4 mr-1" />
+                  <Loader2 className="h-6 w-6 text-white dark:text-black animate-spin my-4 mr-1" />
                   <p>Please wait</p>
                 </>
               )}

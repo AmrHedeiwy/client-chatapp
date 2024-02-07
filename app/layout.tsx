@@ -1,20 +1,19 @@
-import { Ubuntu_Mono, Kalam } from 'next/font/google';
+// import { Inter as FontSans } from 'next/font/google';
 import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 import type { Metadata } from 'next';
 
-import AuthProvider from './provider/AuthProvider';
+import AuthProvider from '../components/provider/AuthProvider';
 import { ToastContainer } from 'react-toastify';
-import ThemeProvider from './provider/ThemeProvider';
+import ThemeProvider from '../components/provider/ThemeProvider';
 import { cn } from '@/lib/utils';
+import { ModalProvider } from '../components/provider/ModalProvider';
 
-const font = Ubuntu_Mono({
-  subsets: ['latin-ext'],
-  weight: ['400'],
-  display: 'swap',
-  adjustFontFallback: false
-});
+// export const fontSans = FontSans({
+//   subsets: ['latin'],
+//   variable: '--font-sans'
+// });
 
 // export const metadata: Metadata = {
 //   title: 'Create Next App',
@@ -23,9 +22,9 @@ const font = Ubuntu_Mono({
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body className={cn(font.className, 'bg-white dark:bg-[#313338]')}>
+    <html lang="en" suppressHydrationWarning>
+      <AuthProvider>
+        <body className={cn('bg-white dark:bg-[#313338] font-sans font-medium')}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -35,7 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ToastContainer />
           </ThemeProvider>
         </body>
-      </html>
-    </AuthProvider>
+      </AuthProvider>
+    </html>
   );
 }

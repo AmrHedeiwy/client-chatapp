@@ -1,8 +1,8 @@
 'use client';
 
-import useConversationParams from '@/app/hooks/useConversationParams';
-import useRoutes from '@/app/hooks/useRoutes';
-import React from 'react';
+import useConversationParams from '@/hooks/useConversationParams';
+import useRoutes from '@/hooks/useRoutes';
+
 import MobileItem from './MobileItem';
 
 const MobileFooter = () => {

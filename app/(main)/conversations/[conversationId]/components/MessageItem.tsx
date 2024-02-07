@@ -1,47 +1,47 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
-import { User } from '@/app/types';
-import Avatar from '../Avatar';
+import { User } from '@/types';
+import Avatar from '@/components/Avatar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { CiFileOn } from 'react-icons/ci';
-import { useSession } from '@/app/hooks/useSession';
+import { useSession } from '@/hooks/useSession';
 import { useEffect, useState } from 'react';
-import { Form, FormControl, FormField, FormItem } from '../ui/form';
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Input } from '../ui/input';
-import { Button } from '../ui/button';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { File } from 'lucide-react';
 
-interface ChatItemProps {
+interface MessageItemProps {
   id: string;
   content: string;
-  sender: User;
-  timestamp: string;
   fileUrl: string | null;
+  timestamp: string;
+  sender: User;
   deleted: boolean;
-  isUpdated: boolean;
+  updated: boolean;
   isGroup: boolean;
-  groupCreatedBy: string | undefined;
+  isAdmin?: boolean;
 }
 
 const formSchema = z.object({
   content: z.string().min(1)
 });
 
-export const ChatItem = ({
+const MessageItem = ({
   id,
   content,
   sender,
   timestamp,
   fileUrl,
   deleted,
-  isUpdated,
+  updated,
   isGroup,
-  groupCreatedBy
-}: ChatItemProps) => {
+  isAdmin
+}: MessageItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   // const { onOpen } = useModal();
   const params = useParams();
@@ -81,9 +81,9 @@ export const ChatItem = ({
 
   const fileType = fileUrl?.split('.').pop();
 
-  const isAdmin = isGroup && sender.userId === groupCreatedBy;
+  const isGroupAdmin = isGroup && isAdmin;
   const isOwner = session?.userId === sender.userId;
-  const canDeleteMessage = !deleted && (isAdmin || isOwner);
+  const canDeleteMessage = !deleted && (isGroupAdmin || isOwner);
   const canEditMessage = !deleted && isOwner && !fileUrl;
   const isPDF = fileType === 'pdf' && fileUrl;
   const isImage = !isPDF && fileUrl;
@@ -92,7 +92,7 @@ export const ChatItem = ({
     <div className="relative group flex items-center hover:bg-black/5 p-4 transition w-full">
       <div className="group flex gap-x-2 items-start w-full">
         <div className="cursor-pointer hover:drop-shadow-md transition">
-          <Avatar user={sender} />
+          <Avatar imageUrl={sender.image} />
         </div>
         <div className="flex flex-col w-full">
           <div className="flex items-center gap-x-2">
@@ -118,7 +118,7 @@ export const ChatItem = ({
 
           {isPDF && (
             <div className="relative flex items-center p-2 mt-2 rounded-md bg-background/10">
-              <CiFileOn className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
+              <File className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
               <a
                 href={fileUrl}
                 target="_blank"
@@ -138,7 +138,7 @@ export const ChatItem = ({
               )}
             >
               {content}
-              {isUpdated && !deleted && (
+              {updated && !deleted && (
                 <span className="text-[10px] mx-2 text-zinc-500 dark:text-zinc-400">
                   (edited)
                 </span>
@@ -184,3 +184,5 @@ export const ChatItem = ({
     </div>
   );
 };
+
+export default MessageItem;

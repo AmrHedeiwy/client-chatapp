@@ -1,9 +1,8 @@
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import useConversationParams from './useConversationParams';
-import { HiArrowLeftOnRectangle, HiOutlineChatBubbleLeftRight } from 'react-icons/hi2';
-import { RiContactsLine } from 'react-icons/ri';
 import signOut from '../actions/signOut';
+import { LogOut, MessageCircle, UsersRound } from 'lucide-react';
 
 const useRoutes = () => {
   const pathname = usePathname();
@@ -15,20 +14,20 @@ const useRoutes = () => {
       {
         label: 'Chat',
         href: '/conversations',
-        icon: HiOutlineChatBubbleLeftRight,
+        icon: MessageCircle,
         active: pathname === '/conversations' || !!conversationId
       },
       {
         label: 'Contact',
         href: '/contacts',
-        icon: RiContactsLine,
+        icon: UsersRound,
         active: pathname === '/contacts'
       },
       {
         label: 'Logout',
         href: '#',
         onClick: () => signOut(),
-        icon: HiArrowLeftOnRectangle
+        icon: LogOut
       }
     ],
     [pathname, conversationId]

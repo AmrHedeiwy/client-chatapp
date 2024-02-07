@@ -1,8 +1,8 @@
 'use client';
 
-import clsx from 'clsx';
 import Link from 'next/link';
 import React from 'react';
+import clsx from 'clsx';
 
 interface MobileItemProps {
   href: string;
@@ -27,10 +27,9 @@ const MobileItem: React.FC<MobileItemProps> = ({ href, icon: Icon, active, onCli
           flex
           justify-center
           rounded-md
-          text-lg
           leading-6
           font-semibold
-          p-4
+          p-3
         text-gray-400
         hover:bg-neutral-100
         dark:hover:bg-neutral-700
@@ -38,7 +37,7 @@ const MobileItem: React.FC<MobileItemProps> = ({ href, icon: Icon, active, onCli
           active && 'text-green-500'
         )}
       >
-        <Icon />
+        <Icon size={18} />
       </Link>
     </li>
   );

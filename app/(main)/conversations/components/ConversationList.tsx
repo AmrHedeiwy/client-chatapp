@@ -1,21 +1,29 @@
 'use client';
 
-import useConversationParams from '@/app/hooks/useConversationParams';
-import { Conversation } from '@/app/types';
-import clsx from 'clsx';
 import { ElementRef, useEffect, useMemo, useRef, useState } from 'react';
+import clsx from 'clsx';
+
+import { Conversation } from '@/types';
+
+import SearchBarInput from '@/components/SeachBarInput';
+
+import { useSession } from '@/hooks/useSession';
+import { useSocket } from '@/hooks/useSocket';
+import useConversationParams from '@/hooks/useConversationParams';
+import { useMain } from '@/hooks/useMain';
+import { useModal } from '@/hooks/useModal';
+import useListScroll from '@/hooks/useListScroll';
+
+import { MessagesSquare } from 'lucide-react';
+
 import ConversationBox from './ConversationBox';
-import SearchBarInput from '@/components/inputs/SeachBarInput';
-import useListScroll from '@/app/hooks/useListScroll';
-import { useSession } from '@/app/hooks/useSession';
-import { useSocket } from '@/app/hooks/useSocket';
-import { useMain } from '@/app/hooks/useMain';
 
 const ConversationList = () => {
   const { session } = useSession();
-  const { onlineUsers } = useSocket();
+  const { onlineSockets } = useSocket();
   const { isOpen } = useConversationParams();
   const { conversations } = useMain();
+  const { onOpen } = useModal();
 
   const topRef = useRef<ElementRef<'div'>>(null);
 
@@ -39,11 +47,7 @@ const ConversationList = () => {
       setFilteredItems(() => {
         return (
           conversationsArray?.filter((conversation) => {
-            const conversationName = (
-              conversation.name ??
-              conversation.users.filter((user) => user.userId != session?.userId)[0]
-                .username
-            ).toLowerCase();
+            const conversationName = (conversation.name as string).toLowerCase();
 
             return conversationName.startsWith(search.toLowerCase());
           }) ?? null
@@ -74,9 +78,17 @@ const ConversationList = () => {
       )}
     >
       <div className="px-3 mt-4 mb-6">
-        <h2 className="w-full text-slate-900 tracking-widest dark:text-white text-xl flex items-center h-10 mb-2">
-          Chats
-        </h2>
+        <div className="flex justify-between items-center h-10 mb-2 mx-2  ">
+          <h2 className="tracking-widest text-slate-900 dark:text-white text-xl">
+            Chats
+          </h2>
+          <MessagesSquare
+            onClick={() => onOpen('createGroupChat', { call: true })}
+            className="cursor-pointer hover:text-zinc-600 dark:hover:text-zinc-300"
+            size={24}
+          />
+        </div>
+
         <SearchBarInput
           inputRef={inputRef}
           onChange={(e) => setSearch(e.target.value)}
@@ -92,7 +104,7 @@ const ConversationList = () => {
                 key={item.conversationId}
                 conversation={item}
                 {...(!item.isGroup && {
-                  isOnline: onlineUsers.includes(item.otherUser?.userId as string)
+                  isOnline: onlineSockets.includes(item.otherMember?.userId as string)
                 })}
               />
             );

@@ -5,8 +5,8 @@ import Header from './components/Header';
 import Form from './components/Form';
 import Body from './components/Body';
 import { useMemo } from 'react';
-import { useMain } from '@/app/hooks/useMain';
-import useConversationParams from '@/app/hooks/useConversationParams';
+import { useMain } from '@/hooks/useMain';
+import useConversationParams from '@/hooks/useConversationParams';
 
 const ConversationId = () => {
   const { conversations } = useMain();

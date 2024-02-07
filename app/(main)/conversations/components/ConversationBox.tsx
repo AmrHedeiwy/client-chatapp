@@ -1,10 +1,10 @@
 'use client';
 
 import Avatar from '@/components/Avatar';
-import useConversationParams from '@/app/hooks/useConversationParams';
-import { useSession } from '@/app/hooks/useSession';
-import { useSocket } from '@/app/hooks/useSocket';
-import { Conversation, Message, User } from '@/app/types';
+import useConversationParams from '@/hooks/useConversationParams';
+import { useSession } from '@/hooks/useSession';
+import { useSocket } from '@/hooks/useSocket';
+import { Conversation, Message } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { format } from 'date-fns';
@@ -19,9 +19,9 @@ interface ConversationBoxProps {
 const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnline }) => {
   const router = useRouter();
   const { session } = useSession();
-  const otherUser = !conversation.isGroup ? conversation.otherUser : null;
+  const otherMember = !conversation.isGroup ? conversation.otherMember : null;
   const { conversationId: activeConversationId } = useConversationParams();
-  const { socket, isConnected } = useSocket();
+  const { isConnected } = useSocket();
 
   const { data } = useQuery({
     queryKey: ['messages', conversation.conversationId],
@@ -38,7 +38,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
 
   const handleClick = useCallback(() => {
     router.push(`/conversations/${conversation.conversationId}`);
-  }, [conversation, router, socket, unseenMessagesCount]);
+  }, [conversation, router]);
 
   const userUserId = useMemo(() => session?.userId, [session?.userId]);
 
@@ -51,7 +51,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
       return false;
     }
 
-    return unseenMessagesCount === 0 || lastMessage.senderId === userUserId;
+    return unseenMessagesCount === 0 || lastMessage.sender.userId === userUserId;
   }, [userUserId, lastMessage]);
 
   const lastMessageText = useMemo(() => {
@@ -63,7 +63,9 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
       return lastMessage?.content;
     }
 
-    return `Say hi to ${otherUser?.username}🫶🏼`;
+    return `Say hi to ${
+      conversation.isGroup ? conversation.name + ' members' : otherMember?.username
+    }🫶🏼`;
   }, [lastMessage]);
 
   return (
@@ -86,11 +88,16 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
           : 'bg-transparent'
       )}
     >
-      {conversation.isGroup ? (
-        'Grouped Avatar (Implement later)'
-      ) : (
-        <Avatar user={otherUser as User} withStatus isOnline={isOnline} />
-      )}
+      <Avatar
+        imageUrl={
+          conversation.isGroup
+            ? conversation.image
+            : (conversation.otherMember?.image as string)
+        }
+        withStatus={!conversation.isGroup}
+        isOnline={isOnline}
+      />
+
       <div className="min-w-0 flex-1">
         <div className="focus:outline-none">
           <span className="absolute inset-0" aria-hidden="true" />
@@ -103,7 +110,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
               {conversation.name}
             </p>
 
-            {lastMessage?.createdAt && (
+            {lastMessage?.sentAt && (
               <p
                 className="
                   text-xs 
@@ -112,7 +119,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
                   font-light
                 "
               >
-                {format(new Date(lastMessage.createdAt), 'p')}
+                {format(new Date(lastMessage.sentAt), 'p')}
               </p>
             )}
           </div>
@@ -125,9 +132,9 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
                   : 'text-black dark:text-white font-bold'
               )}
             >
-              {conversation.isGroup
-                ? lastMessage?.senderId !== userUserId
-                  ? lastMessage?.user.username + ' ' + lastMessageText
+              {conversation.isGroup && lastMessage
+                ? lastMessage?.sender.userId !== userUserId
+                  ? lastMessage?.sender.username + ': ' + lastMessageText
                   : 'You: ' + lastMessageText
                 : lastMessageText}
             </p>

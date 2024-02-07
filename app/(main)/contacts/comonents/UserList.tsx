@@ -1,11 +1,11 @@
 'use client';
 
-import { User } from '@/app/types/index';
+import { User } from '@/types/index';
 import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
 import UserBox from './UserBox';
 import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
-import { BsExclamationCircle } from 'react-icons/bs';
-import useListScroll from '@/app/hooks/useListScroll';
+import { ShieldAlert } from 'lucide-react';
+import useListScroll from '@/hooks/useListScroll';
 import { Button } from '@/components/ui/button';
 
 interface UserListProps {
@@ -92,7 +92,7 @@ const UserList: React.FC<UserListProps> = ({
 
       {isError && (
         <div className="flex flex-col flex-1 justify-center items-center">
-          <BsExclamationCircle className="h-6 w-6 text-rose-400 my-4" />
+          <ShieldAlert className="h-6 w-6 text-rose-400 my-4" />
           <p className="text-xs text-rose-400">Somthing went wrong!</p>
         </div>
       )}

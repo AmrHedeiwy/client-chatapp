@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from '@/app/hooks/useSession';
+import { useSession } from '@/hooks/useSession';
 import { useEffect, useState } from 'react';
 
 export default function EmailVerificationMaskedEmail() {

@@ -1,11 +1,13 @@
 'use client';
 
-import useRoutes from '@/app/hooks/useRoutes';
 import React, { useState } from 'react';
+import useRoutes from '@/hooks/useRoutes';
+import { useMain } from '@/hooks/useMain';
+
+import { ModeToggle } from '@/components/ModeToggle';
+
 import DesktopItem from './DesktopItem';
 import Avatar from '../Avatar';
-import { useMain } from '@/app/hooks/useMain';
-import { ModeToggle } from '@/components/ModeToggle';
 
 const DesktopSidebar = () => {
   const routes = useRoutes();
@@ -52,7 +54,7 @@ const DesktopSidebar = () => {
           onClick={() => setIsOpen(true)}
           className="cursor-pointer hover:opacity-75 transition"
         >
-          <Avatar user={userProfile} current />
+          <Avatar imageUrl={userProfile.image as string} current />
         </div>
       </nav>
     </div>

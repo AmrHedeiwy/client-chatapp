@@ -1,11 +1,11 @@
 import EmptyState from '@/components/EmptyState';
 
-const Search = () => {
+const Contacts = () => {
   return (
-    <div className="hidden  lg:block lg:pl-80 h-full">
+    <div className="h-full lg:pl-80 lg:block hidden">
       <EmptyState />
     </div>
   );
 };
 
-export default Search;
+export default Contacts;

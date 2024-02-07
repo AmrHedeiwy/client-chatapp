@@ -22,11 +22,13 @@ export default function CallBackPage() {
       // @ts-ignore
       if (!isCallbackProvider) window.close() || window.history.back();
 
-      const timeOut = setTimeout(() => {
+      let timer: NodeJS.Timeout | null = null;
+
+      timer = setTimeout(() => {
         localStorage.setItem(provider, type);
         window.close();
 
-        clearTimeout(timeOut);
+        if (timer) clearInterval(timer);
       }, 1000);
     })();
   }, [provider, type]);

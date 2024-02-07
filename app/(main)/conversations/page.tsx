@@ -1,17 +1,11 @@
-'use client';
-
-import clsx from 'clsx';
-
-import useConversationParams from '@/app/hooks/useConversationParams';
 import EmptyState from '@/components/EmptyState';
 
-const Home = () => {
-  const { isOpen } = useConversationParams();
+const Conversations = () => {
   return (
-    <div className={clsx('lg:pl-80 h-full lg:block ', isOpen ? 'block' : 'hidden')}>
+    <div className="h-full lg:pl-80 lg:block hidden">
       <EmptyState />
     </div>
   );
 };
 
-export default Home;
+export default Conversations;

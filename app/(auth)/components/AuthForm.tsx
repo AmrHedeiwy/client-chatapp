@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import { FieldValues, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import SocialButton from '@/app/(auth)/components/SocialButton';
-import { notify } from '@/app/utils/notifications';
+import { toast } from '@/lib/utils';
 
-import { useSession } from '@/app/hooks/useSession';
+import { useSession } from '@/hooks/useSession';
 import { useRouter } from 'next/navigation';
-import { ErrorProps, FormErrorProps, ResponseProps } from '@/app/types/Axios';
+import { ErrorProps, FormErrorProps, ResponseProps } from '@/types/Axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { LuLoader2 } from 'react-icons/lu';
+import { Loader2 } from 'lucide-react';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
@@ -123,7 +123,7 @@ export default function AuthForm() {
       .then((res: AxiosResponse<ResponseProps>) => {
         const { message, redirect } = res.data;
 
-        notify('success', message as string);
+        toast('success', message as string);
 
         if (redirect) router.push(redirect);
       })
@@ -134,7 +134,7 @@ export default function AuthForm() {
             form.setError(fieldName, { message: fieldMessage, type: 'manual' });
           });
         } else {
-          notify('error', error?.message as string);
+          toast('error', error?.message as string);
         }
       })
       .finally(() => setTimeout(() => setIsLoading(false), 1000));
@@ -161,10 +161,9 @@ export default function AuthForm() {
           setIsLoading(false);
           const res = localStorage.getItem(action);
 
-          console.log(res);
           if (res === 'success') router.push('/users');
           if (res === 'error') {
-            notify(
+            toast(
               'error',
               'Oops, something went wrong. Please try again later or contact support if the problem persists.',
               8000
@@ -279,7 +278,7 @@ export default function AuthForm() {
             )
           ) : (
             <>
-              <LuLoader2 className="h-6 w-6 text-white dark:text-black animate-spin my-4 mr-1" />
+              <Loader2 className="h-6 w-6 text-white dark:text-black animate-spin my-4 mr-1" />
               <p>Please wait</p>
             </>
           )}

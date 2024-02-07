@@ -1,4 +1,4 @@
-import { MainContext } from '../provider/MainProvider';
+import { MainContext } from '../components/provider/MainProvider';
 import { useContext } from 'react';
 
 export const useMain = () => {

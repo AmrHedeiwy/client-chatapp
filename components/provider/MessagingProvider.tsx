@@ -1,10 +1,10 @@
 'use client';
 
 import React, { createContext, useEffect } from 'react';
-import { Conversation, Message, User } from '../types';
+import { Conversation, Message, User } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
-import { useSocket } from '../hooks/useSocket';
-import useConversationParams from '../hooks/useConversationParams';
+import { useSocket } from '@/hooks/useSocket';
+import useConversationParams from '@/hooks/useConversationParams';
 
 type StatusMessageResponse = {
   conversationId: string;
@@ -64,7 +64,7 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
 
       socket.emit('acknowledge_message', {
         type: 'single',
-        senderId: newMessage.senderId,
+        senderId: newMessage.sender.userId,
         conversationId: newMessage.conversationId,
         messageId: newMessage.messageId,
         pageMessagesLength: pageMessagesLength,
@@ -74,7 +74,7 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       if (activeConversationId === newMessage.conversationId) {
         socket.emit('seen_message', {
           type: 'single',
-          senderId: newMessage.senderId,
+          senderId: newMessage.sender.userId,
           conversationId: newMessage.conversationId,
           messageId: newMessage.messageId,
           pageMessagesLength: pageMessagesLength,

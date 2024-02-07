@@ -1,16 +1,17 @@
 'use client';
 
-import clsx from 'clsx';
 import {
   ChangeEventHandler,
   FocusEventHandler,
   MouseEventHandler,
   RefObject,
-  useEffect,
   useState
 } from 'react';
-import { HiOutlineArrowRight, HiSearch } from 'react-icons/hi';
-import { Input } from '../ui/input';
+
+import clsx from 'clsx';
+import { Search, ArrowRight } from 'lucide-react';
+
+import { Input } from '@/components/ui/input';
 
 interface SearchBarInputProps {
   inputRef: RefObject<any>;
@@ -51,7 +52,7 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
   };
 
   return (
-    <div className="flex justify-center items-center">
+    <div className="relative ">
       <Input
         id={'search_bar'}
         ref={inputRef}
@@ -62,10 +63,11 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
         onChange={onChange}
         onClick={onClickInput}
         onBlur={onBlurInput}
-        maxLength={30}
+        maxLength={37}
         className={clsx(
           ` 
             w-full
+            block
             h-10
             py-3 
             px-4 
@@ -85,13 +87,20 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
           disabled && 'opacity-50 cursor-default'
         )}
       />
+      {/* <button
+        type="button"
+        onClick={onClickIconButton}
+        className="rounded-r absolute py-2 px-4 h-10 align-middle  bg-zinc-50 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+      >
+       
+      </button> */}
       <button
         type="button"
         onClick={onClickIconButton}
-        className="rounded-r py-2 px-4 h-10 align-middle  bg-zinc-50 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+        className="absolute bottom-2 right-4"
       >
-        {variant === 'SEARCH' && <HiSearch />}
-        {variant === 'RIGHTARROW' && <HiOutlineArrowRight />}
+        {variant === 'SEARCH' && <Search />}
+        {variant === 'RIGHTARROW' && <ArrowRight />}
       </button>
     </div>
   );

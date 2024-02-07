@@ -1,22 +1,27 @@
 import Sidebar from '@/components/sidebar/Sidebar';
 import React from 'react';
-import { SocketProvider } from '../provider/SocketProvider';
+import { SocketProvider } from '../../components/provider/SocketProvider';
 
-import { QueryProvider } from '@/app/provider/QueryProvider';
+import { QueryProvider } from '@/components/provider/QueryProvider';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import getConversations from '../actions/getConversations';
-import MessagingProvider from '../provider/MessagingProvider';
+import getConversations from '../../actions/getConversations';
+import MessagingProvider from '../../components/provider/MessagingProvider';
 import { QueryClient, dehydrate, HydrationBoundary } from '@tanstack/react-query';
-import MainProvider from '../provider/MainProvider';
-import getCurrentUserProfile from '../actions/getCurrentUserProfile';
+import MainProvider from '../../components/provider/MainProvider';
+import getCurrentUserProfile from '../../actions/getCurrentUserProfile';
+import { ModalProvider } from '../../components/provider/ModalProvider';
+import getContacts from '../../actions/getContacts';
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient();
-  const data = await getConversations();
+
   const currentUserProfile = await getCurrentUserProfile();
 
-  if (data && data.groupedMessages) {
-    Object.entries(data.groupedMessages).forEach(async (groupedMessage) => {
+  const groupedData = await getConversations();
+  const contacts = await getContacts();
+
+  if (groupedData && groupedData.groupedMessages) {
+    Object.entries(groupedData.groupedMessages).forEach(async (groupedMessage) => {
       const count = groupedMessage[1].messages.length;
 
       await queryClient.setQueryData(['messages', groupedMessage[0]], {
@@ -38,11 +43,13 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           <MessagingProvider>
             <MainProvider
               currentUserProfile={currentUserProfile}
-              intialConversations={data?.conversations || null}
+              intialConversations={groupedData?.conversations || null}
+              intialContacts={contacts}
             >
               <Sidebar>
+                <ModalProvider />
                 {children}
-                <ReactQueryDevtools buttonPosition="top-left" />
+                {/* <ReactQueryDevtools buttonPosition="top-left" /> */}
               </Sidebar>
             </MainProvider>
           </MessagingProvider>

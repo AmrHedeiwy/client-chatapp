@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 type SocketContextType = {
   socket: any | null;
   isConnected: boolean;
-  onlineUsers: string[];
+  onlineSockets: string[];
 };
 
 export const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -20,7 +20,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [onlineSockets, setOnlineSockets] = useState<string[]>([]);
 
   const router = useRouter();
 
@@ -39,11 +39,11 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
     socketInstance.on('connected', (status: string, userIds: string[]) => {
       if (status) {
-        setOnlineUsers((prev) => {
+        setOnlineSockets((prev) => {
           return [...prev, ...userIds];
         });
       } else
-        setOnlineUsers((prev) => {
+        setOnlineSockets((prev) => {
           return prev.filter((userId) => !prev?.includes(userId));
         });
     });
@@ -81,7 +81,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       value={{
         socket,
         isConnected,
-        onlineUsers
+        onlineSockets
       }}
     >
       {children}

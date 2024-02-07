@@ -1,8 +1,7 @@
 'use client';
 
-import FormInput from '@/components/inputs/FormInput';
-import { ErrorProps, FormErrorProps, ResponseProps } from '@/app/types/Axios';
-import { notify } from '@/app/utils/notifications';
+import { ErrorProps, FormErrorProps, ResponseProps } from '@/types/Axios';
+import { toast } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -19,7 +18,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import { LuLoader2 } from 'react-icons/lu';
+import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 
 const formSchema = z
@@ -94,7 +93,7 @@ export default function PasswordResetForm() {
       .then((res: AxiosResponse<ResponseProps>) => {
         const { message, redirect } = res.data;
 
-        notify('success', message as string);
+        toast('success', message as string);
 
         if (redirect) router.push(redirect);
       })
@@ -105,7 +104,7 @@ export default function PasswordResetForm() {
             form.setError(fieldName, { message: fieldMessage, type: 'manual' });
           });
         } else {
-          notify('error', error?.message as string);
+          toast('error', error?.message as string);
 
           if (error?.redirect) router.replace(error.redirect);
         }
@@ -152,7 +151,7 @@ export default function PasswordResetForm() {
             'Reset Password'
           ) : (
             <>
-              <LuLoader2 className="h-6 w-6 text-white  dark:text-black animate-spin my-4 mr-1" />
+              <Loader2 className="h-6 w-6 text-white  dark:text-black animate-spin my-4 mr-1" />
               <p>Please wait</p>
             </>
           )}

@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { notify } from '../utils/notifications';
+
+import { toast } from '@/lib/utils';
 
 const signOut = async () => {
   const url = 'http://localhost:5000/auth/sign-out';
@@ -15,7 +16,7 @@ const signOut = async () => {
     .then((res: AxiosResponse) => window.location.replace(res.data.redirect))
     .catch((e: AxiosError) => {
       console.error(e);
-      notify(
+      toast(
         'error',
         'Oops, something went wrong. Please try again later or contact support if the problem persists.'
       );

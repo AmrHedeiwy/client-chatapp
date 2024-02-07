@@ -1,18 +1,20 @@
 'use client';
 
-import { Conversation, Message } from '@/app/types';
-import { useChatQuery } from '@/app/hooks/useChatQuery';
-import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
-import { LuServerCrash, LuLoader2 } from 'react-icons/lu';
-import { ChatWelcome } from '@/components/chat/HelloChat';
-import { useChatScroll } from '@/app/hooks/useChatScroll';
-import { ChatItem } from '@/components/chat/ChatItem';
+import { Conversation, Message } from '@/types';
+import { useChatQuery } from '@/hooks/useChatQuery';
+import React, { ElementRef, Fragment, useEffect, useRef } from 'react';
+import { ServerCrash, Loader2 } from 'lucide-react';
+import { ChatWelcome } from './HelloChat';
+import { useChatScroll } from '@/hooks/useChatScroll';
+import MessageItem from './MessageItem';
+import { useSession } from '@/hooks/useSession';
 
 type BodyProps = {
   conversation: Conversation;
 };
 
 const Body = ({ conversation }: BodyProps) => {
+  const { session } = useSession();
   const chatRef = useRef<ElementRef<'div'>>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -20,6 +22,7 @@ const Body = ({ conversation }: BodyProps) => {
     queryKey: conversation.conversationId
   });
 
+  useEffect(() => console.log(conversation), [conversation]);
   useChatScroll({
     chatRef,
     bottomRef,
@@ -31,7 +34,7 @@ const Body = ({ conversation }: BodyProps) => {
   if (status === 'pending') {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
-        <LuLoader2 className="h-7 w-7 text-zinc-500 animate-spin my-4" />
+        <Loader2 className="h-7 w-7 text-zinc-500 animate-spin my-4" />
         <p className="text-xs text-zinc-500 dark:text-zinc-400">Loading messages...</p>
       </div>
     );
@@ -40,7 +43,7 @@ const Body = ({ conversation }: BodyProps) => {
   if (status === 'error') {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
-        <LuServerCrash className="h-7 w-7 text-zinc-500 my-4" />
+        <ServerCrash className="h-7 w-7 text-zinc-500 my-4" />
         <p className="text-xs text-zinc-500 dark:text-zinc-400">Something went wrong!</p>
       </div>
     );
@@ -49,7 +52,7 @@ const Body = ({ conversation }: BodyProps) => {
   return (
     <div
       ref={chatRef}
-      className="flex-1 flex flex-col py-4 overflow-y-auto scrollable-content"
+      className="flex-1 flex flex-col py-4 overflow-y-auto overflow-x-hidden scrollable-content"
     >
       {(!conversation?.hasInitialNextPage || !hasNextPage) && <div className="flex-1" />}
       {(!conversation?.hasInitialNextPage || !hasNextPage) && (
@@ -61,7 +64,7 @@ const Body = ({ conversation }: BodyProps) => {
       {conversation?.hasInitialNextPage && hasNextPage && (
         <div className="flex justify-center">
           {isFetchingNextPage ? (
-            <LuLoader2 className="h-6 w-6 text-zinc-500 animate-spin my-4" />
+            <Loader2 className="h-6 w-6 text-zinc-500 animate-spin my-4" />
           ) : (
             <button
               onClick={() => fetchNextPage()}
@@ -82,14 +85,18 @@ const Body = ({ conversation }: BodyProps) => {
                 let i_message = i.toString();
                 return (
                   <Fragment key={i_message}>
-                    <ChatItem
+                    <MessageItem
                       id={message.messageId}
+                      isAdmin={
+                        conversation.isGroup
+                          ? conversation.adminIds.includes(session?.userId as string)
+                          : false
+                      }
                       content={message.content}
                       fileUrl={message.fileUrl}
-                      timestamp={message.createdAt}
+                      timestamp={message.sentAt}
                       sender={message.sender}
                       isGroup={conversation.isGroup}
-                      // groupCreatedBy={conversation}
                     />
                   </Fragment>
                 );
