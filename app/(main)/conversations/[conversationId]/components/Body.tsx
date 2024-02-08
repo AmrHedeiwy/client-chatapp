@@ -14,15 +14,29 @@ type BodyProps = {
 };
 
 const Body = ({ conversation }: BodyProps) => {
-  const { session } = useSession();
   const chatRef = useRef<ElementRef<'div'>>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const {
+    conversationId,
+    adminIds,
+    createdAt,
+    hasInitialNextPage,
+    image,
+    isGroup,
+    lastMessageAt,
+    members,
+    messages,
+    name,
+    unseenMessagesCount,
+    otherMember,
+    otherMembers
+  } = conversation;
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useChatQuery({
-    queryKey: conversation.conversationId
+    queryKey: conversationId
   });
 
-  useEffect(() => console.log(conversation), [conversation]);
   useChatScroll({
     chatRef,
     bottomRef,
@@ -54,14 +68,11 @@ const Body = ({ conversation }: BodyProps) => {
       ref={chatRef}
       className="flex-1 flex flex-col py-4 overflow-y-auto overflow-x-hidden scrollable-content"
     >
-      {(!conversation?.hasInitialNextPage || !hasNextPage) && <div className="flex-1" />}
-      {(!conversation?.hasInitialNextPage || !hasNextPage) && (
-        <ChatWelcome
-          isGroup={conversation?.isGroup as boolean}
-          name={conversation?.name as string}
-        />
+      {(!hasInitialNextPage || !hasNextPage) && <div className="flex-1" />}
+      {(!hasInitialNextPage || !hasNextPage) && (
+        <ChatWelcome isGroup={isGroup as boolean} name={name as string} />
       )}
-      {conversation?.hasInitialNextPage && hasNextPage && (
+      {hasInitialNextPage && hasNextPage && (
         <div className="flex justify-center">
           {isFetchingNextPage ? (
             <Loader2 className="h-6 w-6 text-zinc-500 animate-spin my-4" />
@@ -81,26 +92,36 @@ const Body = ({ conversation }: BodyProps) => {
 
           return (
             <Fragment key={i_group}>
-              {group?.items.map((message: Message, i: any) => {
-                let i_message = i.toString();
-                return (
-                  <Fragment key={i_message}>
-                    <MessageItem
-                      id={message.messageId}
-                      isAdmin={
-                        conversation.isGroup
-                          ? conversation.adminIds.includes(session?.userId as string)
-                          : false
-                      }
-                      content={message.content}
-                      fileUrl={message.fileUrl}
-                      timestamp={message.sentAt}
-                      sender={message.sender}
-                      isGroup={conversation.isGroup}
-                    />
-                  </Fragment>
-                );
-              })}
+              {group &&
+                group.items.map((message: Message, i: any) => {
+                  let i_message = i.toString();
+                  return (
+                    <Fragment key={i_message}>
+                      <MessageItem
+                        id={message.messageId}
+                        isAdmin={
+                          isGroup
+                            ? adminIds.includes(message.sender.userId as string)
+                            : false
+                        }
+                        previousSenderId={
+                          i !== group.items.length - 1
+                            ? group.items[i + 1].sender.userId
+                            : null
+                        }
+                        content={message.content}
+                        fileUrl={message.fileUrl}
+                        timestamp={message.sentAt}
+                        sender={message.sender}
+                        isGroup={isGroup}
+                        isNotReceived={!!message.notReceived}
+                        deliverStatus={message.deliverStatus || []}
+                        seenStatus={message.seenStatus || []}
+                        membersCount={isGroup ? (otherMembers?.length as number) : 1}
+                      />
+                    </Fragment>
+                  );
+                })}
             </Fragment>
           );
         })}

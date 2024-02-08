@@ -110,7 +110,7 @@ export const GroupChatModal = () => {
     formData.append('file', file);
     const fileRouteRes = await axios.post(fileRouteUrl, formData, fileRouteoptions);
 
-    conversation.image = fileRouteRes.data.imageUrl;
+    conversation.image = fileRouteRes.data.fileUrl;
 
     dispatchConversations({ type: 'add', payload: { conversation } });
 

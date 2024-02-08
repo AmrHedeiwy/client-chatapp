@@ -38,15 +38,15 @@ export interface Message {
   sentAt: string;
   seenStatus: MessageStatus[];
   deliverStatus: MessageStatus[];
-  received?: boolean;
+  notReceived?: boolean;
   sender: User;
 }
 
-interface MessageStatus {
+export type MessageStatus = {
   seenAt: string;
   deliveredAt: string;
   user: User;
-}
+};
 
 export type GroupedMessages = {
   [conversationId: string]: {

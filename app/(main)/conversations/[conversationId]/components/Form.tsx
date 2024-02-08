@@ -25,7 +25,6 @@ type FormProps = {
 };
 
 const ChatInput: React.FC<FormProps> = ({ conversation }) => {
-  const { session } = useSession();
   const queryClient = useQueryClient();
   const { conversationId } = useConversationParams();
   const { userProfile, dispatchConversations } = useMain();
@@ -66,7 +65,7 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
     const messageId = uuidv4();
     const sentAt = new Date();
 
-    // The number of messages in the current page, set as 1 is there were no previous messages
+    // The number of messages in the current page, set as 1 if there were no previous messages
     let pageMessagesLength = 1;
 
     let newMessage = {
@@ -77,7 +76,7 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
       content: data.content,
       seenStatus: [],
       deliverStatus: [],
-      received: false
+      notReceived: true
     };
 
     form.reset();
@@ -111,9 +110,6 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
       };
     });
 
-    // Add the conversation to the top of the conversations list
-    dispatchConversations({ type: 'move', payload: { conversation } });
-
     socket.emit(
       'sendMessage',
       {
@@ -127,7 +123,7 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
       // Callback when the message was received by the server
       () => {
         // Set the received status to true in the user's cache
-        const updatedMessage = { ...newMessage, received: true };
+        const updatedMessage = { ...newMessage, notReceived: false };
         queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
           if (!prevData || !prevData.pages || prevData.pages.length === 0) {
             return prevData;
@@ -153,6 +149,9 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
         });
       }
     );
+
+    // Add the conversation to the top of the conversations list
+    dispatchConversations({ type: 'move', payload: { conversation } });
   };
 
   return (

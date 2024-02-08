@@ -49,7 +49,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
               <Sidebar>
                 <ModalProvider />
                 {children}
-                {/* <ReactQueryDevtools buttonPosition="top-left" /> */}
+                <ReactQueryDevtools buttonPosition="top-left" />
               </Sidebar>
             </MainProvider>
           </MessagingProvider>
