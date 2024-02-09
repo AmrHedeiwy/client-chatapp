@@ -24,6 +24,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     Object.entries(groupedData.groupedMessages).forEach(async (groupedMessage) => {
       const count = groupedMessage[1].messages.length;
 
+      console.log(typeof groupedMessage[1].unseenMessagesCount);
       await queryClient.setQueryData(['messages', groupedMessage[0]], {
         pages: [
           {
@@ -36,6 +37,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
       });
     });
   }
+
   return (
     <QueryProvider>
       <HydrationBoundary state={dehydrate(queryClient)}>

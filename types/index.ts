@@ -36,8 +36,9 @@ export interface Message {
   content: string;
   fileUrl: string;
   sentAt: string;
-  seenStatus: MessageStatus[];
-  deliverStatus: MessageStatus[];
+  seenCount: number;
+  deliverCount: number;
+  status: any;
   notReceived?: boolean;
   sender: User;
 }

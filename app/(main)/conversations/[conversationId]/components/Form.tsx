@@ -46,6 +46,24 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
     ) as string[];
   }, [conversation]);
 
+  const intialMessageStatus = useMemo(() => {
+    const { isGroup, otherMember, otherMembers } = conversation;
+    if (!isGroup)
+      return {
+        [otherMember?.userId as string]: {
+          deliverAt: null,
+          seenAt: null,
+          user: otherMember
+        }
+      };
+
+    return (otherMembers as User[]).reduce((acc: any, user) => {
+      acc[user.userId] = { deliverAt: null, seenAt: null, user };
+
+      return acc;
+    }, {});
+  }, [conversation]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,7 +79,7 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
     return Math.min(height, maxHeight);
   };
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     const messageId = uuidv4();
     const sentAt = new Date();
 
@@ -74,41 +92,45 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
       sentAt: sentAt.toLocaleString(),
       sender: userProfile,
       content: data.content,
-      seenStatus: [],
-      deliverStatus: [],
+      seenCount: 0,
+      deliverCount: 0,
+      status: intialMessageStatus,
       notReceived: true
     };
 
     form.reset();
 
     // Add the new message to the user's cache
-    queryClient.setQueryData(['messages', newMessage.conversationId], (prevData: any) => {
-      if (!prevData || !prevData.pages || prevData.pages.length === 0) {
+    await queryClient.setQueryData(
+      ['messages', newMessage.conversationId],
+      (prevData: any) => {
+        if (!prevData || !prevData.pages || prevData.pages.length === 0) {
+          return {
+            pages: [
+              {
+                items: [newMessage]
+              }
+            ],
+            unseenMessagesCount: 0
+          };
+        }
+
+        const newData = [...prevData.pages];
+
+        newData[0] = {
+          nextPage: newData[0].nextPage + 1,
+          items: [newMessage, ...newData[0].items]
+        };
+
+        pageMessagesLength = newData[0].items.length;
+
         return {
-          pages: [
-            {
-              items: [newMessage]
-            }
-          ],
-          unseenMessagesCount: 0
+          pages: newData,
+          pageParams: prevData.pageParams,
+          unseenMessagesCount: prevData.unseenMessagesCount
         };
       }
-
-      const newData = [...prevData.pages];
-
-      newData[0] = {
-        nextPage: newData[0].nextPage + 1,
-        items: [newMessage, ...newData[0].items]
-      };
-
-      pageMessagesLength = newData[0].items.length;
-
-      return {
-        pages: newData,
-        pageParams: prevData.pageParams,
-        unseenMessagesCount: prevData.unseenMessagesCount
-      };
-    });
+    );
 
     socket.emit(
       'sendMessage',
@@ -131,7 +153,7 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
 
           const newData = prevData.pages.map((page: any) => {
             return {
-              nextPage: page.nextPage,
+              ...page,
               items: page.items.map((message: Message) => {
                 if (message.messageId === updatedMessage.messageId) {
                   return updatedMessage;
@@ -142,9 +164,8 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
           });
 
           return {
-            pageParams: prevData.pageParams,
-            pages: newData,
-            unseenMessagesCount: prevData.unseenMessagesCount
+            ...prevData,
+            pages: newData
           };
         });
       }

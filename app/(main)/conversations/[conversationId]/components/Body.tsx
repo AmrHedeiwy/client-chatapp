@@ -2,12 +2,11 @@
 
 import { Conversation, Message } from '@/types';
 import { useChatQuery } from '@/hooks/useChatQuery';
-import React, { ElementRef, Fragment, useEffect, useRef } from 'react';
+import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
 import { ServerCrash, Loader2 } from 'lucide-react';
 import { ChatWelcome } from './HelloChat';
 import { useChatScroll } from '@/hooks/useChatScroll';
 import MessageItem from './MessageItem';
-import { useSession } from '@/hooks/useSession';
 
 type BodyProps = {
   conversation: Conversation;
@@ -16,6 +15,10 @@ type BodyProps = {
 const Body = ({ conversation }: BodyProps) => {
   const chatRef = useRef<ElementRef<'div'>>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    console.log('Component re-rendered');
+  }, []);
 
   const {
     conversationId,
@@ -26,7 +29,6 @@ const Body = ({ conversation }: BodyProps) => {
     isGroup,
     lastMessageAt,
     members,
-    messages,
     name,
     unseenMessagesCount,
     otherMember,
@@ -86,10 +88,10 @@ const Body = ({ conversation }: BodyProps) => {
           )}
         </div>
       )}
-      <div className="flex flex-col-reverse mt-auto">
-        {data?.pages.map((group, i) => {
-          let i_group = i.toString();
 
+      <div className="flex flex-col-reverse mt-auto">
+        {data.pages.map((group, i) => {
+          let i_group = i.toString();
           return (
             <Fragment key={i_group}>
               {group &&
@@ -115,9 +117,10 @@ const Body = ({ conversation }: BodyProps) => {
                         sender={message.sender}
                         isGroup={isGroup}
                         isNotReceived={!!message.notReceived}
-                        deliverStatus={message.deliverStatus || []}
-                        seenStatus={message.seenStatus || []}
-                        membersCount={isGroup ? (otherMembers?.length as number) : 1}
+                        deliverCount={message.deliverCount || 0}
+                        seenCount={message.seenCount || 0}
+                        status={Object.values(message.status || {})}
+                        message={message}
                       />
                     </Fragment>
                   );
