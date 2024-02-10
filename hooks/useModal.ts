@@ -4,10 +4,12 @@ export type ModalType =
   | 'createGroupChat'
   | 'updateUserProfile'
   | 'messageFile'
-  | 'removeContact';
+  | 'removeContact'
+  | 'messageStatus';
 
 type ModalData = {
   contact?: { username?: string; confirm?: (action: 'remove') => void };
+  messageStatus?: { status: any[]; isGroup: boolean };
 };
 
 type ModalStore = {

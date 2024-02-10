@@ -16,10 +16,6 @@ const Body = ({ conversation }: BodyProps) => {
   const chatRef = useRef<ElementRef<'div'>>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    console.log('Component re-rendered');
-  }, []);
-
   const {
     conversationId,
     adminIds,
@@ -90,44 +86,45 @@ const Body = ({ conversation }: BodyProps) => {
       )}
 
       <div className="flex flex-col-reverse mt-auto">
-        {data.pages.map((group, i) => {
-          let i_group = i.toString();
-          return (
-            <Fragment key={i_group}>
-              {group &&
-                group.items.map((message: Message, i: any) => {
-                  let i_message = i.toString();
-                  return (
-                    <Fragment key={i_message}>
-                      <MessageItem
-                        id={message.messageId}
-                        isAdmin={
-                          isGroup
-                            ? adminIds.includes(message.sender.userId as string)
-                            : false
-                        }
-                        previousSenderId={
-                          i !== group.items.length - 1
-                            ? group.items[i + 1].sender.userId
-                            : null
-                        }
-                        content={message.content}
-                        fileUrl={message.fileUrl}
-                        timestamp={message.sentAt}
-                        sender={message.sender}
-                        isGroup={isGroup}
-                        isNotReceived={!!message.notReceived}
-                        deliverCount={message.deliverCount || 0}
-                        seenCount={message.seenCount || 0}
-                        status={Object.values(message.status || {})}
-                        message={message}
-                      />
-                    </Fragment>
-                  );
-                })}
-            </Fragment>
-          );
-        })}
+        {data &&
+          data.pages.map((group, i) => {
+            let i_group = i.toString();
+            return (
+              <Fragment key={i_group}>
+                {group &&
+                  group.items.map((message: Message, i: any) => {
+                    let i_message = i.toString();
+                    return (
+                      <Fragment key={i_message}>
+                        <MessageItem
+                          id={message.messageId}
+                          isAdmin={
+                            isGroup
+                              ? adminIds.includes(message.sender.userId as string)
+                              : false
+                          }
+                          previousSenderId={
+                            i !== group.items.length - 1
+                              ? group.items[i + 1].sender.userId
+                              : null
+                          }
+                          content={message.content}
+                          fileUrl={message.fileUrl}
+                          timestamp={message.sentAt}
+                          sender={message.sender}
+                          isGroup={isGroup}
+                          isNotReceived={!!message.notReceived}
+                          deliverCount={message.deliverCount || 0}
+                          seenCount={message.seenCount || 0}
+                          status={Object.values(message.status || {})}
+                          message={message}
+                        />
+                      </Fragment>
+                    );
+                  })}
+              </Fragment>
+            );
+          })}
       </div>
       <div ref={bottomRef} />
     </div>

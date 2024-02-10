@@ -80,53 +80,64 @@ export const GroupChatModal = () => {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const { file, members, name } = values;
-    const formData = new FormData();
+    try {
+      const { file, members, name } = values;
+      const formData = new FormData();
 
-    const conversationRouteUrl: string = `http://localhost:5000/conversations/create`;
-    const conversationRouteoptions: AxiosRequestConfig = {
-      withCredentials: true,
-      headers: { 'Content-Type': 'application/json' }
-    };
+      const conversationRouteUrl: string = `http://localhost:5000/conversations/create`;
+      const conversationRouteoptions: AxiosRequestConfig = {
+        withCredentials: true,
+        headers: { 'Content-Type': 'application/json' }
+      };
 
-    const conversationRouteRes = await axios.post(
-      conversationRouteUrl,
-      {
-        name,
-        members,
-        isGroup: true
-      },
-      conversationRouteoptions
-    );
+      const conversationRouteRes = await axios.post(
+        conversationRouteUrl,
+        {
+          name,
+          members,
+          isGroup: true
+        },
+        conversationRouteoptions
+      );
 
-    const { conversation } = conversationRouteRes.data;
+      const { conversation } = conversationRouteRes.data;
 
-    const fileRouteUrl: string = `http://localhost:5000/file?conversationId=${conversation.conversationId}`;
-    const fileRouteoptions: AxiosRequestConfig = {
-      withCredentials: true,
-      headers: { 'Content-Type': 'multipart/form-data' }
-    };
+      const fileRouteUrl: string = `http://localhost:5000/file?conversationId=${conversation.conversationId}`;
+      const fileRouteoptions: AxiosRequestConfig = {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      };
 
-    formData.append('file', file);
-    const fileRouteRes = await axios.post(fileRouteUrl, formData, fileRouteoptions);
+      formData.append('file', file);
+      const fileRouteRes = await axios.post(fileRouteUrl, formData, fileRouteoptions);
 
-    conversation.image = fileRouteRes.data.fileUrl;
+      conversation.image = fileRouteRes.data.fileUrl;
 
-    dispatchConversations({ type: 'add', payload: { conversation } });
+      dispatchConversations({ type: 'add', payload: { conversation } });
 
-    // Initialize the messages for the conversation in the user's cache
-    await queryClient.setQueryData(['messages', conversation.conversationId], {
-      pages: [{ items: [], nextPage: 0 }],
-      pageParams: 0,
-      unseenMessagesCount: 0
-    });
+      // Initialize the messages for the conversation in the user's cache
+      await queryClient.setQueryData(['messages', conversation.conversationId], {
+        pages: [{ items: [], nextPage: 0 }],
+        pageParams: 0,
+        unseenMessagesCount: 0
+      });
 
-    onClose();
-    router.push(`/conversations/${conversation.conversationId}`);
+      // @ts-ignore
+      form.setValue('file', undefined);
+      form.setValue('name', '');
+      form.setValue('members', []);
+
+      onClose();
+      router.push(`/conversations/${conversation.conversationId}`);
+    } catch (error) {}
   };
 
   const handleClose = () => {
-    form.reset();
+    // @ts-ignore
+    form.setValue('file', undefined);
+    form.setValue('name', '');
+    form.setValue('members', []);
+
     onClose();
   };
 
@@ -172,12 +183,7 @@ export const GroupChatModal = () => {
                   <FormItem>
                     <FormLabel className="uppercase text-xs font-bold">name</FormLabel>
                     <FormControl>
-                      <Input
-                        disabled={isLoading}
-                        className=" rounded "
-                        placeholder="Enter group name"
-                        {...field}
-                      />
+                      <Input placeholder="Enter group name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

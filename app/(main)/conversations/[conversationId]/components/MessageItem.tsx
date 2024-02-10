@@ -1,6 +1,19 @@
 'use client';
 
-import { useRouter, useParams } from 'next/navigation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import { Message, MessageStatus, User } from '@/types';
 import Avatar from '@/components/Avatar';
 import { format } from 'date-fns';
@@ -13,10 +26,11 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Check, CheckCheck, File, ShieldAlert } from 'lucide-react';
+import { Check, CheckCheck, File, Info, ShieldAlert } from 'lucide-react';
 import clsx from 'clsx';
 import { ActionTooltip } from '@/components/ActionTooltip';
 import { useMain } from '@/hooks/useMain';
+import { useModal } from '@/hooks/useModal';
 
 interface MessageItemProps {
   id: string;
@@ -57,10 +71,8 @@ const MessageItem = ({
   previousSenderId
 }: MessageItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  // const { onOpen } = useModal();
-  const params = useParams();
-  const router = useRouter();
   const { userProfile } = useMain();
+  const { onOpen } = useModal();
 
   useEffect(() => {
     const handleKeyDown = (event: any) => {
@@ -189,13 +201,43 @@ const MessageItem = ({
                 </span>
               )}
             </p>
-            <span className="flex mt-0.5 justify-end gap-x-1 text-xs text-zinc-500 dark:text-zinc-400">
-              <p>{format(new Date(timestamp), 'p')}</p>
-              {!isNotReceived && !isDelivered && isOwn && <Check size={15} />}
-              {(isDelivered || isSeen) && isOwn && (
-                <CheckCheck size={15} className={cn(isSeen && 'text-blue-500')} />
+
+            <div
+              className={cn('flex text-xs justify-between mt-1', !isOwn && 'justify-end')}
+            >
+              {isOwn && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Info
+                      size={12}
+                      className="cursor-pointer text-yellow-900 dark:text-zinc-400"
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-fit" side="left">
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() =>
+                        onOpen('messageStatus', { messageStatus: { status, isGroup } })
+                      }
+                    >
+                      status
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">edit</DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">delete</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
-            </span>
+              <span className="flex gap-x-1 text-xs text-zinc-500 dark:text-zinc-400">
+                <p>{format(new Date(timestamp), 'p')}</p>
+                {!isNotReceived && !isDelivered && isOwn && <Check size={15} />}
+                {(isDelivered || isSeen) && isOwn && (
+                  <CheckCheck
+                    size={15}
+                    className={cn(isSeen && 'text-teal-500 dark:text-blue-500')}
+                  />
+                )}
+              </span>
+            </div>
           </div>
         )}
       </div>

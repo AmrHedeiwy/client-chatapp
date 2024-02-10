@@ -16,7 +16,7 @@ function UploadDropzone({
   const { isOpen, type } = useModal();
 
   const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
-    if (rejectedFiles) {
+    if (rejectedFiles.length !== 0) {
       const firstFileError = rejectedFiles[0].errors[0];
 
       if (firstFileError.code === 'file-invalid-type')

@@ -5,17 +5,21 @@ import { FileIcon, X } from 'lucide-react';
 
 type FileUploadProps = {
   onChange: (file?: File) => void;
-  value: Blob & File;
+  value: (Blob & File) | undefined;
   setError: any;
   isModalOpen: boolean;
 };
 
 function FileUpload({ onChange, value, setError, isModalOpen }: FileUploadProps) {
-  const fileType = value ? value.type.split('/').pop() : null;
+  let fileType = value ? value.type.split('/').pop() : null;
 
-  const preview = value ? URL.createObjectURL(value) : null;
+  let preview = value ? URL.createObjectURL(value) : null;
 
-  if (!isModalOpen && preview) URL.revokeObjectURL(preview);
+  if (!isModalOpen && (value || preview)) {
+    if (preview) URL.revokeObjectURL(preview);
+    preview = null;
+    value = undefined;
+  }
 
   if (preview && fileType !== 'pdf') {
     return (
