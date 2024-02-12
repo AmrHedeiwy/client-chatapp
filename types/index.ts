@@ -1,52 +1,72 @@
-export interface User {
+export type Profile = {
   userId: string;
-  googleId?: string | null;
-  facebookId?: string | null;
   username: string;
-  email: string;
   image: string | null;
-  isVerified: boolean;
-  lastVerifiedAt?: string | null;
-  createdAt?: string;
-  conversations?: [];
-  followers?: object[];
-  isContact?: boolean;
-  messages?: Message[];
-}
+};
 
-export interface Conversation {
+export type CurrentUser = Profile & {
+  googleId: string | null;
+  facebookId: string | null;
+  email: string;
+  createdAt: string;
+};
+
+export type User = Profile & {
+  createdAt: string;
+  isContact: boolean;
+};
+
+export type Member = Profile & {
+  conversationId: string;
+  joinedAt: string;
+  isAdmin: boolean;
+};
+
+export type Session = {
+  isCallbackProvider: boolean;
+  isPasswordReset: boolean;
+  user: {
+    userId: string;
+    email: string;
+    lastVerifiedAt: string | null;
+  } | null;
+};
+
+export type Conversation = {
   conversationId: string;
   createdAt: string;
   lastMessageAt: string;
   name: string | null;
   image: string | null;
   isGroup: boolean;
-  members: User[];
+  members: Member[];
   messages: Message[];
-  otherMember?: User;
-  otherMembers?: User[];
+  otherMember?: Member;
+  otherMembers?: Member[];
   adminIds: string[];
   unseenMessagesCount: number;
   hasInitialNextPage: boolean;
-}
+};
 
-export interface Message {
+export type Message = {
   messageId: string;
   conversationId: string;
-  content: string;
-  fileUrl: string;
+  content: string | null;
+  fileUrl: string | null;
   sentAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
   seenCount: number;
   deliverCount: number;
-  status: any;
+  status: { [userId: string]: MessageStatus };
   notReceived?: boolean;
-  sender: User;
-}
+  sender: Profile;
+};
 
 export type MessageStatus = {
+  deliverAt: string;
   seenAt: string;
-  deliveredAt: string;
-  user: User;
+  user: Profile;
 };
 
 export type GroupedMessages = {

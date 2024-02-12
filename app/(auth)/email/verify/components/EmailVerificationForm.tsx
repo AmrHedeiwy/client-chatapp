@@ -9,13 +9,16 @@ import React, {
   useRef,
   useState
 } from 'react';
-import OTPInput from '@/app/(auth)/email/verify/components/OTPInput';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { toast } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { ErrorProps, ResponseProps } from '@/types/Axios';
-import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ErrorProps, ResponseProps } from '@/types/Axios';
+
+import { toast } from '@/lib/utils';
+
+import { Button } from '@/components/ui/button';
+import OTPInput from './OTPInput';
 
 export default function EmailVerificationForm() {
   const router = useRouter();

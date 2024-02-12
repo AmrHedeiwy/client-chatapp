@@ -1,8 +1,10 @@
 'use client';
 
-import React, { Dispatch, useReducer } from 'react';
+import React, { Dispatch, useEffect, useReducer } from 'react';
 import { createContext, useState } from 'react';
 import { Conversation, GroupedContacts, GroupedConversations, User } from '@/types';
+import { useSocket } from '@/hooks/useSocket';
+import { useQueryClient } from '@tanstack/react-query';
 
 type MainContextType = {
   userProfile: User;
@@ -22,7 +24,11 @@ export const MainContext = createContext<MainContextType | undefined>(undefined)
 
 type conversationActionType = {
   type: 'move' | 'add' | 'update' | 'remove';
-  payload: any;
+  payload: {
+    conversation?: Conversation;
+    updateInfo?: { conversationId: string; data: any };
+    removeInfo?: { conversationId: string };
+  };
 };
 type contactActionType = {
   type: 'add' | 'update' | 'remove' | null;
@@ -33,21 +39,33 @@ function conversationsReducer(
   conversations: GroupedConversations | null,
   action: conversationActionType
 ) {
-  let conversation = action.payload.conversation as Conversation;
+  let { conversation, updateInfo } = action.payload;
 
   switch (action.type) {
     case 'add':
+      if (!conversation) return conversations;
+
       if (!conversations || !conversations[conversation.conversationId]) {
         return { [conversation.conversationId]: conversation, ...conversations };
       }
       return conversations;
     case 'move':
+      if (!conversation) return conversations;
+
       if (!conversations) return { [conversation.conversationId]: conversation };
 
       delete conversations[conversation.conversationId];
       return { [conversation.conversationId]: conversation, ...conversations };
     case 'update':
-      break;
+      if (!updateInfo || !conversations) return conversations;
+
+      return {
+        ...conversations,
+        [updateInfo.conversationId]: {
+          ...conversations[updateInfo.conversationId],
+          ...updateInfo.data
+        }
+      };
     case 'remove':
       break;
   }
@@ -92,13 +110,53 @@ const MainProvider = ({
   currentUserProfile,
   children
 }: SocketProviderProps) => {
+  const { socket } = useSocket();
+  const queryClient = useQueryClient();
+
   const [userProfile, setUserProfile] = useState(currentUserProfile);
   const [conversations, dispatchConversations] = useReducer(
     conversationsReducer,
     intialConversations
   );
-
   const [contacts, dispatchContacts] = useReducer(contactsReducer, intialContacts);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('new_group_chat', async (data: { conversation: Conversation }) => {
+      await queryClient.setQueryData(['messages', data.conversation.conversationId], {
+        pages: [{ items: [], nextPage: 0 }],
+        pageParams: 0,
+        unseenMessagesCount: 0
+      });
+
+      data.conversation.otherMembers = data.conversation.members.filter(
+        (member) => member.userId !== userProfile.userId
+      );
+
+      dispatchConversations({
+        type: 'add',
+        payload: { conversation: data.conversation }
+      });
+    });
+
+    socket.on(
+      'update_conversation',
+      (updatedData: { conversationId: string; data: any }) => {
+        dispatchConversations({
+          type: 'update',
+          payload: { updateInfo: updatedData }
+        });
+      }
+    );
+
+    return () => {
+      socket?.off('new_group_chat');
+      socket?.off('update_conversation');
+    };
+  }, [socket]);
+
+  useEffect(() => console.log(conversations), [conversations]);
 
   return (
     <MainContext.Provider

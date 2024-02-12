@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 interface AvatarProps {
@@ -22,7 +22,7 @@ const UserAvatar: React.FC<AvatarProps> = ({
   return (
     <div className="relative">
       <div
-        className={clsx(
+        className={cn(
           `
           relative
           inline-block
@@ -45,7 +45,7 @@ const UserAvatar: React.FC<AvatarProps> = ({
       </div>
       {withStatus && (
         <span
-          className={clsx(
+          className={cn(
             `
             absolute 
             block 

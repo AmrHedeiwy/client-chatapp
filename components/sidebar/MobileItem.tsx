@@ -1,8 +1,8 @@
 'use client';
 
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import React from 'react';
-import clsx from 'clsx';
 
 interface MobileItemProps {
   href: string;
@@ -22,7 +22,7 @@ const MobileItem: React.FC<MobileItemProps> = ({ href, icon: Icon, active, onCli
       <Link
         onClick={handleClick}
         href={href}
-        className={clsx(
+        className={cn(
           `
           flex
           justify-center

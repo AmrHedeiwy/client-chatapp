@@ -4,12 +4,13 @@ import { useSession } from '@/hooks/useSession';
 import { useEffect, useState } from 'react';
 
 export default function EmailVerificationMaskedEmail() {
-  const { session } = useSession();
+  const session = useSession();
   const [maskedEmail, setMaskedEmail] = useState<string>('');
 
   useEffect(() => {
-    if (!session) return;
-    const email = session?.email as string;
+    if (!session || !session.user) return;
+
+    const email = session.user.email as string;
 
     // Extract the username and domain from the email
     const [username, domain] = email.split('@');

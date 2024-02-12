@@ -1,6 +1,5 @@
-import React from 'react';
-import PasswordForgotForm from './components/PasswordForgotForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PasswordForgotForm from './components/PasswordForgotForm';
 
 export default function PasswordForgot() {
   return (

@@ -4,8 +4,8 @@ import SearchBarInput from '@/components/SeachBarInput';
 import { useRef, useState } from 'react';
 import UserList from './UserList';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import clsx from 'clsx';
 import useConversationParams from '@/hooks/useConversationParams';
+import { cn } from '@/lib/utils';
 
 const ContactForm = () => {
   const [search, setSearch] = useState('');
@@ -39,7 +39,7 @@ const ContactForm = () => {
 
   return (
     <aside
-      className={clsx(
+      className={cn(
         `
         fixed
         inset-y-0

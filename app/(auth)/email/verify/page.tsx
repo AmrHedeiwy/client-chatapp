@@ -1,6 +1,8 @@
 import React from 'react';
+
 import EmailVerificationForm from '@/app/(auth)/email/verify/components/EmailVerificationForm';
 import MaskedEmail from '@/app/(auth)/email/verify/components/MaskedEmail';
+
 import {
   Card,
   CardContent,
@@ -23,13 +25,11 @@ export default function EmailVerification() {
         lg:px-8"
     >
       <Card className=" w-11/12 md:w-[450px]">
-        <CardHeader>
-          <div className="flex flex-col justify-center items-center ">
-            <CardTitle className="text-lg">Email Verification</CardTitle>
-            <CardDescription className="text-sm">
-              We have sent a code to your email <MaskedEmail />
-            </CardDescription>
-          </div>
+        <CardHeader className="flex flex-col justify-center items-center">
+          <CardTitle className="text-2xl">Email Verification</CardTitle>
+          <CardDescription className="text-center text-sm">
+            We have sent a code to your email <MaskedEmail />
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <EmailVerificationForm />

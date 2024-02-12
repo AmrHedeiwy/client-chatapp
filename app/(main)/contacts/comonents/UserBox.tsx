@@ -3,7 +3,6 @@
 import Avatar from '@/components/Avatar';
 import { Conversation, User } from '@/types/index';
 import { FormEventHandler, useState } from 'react';
-import clsx from 'clsx';
 
 import {
   UserRoundPlus,
@@ -14,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { toast } from '@/lib/utils';
+import { cn, toast } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ErrorProps } from '@/types/Axios';
 
@@ -113,7 +112,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
     <HoverCard>
       <HoverCardTrigger asChild>
         <div
-          className={clsx(
+          className={cn(
             `
             flex
             justify-between

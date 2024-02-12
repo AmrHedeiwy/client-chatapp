@@ -53,7 +53,7 @@ const formSchema = z.object({
   members: z.array(z.string()).min(1)
 });
 
-export const GroupChatModal = () => {
+const GroupChatModal = () => {
   const { type, isOpen, onClose } = useModal();
   const { conversations } = useMain();
   const router = useRouter();
@@ -233,3 +233,5 @@ export const GroupChatModal = () => {
     </Dialog>
   );
 };
+
+export default GroupChatModal;

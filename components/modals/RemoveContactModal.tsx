@@ -1,18 +1,6 @@
 'use client';
 
-import axios from 'axios';
-import { useState } from 'react';
-
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog';
 import { useModal } from '@/hooks/useModal';
-import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,

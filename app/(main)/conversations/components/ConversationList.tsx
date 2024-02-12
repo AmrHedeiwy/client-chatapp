@@ -1,13 +1,11 @@
 'use client';
 
 import { ElementRef, useEffect, useMemo, useRef, useState } from 'react';
-import clsx from 'clsx';
 
 import { Conversation } from '@/types';
 
 import SearchBarInput from '@/components/SeachBarInput';
 
-import { useSession } from '@/hooks/useSession';
 import { useSocket } from '@/hooks/useSocket';
 import useConversationParams from '@/hooks/useConversationParams';
 import { useMain } from '@/hooks/useMain';
@@ -17,9 +15,9 @@ import useListScroll from '@/hooks/useListScroll';
 import { MessagesSquare } from 'lucide-react';
 
 import ConversationBox from './ConversationBox';
+import { cn } from '@/lib/utils';
 
 const ConversationList = () => {
-  const { session } = useSession();
   const { onlineSockets } = useSocket();
   const { isOpen } = useConversationParams();
   const { conversations } = useMain();
@@ -62,7 +60,7 @@ const ConversationList = () => {
 
   return (
     <div
-      className={clsx(
+      className={cn(
         `
         fixed
         inset-y-0

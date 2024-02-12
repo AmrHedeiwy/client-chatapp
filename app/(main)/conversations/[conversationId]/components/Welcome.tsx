@@ -1,9 +1,9 @@
-type ChatWelcomeProps = {
+type WelcomeProps = {
   name: string;
   isGroup: boolean;
 };
 
-export const ChatWelcome = ({ name, isGroup }: ChatWelcomeProps) => {
+export const Welcome = ({ name, isGroup }: WelcomeProps) => {
   return (
     <div className="space-y-2 px-4 mb-4">
       <p className="text-xl md:text-3xl font-bold">

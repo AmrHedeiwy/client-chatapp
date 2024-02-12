@@ -1,7 +1,7 @@
 'use client';
 
-import clsx from 'clsx';
 import React, { ChangeEvent, KeyboardEvent, RefObject } from 'react';
+import { cn } from '@/lib/utils';
 
 interface OTPInputProps {
   index: number;
@@ -27,7 +27,7 @@ const OTPInput: React.FC<OTPInputProps> = ({
       ref={inputRef}
       onChange={onChange}
       onKeyDown={onKeyDown}
-      className={clsx(
+      className={cn(
         `
           w-10
           h-10

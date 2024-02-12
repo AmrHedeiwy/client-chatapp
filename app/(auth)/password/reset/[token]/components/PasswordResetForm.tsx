@@ -1,7 +1,11 @@
 'use client';
 
 import { ErrorProps, FormErrorProps, ResponseProps } from '@/types/Axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+
+import { Loader2 } from 'lucide-react';
 import { toast } from '@/lib/utils';
+
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,13 +17,13 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { zodResolver } from '@hookform/resolvers/zod';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { useParams, useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
+
 import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { FieldValues, useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 
 const formSchema = z
   .object<FieldValues>({
@@ -52,7 +56,7 @@ export default function PasswordResetForm() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch('http://localhost:5000/auth/info/authorisation', {
+      const res = await fetch('http://localhost:5000/auth/session', {
         credentials: 'include'
       });
 

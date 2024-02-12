@@ -1,9 +1,11 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import React, { useEffect } from 'react';
 import Image from 'next/image';
-import clsx from 'clsx';
+
+import { cn } from '@/lib/utils';
+
+import { useParams } from 'next/navigation';
 
 export default function CallBackPage() {
   const { provider, type } = useParams<{
@@ -12,31 +14,20 @@ export default function CallBackPage() {
   }>();
 
   useEffect(() => {
-    (async () => {
-      const res = await fetch(`http://localhost:5000/auth/info/authorisation`, {
-        credentials: 'include'
-      });
+    let timer: NodeJS.Timeout | null = null;
 
-      const { isCallbackProvider } = await res.json();
+    timer = setTimeout(() => {
+      localStorage.setItem(provider, type);
+      window.close();
 
-      // @ts-ignore
-      if (!isCallbackProvider) window.close() || window.history.back();
-
-      let timer: NodeJS.Timeout | null = null;
-
-      timer = setTimeout(() => {
-        localStorage.setItem(provider, type);
-        window.close();
-
-        if (timer) clearInterval(timer);
-      }, 1000);
-    })();
+      if (timer) clearInterval(timer);
+    }, 1000);
   }, [provider, type]);
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-50">
       <div
-        className={clsx(
+        className={cn(
           `
             flex 
             border 
@@ -49,7 +40,7 @@ export default function CallBackPage() {
         <Image src={`/images/${type}-provider.png`} alt={type} width={100} height={100} />
 
         <p
-          className={clsx(
+          className={cn(
             `
             flex
             items-center

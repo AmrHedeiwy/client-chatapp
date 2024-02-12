@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { FieldValues, useForm } from 'react-hook-form';
-import { z } from 'zod';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { Loader2 } from 'lucide-react';
 
-import SocialButton from '@/app/(auth)/components/SocialButton';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import { toast } from '@/lib/utils';
 
+import { FieldValues, useForm } from 'react-hook-form';
 import { useSession } from '@/hooks/useSession';
 import { useRouter } from 'next/navigation';
 import { ErrorProps, FormErrorProps, ResponseProps } from '@/types/Axios';
-import { zodResolver } from '@hookform/resolvers/zod';
+
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -24,7 +26,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2 } from 'lucide-react';
+
+import SocialButton from '@/app/(auth)/components/SocialButton';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
@@ -32,11 +35,15 @@ export default function AuthForm() {
   const router = useRouter();
   const [variant, setVariant] = useState<Variant>('LOGIN');
   const [isLoading, setIsLoading] = useState(false);
-  const { session } = useSession();
+  const session = useSession();
 
   useEffect(() => {
-    if (session && session.isVerified) router.push('/conversations');
-    if (session && !session.isVerified) router.push('/email/verify');
+    if (!session) return;
+
+    const { user } = session;
+
+    if (user && !!user.lastVerifiedAt) router.push('/conversations');
+    if (user && !user.lastVerifiedAt) router.push('/email/verify');
   }, [session, router]);
 
   const formSchema = z
@@ -161,7 +168,7 @@ export default function AuthForm() {
           setIsLoading(false);
           const res = localStorage.getItem(action);
 
-          if (res === 'success') router.push('/users');
+          if (res === 'success') router.push('/conversations');
           if (res === 'error') {
             toast(
               'error',

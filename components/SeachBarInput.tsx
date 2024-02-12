@@ -8,10 +8,10 @@ import {
   useState
 } from 'react';
 
-import clsx from 'clsx';
 import { Search, ArrowRight } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 interface SearchBarInputProps {
   inputRef: RefObject<any>;
@@ -64,7 +64,7 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
         onClick={onClickInput}
         onBlur={onBlurInput}
         maxLength={37}
-        className={clsx(
+        className={cn(
           ` 
             w-full
             block

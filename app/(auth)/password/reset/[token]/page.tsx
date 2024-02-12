@@ -1,6 +1,5 @@
-import React from 'react';
-import PasswordResetForm from './components/PasswordResetForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PasswordResetForm from './components/PasswordResetForm';
 
 export default function PasswordReset() {
   return (

@@ -2,11 +2,12 @@
 
 import { Conversation, Message } from '@/types';
 import { useChatQuery } from '@/hooks/useChatQuery';
-import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
+import React, { ElementRef, Fragment, useRef } from 'react';
 import { ServerCrash, Loader2 } from 'lucide-react';
-import { ChatWelcome } from './HelloChat';
+import { Welcome } from './Welcome';
 import { useChatScroll } from '@/hooks/useChatScroll';
-import MessageItem from './MessageItem';
+import Item from './Item';
+import { useMain } from '@/hooks/useMain';
 
 type BodyProps = {
   conversation: Conversation;
@@ -15,21 +16,9 @@ type BodyProps = {
 const Body = ({ conversation }: BodyProps) => {
   const chatRef = useRef<ElementRef<'div'>>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { userProfile } = useMain();
 
-  const {
-    conversationId,
-    adminIds,
-    createdAt,
-    hasInitialNextPage,
-    image,
-    isGroup,
-    lastMessageAt,
-    members,
-    name,
-    unseenMessagesCount,
-    otherMember,
-    otherMembers
-  } = conversation;
+  const { conversationId, adminIds, hasInitialNextPage, isGroup, name } = conversation;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useChatQuery({
     queryKey: conversationId
@@ -68,7 +57,7 @@ const Body = ({ conversation }: BodyProps) => {
     >
       {(!hasInitialNextPage || !hasNextPage) && <div className="flex-1" />}
       {(!hasInitialNextPage || !hasNextPage) && (
-        <ChatWelcome isGroup={isGroup as boolean} name={name as string} />
+        <Welcome isGroup={isGroup as boolean} name={name as string} />
       )}
       {hasInitialNextPage && hasNextPage && (
         <div className="flex justify-center">
@@ -94,30 +83,43 @@ const Body = ({ conversation }: BodyProps) => {
                 {group &&
                   group.items.map((message: Message, i: any) => {
                     let i_message = i.toString();
+
                     return (
                       <Fragment key={i_message}>
-                        <MessageItem
-                          id={message.messageId}
-                          isAdmin={
-                            isGroup
-                              ? adminIds.includes(message.sender.userId as string)
-                              : false
+                        <Item
+                          messageId={message.messageId}
+                          conversationId={conversationId}
+                          content={
+                            !message.deletedAt
+                              ? message.content
+                              : 'This message was deleted'
                           }
-                          previousSenderId={
+                          fileUrl={!message.deletedAt ? message.fileUrl : null}
+                          sentAt={message.sentAt}
+                          sender={message.sender}
+                          previousMessageSenderId={
                             i !== group.items.length - 1
                               ? group.items[i + 1].sender.userId
                               : null
                           }
-                          content={message.content}
-                          fileUrl={message.fileUrl}
-                          timestamp={message.sentAt}
-                          sender={message.sender}
+                          isSenderAdmin={
+                            isGroup
+                              ? adminIds.includes(message.sender.userId as string)
+                              : false
+                          }
+                          isCurrentUserAdmin={
+                            isGroup
+                              ? adminIds.includes(userProfile.userId as string)
+                              : false
+                          }
+                          isOwn={userProfile.userId === message.sender.userId}
                           isGroup={isGroup}
                           isNotReceived={!!message.notReceived}
                           deliverCount={message.deliverCount || 0}
                           seenCount={message.seenCount || 0}
                           status={Object.values(message.status || {})}
-                          message={message}
+                          updated={message.sentAt !== message.updatedAt}
+                          deleted={!!message.deletedAt}
                         />
                       </Fragment>
                     );

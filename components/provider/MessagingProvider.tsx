@@ -27,7 +27,7 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
     if (!socket) return;
     // A user(sender) sent a message to the current user
     socket.on('new_message', (newMessage: Message, pageMessagesLength: number) => {
-      const deliverAt = new Date();
+      const deliverAt = Date.now();
 
       queryClient.setQueryData(
         ['messages', newMessage.conversationId],
@@ -121,7 +121,7 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
 
     // The messages that the current user did not recieve
     socket.on('undelivered_messages', (data: Conversation[]) => {
-      const deliverAt = new Date();
+      const deliverAt = Date.now();
 
       for (const conversation of data) {
         queryClient.setQueryData(
@@ -176,6 +176,68 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
+    socket.on(
+      'update_message',
+      (data: {
+        messageId: string;
+        conversationId: string;
+        content: string;
+        updatedAt: string;
+      }) => {
+        queryClient.setQueryData(['messages', data.conversationId], (prevData: any) => {
+          const newData = prevData.pages.map((page: any) => {
+            return {
+              ...page,
+              items: page.items.map((item: any) => {
+                if (item.messageId === data.messageId) {
+                  return {
+                    ...item,
+                    content: data.content,
+                    updatedAt: data.updatedAt
+                  };
+                }
+                return item;
+              })
+            };
+          });
+
+          return {
+            ...prevData,
+            pages: newData
+          };
+        });
+      }
+    );
+
+    socket.on(
+      'remove_message',
+      (data: { messageId: string; conversationId: string; deletedAt: string }) => {
+        console.log(data);
+        queryClient.setQueryData(['messages', data.conversationId], (prevData: any) => {
+          const newData = prevData.pages.map((page: any) => {
+            return {
+              ...page,
+              items: page.items.map((item: any) => {
+                if (item.messageId === data.messageId) {
+                  return {
+                    ...item,
+                    content: 'This message was deleted',
+                    deletedAt: data.deletedAt
+                  };
+                }
+                return item;
+              })
+            };
+          });
+
+          return {
+            ...prevData,
+            pages: newData
+          };
+        });
+      }
+    );
+
     if (!!activeConversationId) {
       const data = queryClient.getQueryData(['messages', activeConversationId]) as any;
 
@@ -186,7 +248,7 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
         socket.emit('update_status', {
           type: 'seen',
           messages: messages.slice(0, unseenMessagesCount),
-          seenAt: new Date()
+          seenAt: Date.now()
         });
 
         queryClient.setQueryData(['messages', activeConversationId], (prevData: any) => {

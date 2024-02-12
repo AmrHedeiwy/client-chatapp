@@ -1,3 +1,4 @@
+import { MessageStatus } from '@/types';
 import { create } from 'zustand';
 
 export type ModalType =
@@ -5,11 +6,13 @@ export type ModalType =
   | 'updateUserProfile'
   | 'messageFile'
   | 'removeContact'
-  | 'messageStatus';
+  | 'messageStatus'
+  | 'deleteMessage';
 
 type ModalData = {
   contact?: { username?: string; confirm?: (action: 'remove') => void };
-  messageStatus?: { status: any[]; isGroup: boolean };
+  messageStatus?: { status: MessageStatus[]; isGroup: boolean };
+  deleteMessage?: { conversationId: string; messageId: string };
 };
 
 type ModalStore = {

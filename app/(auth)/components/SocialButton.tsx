@@ -1,6 +1,7 @@
-import clsx from 'clsx';
 import React from 'react';
 import Image from 'next/image';
+
+import { cn } from '@/lib/utils';
 
 interface SocialButtonProps {
   provider: 'facebook' | 'google';
@@ -12,7 +13,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
     <button
       type="button"
       onClick={onClick}
-      className={clsx(
+      className={cn(
         `py-2 
         rounded-xl 
         ring-1 
@@ -32,7 +33,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
         />
         <span
           id="google"
-          className={clsx(
+          className={cn(
             `flex items-center font-medium text-sm tracking-wider `,
             provider === 'google' && ' text-white dark:text-blue-500',
             provider === 'facebook' && 'text-white dark:text-blue-700'

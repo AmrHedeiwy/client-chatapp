@@ -1,15 +1,18 @@
-import axios from 'axios';
+import { Session } from '@/types';
 
 const getSession = async () => {
-  try {
-    const response = await axios.get('http://localhost:5000/auth/info/session', {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      withCredentials: true
-    });
+  const url = 'http://localhost:5000/auth/session';
+  const options: RequestInit = {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  };
 
-    return response.data.user;
+  try {
+    const res = await fetch(url, options);
+
+    return (await res.json()) as Session;
   } catch (error) {
     console.error(error);
     return null;

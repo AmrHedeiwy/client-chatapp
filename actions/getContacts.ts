@@ -6,7 +6,7 @@ const getContacts = async () => {
   if (!cookie) return null;
 
   const url = 'http://localhost:5000/contacts';
-  const config = {
+  const options = {
     headers: {
       'Content-Type': 'application/json',
       Cookie: `${cookie.name}=${cookie.value}`
@@ -14,7 +14,7 @@ const getContacts = async () => {
   };
 
   try {
-    const res = await fetch(url, config);
+    const res = await fetch(url, options);
     const { contacts } = await res.json();
 
     return contacts as GroupedContacts | null;

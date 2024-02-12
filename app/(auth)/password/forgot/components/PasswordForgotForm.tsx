@@ -1,7 +1,11 @@
 'use client';
 
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { FormErrorProps, ResponseProps, ErrorProps } from '@/types/Axios';
-import { toast } from '@/lib/utils';
+
+import { Loader2 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -13,13 +17,14 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { zodResolver } from '@hookform/resolvers/zod';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
+
 import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { toast } from '@/lib/utils';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object<FieldValues>({
   email: z.string().trim().min(1, { message: 'Email is required' }).email('Invalid email')

@@ -6,7 +6,7 @@ const getConversations = async () => {
   if (!cookie) return null;
 
   const url = 'http://localhost:5000/conversations';
-  const config = {
+  const options = {
     headers: {
       'Content-Type': 'application/json',
       Cookie: `${cookie.name}=${cookie.value}`
@@ -14,7 +14,7 @@ const getConversations = async () => {
   };
 
   try {
-    const res = await fetch(url, config);
+    const res = await fetch(url, options);
     const { conversations, groupedMessages } = await res.json();
 
     return {

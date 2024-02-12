@@ -2,11 +2,12 @@
 
 import Avatar from '@/components/Avatar';
 import useConversationParams from '@/hooks/useConversationParams';
+import { useMain } from '@/hooks/useMain';
 import { useSession } from '@/hooks/useSession';
 import { useSocket } from '@/hooks/useSocket';
+import { cn } from '@/lib/utils';
 import { Conversation, Message } from '@/types';
 import { useQuery } from '@tanstack/react-query';
-import clsx from 'clsx';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useMemo } from 'react';
@@ -18,7 +19,7 @@ interface ConversationBoxProps {
 
 const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnline }) => {
   const router = useRouter();
-  const { session } = useSession();
+  const { userProfile } = useMain();
   const otherMember = !conversation.isGroup ? conversation.otherMember : null;
   const { conversationId: activeConversationId } = useConversationParams();
   const { isConnected } = useSocket();
@@ -40,26 +41,36 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
     router.push(`/conversations/${conversation.conversationId}`);
   }, [conversation, router]);
 
-  const userUserId = useMemo(() => session?.userId, [session?.userId]);
-
   const hasSeen = useMemo(() => {
     if (!lastMessage) {
       return false;
     }
 
-    if (!userUserId) {
+    if (!userProfile.userId) {
       return false;
     }
 
-    return unseenMessagesCount === 0 || lastMessage.sender.userId === userUserId;
-  }, [userUserId, lastMessage]);
+    return unseenMessagesCount === 0 || lastMessage.sender.userId === userProfile.userId;
+  }, [userProfile.userId, lastMessage]);
 
   const lastMessageText = useMemo(() => {
+    if (!!lastMessage && !!lastMessage.deletedAt) return 'This message was deleted';
+
     if (lastMessage?.fileUrl) {
+      if (conversation.isGroup) {
+        return lastMessage.sender.userId !== userProfile.userId
+          ? `${lastMessage.sender.username}: sent an image`
+          : 'You: sent an image';
+      }
       return 'Sent an image';
     }
 
     if (lastMessage?.content) {
+      if (conversation.isGroup) {
+        return lastMessage.sender.userId !== userProfile.userId
+          ? `${lastMessage.sender.username}: ${lastMessage.content}`
+          : `You: ${lastMessage.content}`;
+      }
       return lastMessage?.content;
     }
 
@@ -71,7 +82,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
   return (
     <div
       onClick={handleClick}
-      className={clsx(
+      className={cn(
         `
         w-full 
         relative 
@@ -103,7 +114,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
           <span className="absolute inset-0" aria-hidden="true" />
           <div className="flex justify-between items-center mb-1">
             <p
-              className={clsx(
+              className={cn(
                 `text-md font-medium text-gray-900 dark:text-gray-100 transition`
               )}
             >
@@ -125,21 +136,20 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
           </div>
           <div className="flex justify-between">
             <p
-              className={clsx(
+              className={cn(
                 `truncate text-xs`,
                 !isConnected || hasSeen
                   ? 'text-zinc-500 dark:text-zinc-300'
-                  : 'text-black dark:text-white font-bold'
+                  : 'text-black dark:text-white font-bold',
+                !!lastMessage &&
+                  !!lastMessage.deletedAt &&
+                  'italic text-zinc-500 dark:text-zinc-400 text-xs'
               )}
             >
-              {conversation.isGroup && lastMessage
-                ? lastMessage?.sender.userId !== userUserId
-                  ? lastMessage?.sender.username + ': ' + lastMessageText
-                  : 'You: ' + lastMessageText
-                : lastMessageText}
+              {lastMessageText}
             </p>
             {unseenMessagesCount > 0 && (
-              <p className="font-semibold text-xs">{unseenMessagesCount}</p>
+              <span className="font-extrabold p-1 text-xs">{unseenMessagesCount}</span>
             )}
           </div>
         </div>
