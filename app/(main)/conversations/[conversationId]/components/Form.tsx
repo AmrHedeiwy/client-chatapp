@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSocket } from '@/hooks/useSocket';
-import { Conversation, Member, Message } from '@/types';
+import { Conversation, Member, Message, MessageStatus } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import { useCallback, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Send } from 'lucide-react';
+import { useModal } from '@/hooks/useModal';
 
 const formSchema = z.object({
   content: z.string().min(1)
@@ -28,9 +29,10 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
   const { conversationId } = useConversationParams();
   const { userProfile, dispatchConversations } = useMain();
   const { socket } = useSocket();
+  const { onOpen } = useModal();
   const textArearRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const intialMessageStatus = useMemo(() => {
+  const intialMessageStatus = useMemo<MessageStatus>(() => {
     const { isGroup, otherMember, otherMembers } = conversation;
     if (!isGroup)
       return {
@@ -111,8 +113,6 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
           items: [newMessage, ...newData[0].items]
         };
 
-        pageMessagesLength = newData[0].items.length;
-
         return {
           pages: newData,
           pageParams: prevData.pageParams,
@@ -182,7 +182,14 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
                   <div className="relative py-4 pl-4 pb-4 w-full">
                     <button
                       type="button"
-                      onClick={() => {}}
+                      onClick={() =>
+                        onOpen('messageFile', {
+                          messageFile: {
+                            conversationId: conversation.conversationId,
+                            intialMessageStatus
+                          }
+                        })
+                      }
                       className="absolute lg:bottom-7 bottom-8 mt-0.5 left-7 bg-zinc-500 dark:bg-zinc-400 hover:bg-zinc-600 dark:hover:bg-zinc-300 transition rounded-full p-1 flex items-center justify-center"
                     >
                       <Plus className="text-white dark:text-[#313338] lg:w-4 lg:h-4 w-3 h-3" />

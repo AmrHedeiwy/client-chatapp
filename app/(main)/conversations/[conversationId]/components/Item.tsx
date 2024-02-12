@@ -202,9 +202,9 @@ const Item = ({
               <div className="flex flex-col">
                 <Image
                   alt="Image"
-                  height="220"
-                  width="193"
-                  // onClick={() => setImageModalOpen(true)}
+                  height="200"
+                  width="250"
+                  onClick={() => onOpen('viewImage', { viewImage: { image: fileUrl } })}
                   src={fileUrl}
                   className="
                     rounded-t-md 
@@ -224,13 +224,13 @@ const Item = ({
 
             {isPDF && (
               <div className="flex flex-col">
-                <div className="relative flex items-center p-2 mt-2 rounded-md bg-background/10">
-                  <File className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
+                <div className="relative flex items-center p-2 mt-2 w-40 rounded-md bg-background/10">
+                  <File className="h-10  fill-blue-200 stroke-blue-400" />
                   <a
                     href={fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-2 text-sm text-indigo-500 dark:text-indigo-400 hover:underline"
+                    className="ml-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     PDF File
                   </a>

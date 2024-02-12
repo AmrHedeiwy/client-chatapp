@@ -30,6 +30,7 @@ function UploadDropzone({
 
         // For code 'too-many-files', use the default error message -> 'Too many files'
 
+        console.log(firstFileError);
         setError('file', { message: firstFileError.message });
       }
       acceptedFiles.forEach((file) => {
@@ -65,7 +66,9 @@ function UploadDropzone({
           <p className="font-bold text-blue-700 dark:text-blue-500">
             Choose files or drag and drop
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-300">Image (4MB)</p>
+          <p className="text-xs text-gray-600 dark:text-gray-300">
+            Image {type === 'messageFile' && 'or PDF'} (4MB)
+          </p>
         </div>
       )}
     </div>

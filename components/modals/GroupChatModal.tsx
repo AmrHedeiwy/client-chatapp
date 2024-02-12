@@ -161,7 +161,7 @@ const GroupChatModal = () => {
                   control={form.control}
                   name="file"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col items-center justify-center">
                       <FormControl>
                         <FileUpload
                           value={field.value}

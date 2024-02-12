@@ -41,13 +41,13 @@ function FileUpload({ onChange, value, setError, isModalOpen }: FileUploadProps)
 
   if (preview && fileType === 'pdf') {
     return (
-      <div className="relative flex items-center p-2 mt-2 rounded-md bg-background/10">
-        <FileIcon className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
+      <div className="relative flex items-center p-4 mt-4 rounded-md bg-zinc-200 dark:bg-zinc-900">
+        <FileIcon className="h-10 w-10 fill-blue-200 stroke-blue-400" />
         <a
           href={preview}
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-2 text-sm text-indigo-500 dark:text-indigo-400 hover:underline"
+          className="ml-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
         >
           {preview}
         </a>

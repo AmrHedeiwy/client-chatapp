@@ -6,6 +6,8 @@ import GroupChatModal from '@/components/modals/GroupChatModal';
 import RemoveContactModal from '../modals/RemoveContactModal';
 import MessageStatusModal from '../modals/MessageStatusModal';
 import DeleteMessageModal from '../modals/DeleteMessageModal';
+import MessageFileModal from '../modals/MessageFile';
+import ImageModal from '../modals/ImageModal';
 
 export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -24,6 +26,8 @@ export const ModalProvider = () => {
       <RemoveContactModal />
       <MessageStatusModal />
       <DeleteMessageModal />
+      <MessageFileModal />
+      <ImageModal />
     </>
   );
 };

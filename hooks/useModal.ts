@@ -7,12 +7,15 @@ export type ModalType =
   | 'messageFile'
   | 'removeContact'
   | 'messageStatus'
-  | 'deleteMessage';
+  | 'deleteMessage'
+  | 'viewImage';
 
 type ModalData = {
   contact?: { username?: string; confirm?: (action: 'remove') => void };
   messageStatus?: { status: MessageStatus[]; isGroup: boolean };
   deleteMessage?: { conversationId: string; messageId: string };
+  messageFile?: { conversationId: string; intialMessageStatus: MessageStatus[] };
+  viewImage?: { image: string };
 };
 
 type ModalStore = {
