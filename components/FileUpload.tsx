@@ -27,8 +27,8 @@ function FileUpload({ onChange, value, setError, isModalOpen }: FileUploadProps)
         <Image fill src={preview} alt="Upload" className="rounded-full" />
         <button
           onClick={() => {
+            if (preview) URL.revokeObjectURL(preview);
             onChange(undefined);
-            URL.revokeObjectURL(preview);
           }}
           className="bg-rose-500 text-white p-1 rounded-full absolute top-0 right-0 shadow-sm"
           type="button"
@@ -53,8 +53,8 @@ function FileUpload({ onChange, value, setError, isModalOpen }: FileUploadProps)
         </a>
         <button
           onClick={() => {
+            if (preview) URL.revokeObjectURL(preview);
             onChange(undefined);
-            URL.revokeObjectURL(preview);
           }}
           className="bg-rose-500 text-white p-1 rounded-full absolute -top-2 -right-2 shadow-sm"
           type="button"

@@ -13,28 +13,31 @@ function UploadDropzone({
   onChange: (file?: File) => void;
   setError: any;
 }) {
-  const { isOpen, type } = useModal();
+  const { type } = useModal();
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
-    if (rejectedFiles.length !== 0) {
-      const firstFileError = rejectedFiles[0].errors[0];
+  const onDrop = useCallback(
+    (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
+      if (rejectedFiles.length !== 0) {
+        const firstFileError = rejectedFiles[0].errors[0];
 
-      if (firstFileError.code === 'file-invalid-type')
-        firstFileError.message = `File must be an image${
-          type === 'messageFile' ? ' or pdf' : ''
-        }`;
+        if (firstFileError.code === 'file-invalid-type')
+          firstFileError.message = `File must be an image${
+            type === 'messageFile' ? ' or pdf' : ''
+          }`;
 
-      if (firstFileError.code === 'file-too-large')
-        firstFileError.message = 'File is larger than 4MB';
+        if (firstFileError.code === 'file-too-large')
+          firstFileError.message = 'File is larger than 4MB';
 
-      // For code 'too-many-files', use the default error message -> 'Too many files'
+        // For code 'too-many-files', use the default error message -> 'Too many files'
 
-      setError('file', { message: firstFileError.message });
-    }
-    acceptedFiles.forEach((file) => {
-      onChange(file);
-    });
-  }, []);
+        setError('file', { message: firstFileError.message });
+      }
+      acceptedFiles.forEach((file) => {
+        onChange(file);
+      });
+    },
+    [onChange, setError, type]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {

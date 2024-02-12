@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Fragment } from 'react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -29,26 +29,28 @@ const MessageStatusModal = () => {
           {messageStatus?.status.map((statusUser) => {
             const { user, deliverAt, seenAt } = statusUser;
             return (
-              <div className="flex gap-x-2 items-start p-4">
-                {messageStatus?.isGroup && <UserAvatar imageUrl={user.image} />}
-                <div className="flex flex-col gap-y-1">
-                  {messageStatus?.isGroup && (
-                    <p className="font-semibold text-sm">{user.username}</p>
-                  )}
+              <Fragment key={user.userId}>
+                <div className="flex gap-x-2 items-start p-4">
+                  {messageStatus?.isGroup && <UserAvatar imageUrl={user.image} />}
+                  <div className="flex flex-col gap-y-1">
+                    {messageStatus?.isGroup && (
+                      <p className="font-semibold text-sm">{user.username}</p>
+                    )}
 
-                  <p className="text-sm text-zinc-600 dark:text-zinc-300">
-                    {deliverAt &&
-                      !seenAt &&
-                      'Delivered at ' +
-                        format(new Date(statusUser.deliverAt), 'dd MMM p')}
+                    <p className="text-sm text-zinc-600 dark:text-zinc-300">
+                      {deliverAt &&
+                        !seenAt &&
+                        'Delivered at ' +
+                          format(new Date(statusUser.deliverAt), 'dd MMM p')}
 
-                    {seenAt &&
-                      'Seen at ' + format(new Date(statusUser.seenAt), 'dd MMM p')}
+                      {seenAt &&
+                        'Seen at ' + format(new Date(statusUser.seenAt), 'dd MMM p')}
 
-                    {!deliverAt && !seenAt && 'pending...'}
-                  </p>
+                      {!deliverAt && !seenAt && 'pending...'}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </Fragment>
             );
           })}
         </div>

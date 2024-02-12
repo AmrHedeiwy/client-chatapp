@@ -130,13 +130,15 @@ const Item = ({
         };
       });
 
-      socket.emit('edit_message', {
-        messageId,
-        ...values,
-        updatedAt,
-        memberIds,
-        conversationId
-      });
+      if (!!socket) {
+        socket.emit('edit_message', {
+          messageId,
+          ...values,
+          updatedAt,
+          memberIds,
+          conversationId
+        });
+      }
 
       form.reset();
       setIsEditing(false);

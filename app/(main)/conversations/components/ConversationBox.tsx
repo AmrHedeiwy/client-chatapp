@@ -22,7 +22,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
   const { userProfile } = useMain();
   const otherMember = !conversation.isGroup ? conversation.otherMember : null;
   const { conversationId: activeConversationId } = useConversationParams();
-  const { isConnected } = useSocket();
+  const { socket } = useSocket();
 
   const { data } = useQuery({
     queryKey: ['messages', conversation.conversationId],
@@ -51,7 +51,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
     }
 
     return unseenMessagesCount === 0 || lastMessage.sender.userId === userProfile.userId;
-  }, [userProfile.userId, lastMessage]);
+  }, [userProfile.userId, lastMessage, unseenMessagesCount]);
 
   const lastMessageText = useMemo(() => {
     if (!!lastMessage && !!lastMessage.deletedAt) return 'This message was deleted';
@@ -77,7 +77,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
     return `Say hi to ${
       conversation.isGroup ? conversation.name + ' members' : otherMember?.username
     }🫶🏼`;
-  }, [lastMessage]);
+  }, [lastMessage, conversation, otherMember, userProfile]);
 
   return (
     <div
@@ -138,7 +138,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
             <p
               className={cn(
                 `truncate text-xs`,
-                !isConnected || hasSeen
+                socket?.disconnect || hasSeen
                   ? 'text-zinc-500 dark:text-zinc-300'
                   : 'text-black dark:text-white font-bold',
                 !!lastMessage &&

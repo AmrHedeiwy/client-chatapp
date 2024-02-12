@@ -154,9 +154,7 @@ const MainProvider = ({
       socket?.off('new_group_chat');
       socket?.off('update_conversation');
     };
-  }, [socket]);
-
-  useEffect(() => console.log(conversations), [conversations]);
+  }, [socket, queryClient, userProfile]);
 
   return (
     <MainContext.Provider

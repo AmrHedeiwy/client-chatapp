@@ -265,7 +265,7 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       socket?.off('set_status');
       socket?.off('undelivered_messages');
     };
-  }, [socket, activeConversationId]);
+  }, [socket, activeConversationId, queryClient]);
 
   return (
     <MessagingContext.Provider value={undefined}>{children}</MessagingContext.Provider>

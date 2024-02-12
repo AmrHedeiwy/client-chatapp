@@ -5,8 +5,7 @@ import { Socket, io } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 
 type SocketContextType = {
-  socket: any | null;
-  isConnected: boolean;
+  socket: Socket | null;
   onlineSockets: string[];
 };
 
@@ -18,7 +17,6 @@ type SocketProviderProps = {
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
 
   const [onlineSockets, setOnlineSockets] = useState<string[]>([]);
 
@@ -27,14 +25,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   useEffect(() => {
     const socketInstance = new (io as any)('http://localhost:5000', {
       withCredentials: true
-    });
-
-    socketInstance.on('connect', () => {
-      setIsConnected(true);
-    });
-
-    socketInstance.on('disconnect', () => {
-      setIsConnected(false);
     });
 
     socketInstance.on('connected', (status: string, userIds: string[]) => {
@@ -57,13 +47,13 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
           if (document.visibilityState === 'hidden') {
             socketInstance.disconnect();
           }
-          if (document.visibilityState === 'visible' && !isConnected) {
+          if (document.visibilityState === 'visible' && socketInstance.disconnected) {
             socketInstance.connect();
           }
           clearTimeout(timeOut);
         }, 1000 * 5);
       } else {
-        if (!isConnected) {
+        if (!socketInstance.disconnected) {
           socketInstance.connect();
           router.refresh();
         }
@@ -80,7 +70,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     <SocketContext.Provider
       value={{
         socket,
-        isConnected,
         onlineSockets
       }}
     >

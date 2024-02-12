@@ -61,7 +61,7 @@ const DeleteMessageModal = () => {
         }
       );
 
-      socket.emit('delete_message', { ...deleteMessage, deletedAt });
+      if (!!socket) socket.emit('delete_message', { ...deleteMessage, deletedAt });
 
       onClose();
     } catch (error) {

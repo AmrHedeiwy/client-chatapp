@@ -121,46 +121,47 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
       }
     );
 
-    socket.emit(
-      'sendMessage',
-      {
-        conversationId,
-        messageId,
-        pageMessagesLength: pageMessagesLength,
-        sentAt,
-        intialMessageStatus,
-        updatedAt: sentAt,
-        ...data
-      },
-      // Callback when the message was received by the server
-      () => {
-        // Set the received status to true in the user's cache
-        const updatedMessage = { ...newMessage, notReceived: false };
-        queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
-          if (!prevData || !prevData.pages || prevData.pages.length === 0) {
-            return prevData;
-          }
+    if (!!socket) {
+      socket.emit(
+        'sendMessage',
+        {
+          conversationId,
+          messageId,
+          pageMessagesLength: pageMessagesLength,
+          sentAt,
+          intialMessageStatus,
+          updatedAt: sentAt,
+          ...data
+        },
+        // Callback when the message was received by the server
+        () => {
+          // Set the received status to true in the user's cache
+          const updatedMessage = { ...newMessage, notReceived: false };
+          queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
+            if (!prevData || !prevData.pages || prevData.pages.length === 0) {
+              return prevData;
+            }
 
-          const newData = prevData.pages.map((page: any) => {
+            const newData = prevData.pages.map((page: any) => {
+              return {
+                ...page,
+                items: page.items.map((message: Message) => {
+                  if (message.messageId === updatedMessage.messageId) {
+                    return updatedMessage;
+                  }
+                  return message;
+                })
+              };
+            });
+
             return {
-              ...page,
-              items: page.items.map((message: Message) => {
-                if (message.messageId === updatedMessage.messageId) {
-                  return updatedMessage;
-                }
-                return message;
-              })
+              ...prevData,
+              pages: newData
             };
           });
-
-          return {
-            ...prevData,
-            pages: newData
-          };
-        });
-      }
-    );
-
+        }
+      );
+    }
     // Add the conversation to the top of the conversations list
     dispatchConversations({ type: 'move', payload: { conversation } });
   };
