@@ -41,19 +41,19 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     <QueryProvider>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <SocketProvider>
-          <MessagingProvider>
-            <MainProvider
-              currentUserProfile={currentUserProfile}
-              intialConversations={groupedData?.conversations || null}
-              intialContacts={contacts}
-            >
+          <MainProvider
+            currentUserProfile={currentUserProfile}
+            intialConversations={groupedData?.conversations || null}
+            intialContacts={contacts}
+          >
+            <MessagingProvider>
               <Sidebar>
                 <ModalProvider />
                 {children}
                 <ReactQueryDevtools buttonPosition="top-left" />
               </Sidebar>
-            </MainProvider>
-          </MessagingProvider>
+            </MessagingProvider>
+          </MainProvider>
         </SocketProvider>
       </HydrationBoundary>
     </QueryProvider>

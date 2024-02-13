@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSocket } from '@/hooks/useSocket';
 import useConversationParams from '@/hooks/useConversationParams';
 import { useRouter } from 'next/navigation';
+import { useMain } from '@/hooks/useMain';
 
 type StatusMessageResponse = {
   conversationId: string;
@@ -21,13 +22,38 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
   const { socket } = useSocket();
   const { conversationId: activeConversationId } = useConversationParams();
-  const router = useRouter();
+  const { userProfile, conversations, dispatchConversations } = useMain();
 
   useEffect(() => {
     if (!socket) return;
+
     // A user(sender) sent a message to the current user
-    socket.on('new_message', (newMessage: Message, pageMessagesLength: number) => {
+    socket.on('new_message', (newMessage: Message) => {
       const deliverAt = Date.now();
+
+      if (!!conversations && !!conversations[newMessage.conversationId]) {
+        dispatchConversations({
+          type: 'move',
+          payload: { moveInfo: { conversationId: newMessage.conversationId } }
+        });
+      } else {
+        const { userId, username, image } = userProfile;
+
+        const conversation = {
+          conversationId: newMessage.conversationId,
+          name: username,
+          members: [{ userId, username, image }, newMessage.sender],
+          otherMember: newMessage.sender,
+          isGroup: false,
+          hasInitialNextPage: false
+        };
+
+        dispatchConversations({
+          type: 'add',
+          // @ts-ignore
+          payload: { addInfo: { conversation, initMessages: false } }
+        });
+      }
 
       queryClient.setQueryData(
         ['messages', newMessage.conversationId],
@@ -36,11 +62,13 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
             return {
               pages: [
                 {
-                  items: [newMessage]
+                  items: [newMessage],
+                  nextPage: 1
                 }
               ],
-              unseenMessageCount:
-                activeConversationId !== newMessage.conversationId ? 1 : 0
+              unseenMessagesCount:
+                activeConversationId !== newMessage.conversationId ? 1 : 0,
+              pageParams: 0
             };
           }
 
@@ -124,6 +152,8 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       const deliverAt = Date.now();
 
       for (const conversation of data) {
+        const messages = conversation.messages ?? [];
+
         queryClient.setQueryData(
           ['messages', conversation.conversationId],
           (prevData: any) => {
@@ -131,13 +161,15 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
               return {
                 pages: [
                   {
-                    items: conversation.messages
+                    items: messages,
+                    nextPage: messages.length
                   }
                 ],
                 unseenMessagesCount:
                   activeConversationId !== conversation.conversationId
-                    ? conversation.messages.length
-                    : 0
+                    ? messages.length
+                    : 0,
+                pageParams: 0
               };
             }
 
@@ -145,8 +177,8 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
 
             newData[0] = {
               ...newData[0],
-              nextPage: newData[0].nextPage + conversation.messages.length,
-              items: [...conversation.messages, ...newData[0].items]
+              nextPage: newData[0].nextPage + messages.length,
+              items: [...messages, ...newData[0].items]
             };
 
             return {
@@ -154,7 +186,7 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
               pages: newData,
               unseenMessagesCount:
                 activeConversationId !== conversation.conversationId
-                  ? prevData.unseenMessagesCount + conversation.messages.length
+                  ? prevData.unseenMessagesCount + messages.length
                   : 0
             };
           }
@@ -162,14 +194,14 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
 
         socket.emit('update_status', {
           type: 'deliver',
-          messages: conversation.messages,
+          messages: messages,
           deliverAt
         });
 
         if (conversation.conversationId === activeConversationId) {
           socket.emit('update_status', {
             type: 'seen',
-            messages: conversation.messages,
+            messages: messages,
             seenAt: deliverAt // message was seen at the same time it was delivered
           });
         }
@@ -212,7 +244,6 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
     socket.on(
       'remove_message',
       (data: { messageId: string; conversationId: string; deletedAt: string }) => {
-        console.log(data);
         queryClient.setQueryData(['messages', data.conversationId], (prevData: any) => {
           const newData = prevData.pages.map((page: any) => {
             return {
@@ -242,7 +273,7 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       const data = queryClient.getQueryData(['messages', activeConversationId]) as any;
 
       const unseenMessagesCount = data.unseenMessagesCount;
-      if (unseenMessagesCount > 0 && socket) {
+      if (unseenMessagesCount > 0 && !!socket) {
         const messages = data.pages[0].items;
 
         socket.emit('update_status', {
@@ -265,7 +296,14 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       socket?.off('set_status');
       socket?.off('undelivered_messages');
     };
-  }, [socket, activeConversationId, queryClient]);
+  }, [
+    socket,
+    activeConversationId,
+    conversations,
+    dispatchConversations,
+    queryClient,
+    userProfile
+  ]);
 
   return (
     <MessagingContext.Provider value={undefined}>{children}</MessagingContext.Provider>

@@ -113,21 +113,12 @@ const GroupChatModal = () => {
 
       conversation.image = fileRouteRes.data.fileUrl;
 
-      dispatchConversations({ type: 'add', payload: { conversation } });
-
-      // Initialize the messages for the conversation in the user's cache
-      await queryClient.setQueryData(['messages', conversation.conversationId], {
-        pages: [{ items: [], nextPage: 0 }],
-        pageParams: 0,
-        unseenMessagesCount: 0
+      dispatchConversations({
+        type: 'add',
+        payload: { addInfo: { conversation, initMessages: true } }
       });
 
-      // @ts-ignore
-      form.setValue('file', undefined);
-      form.setValue('name', '');
-      form.setValue('members', []);
-
-      onClose();
+      handleClose();
       router.push(`/conversations/${conversation.conversationId}`);
     } catch (error) {}
   };

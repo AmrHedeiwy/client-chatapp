@@ -43,7 +43,6 @@ interface UserBoxProps {
 
 const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => {
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const [isContact, setIsContact] = useState(data.isContact); // Indicates whether this user is a contact of the logged-in user
 
@@ -63,13 +62,9 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
         const conversation = res.data.conversation as Conversation;
 
         // Add the conversation to the list if it does not already exist
-        dispatchConversations({ type: 'add', payload: { conversation } });
-
-        // Initialize the messages for the conversation in the user's cache
-        await queryClient.setQueryData(['messages', conversation.conversationId], {
-          pages: [{ items: [], nextPage: 0 }],
-          pageParams: 0,
-          unseenMessagesCount: 0
+        dispatchConversations({
+          type: 'add',
+          payload: { addInfo: { conversation, initMessages: true } }
         });
 
         router.push(`/conversations/${conversation.conversationId}`);

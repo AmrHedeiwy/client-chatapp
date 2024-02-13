@@ -104,12 +104,12 @@ const Body = ({ conversation }: BodyProps) => {
                           }
                           isSenderAdmin={
                             isGroup
-                              ? adminIds.includes(message.sender.userId as string)
+                              ? (adminIds as string[]).includes(message.sender.userId)
                               : false
                           }
                           isCurrentUserAdmin={
                             isGroup
-                              ? adminIds.includes(userProfile.userId as string)
+                              ? (adminIds as string[]).includes(userProfile.userId)
                               : false
                           }
                           isOwn={userProfile.userId === message.sender.userId}

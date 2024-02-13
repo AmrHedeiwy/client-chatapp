@@ -102,7 +102,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
       <Avatar
         imageUrl={
           conversation.isGroup
-            ? conversation.image
+            ? (conversation.image as string)
             : (conversation.otherMember?.image as string)
         }
         withStatus={!conversation.isGroup}

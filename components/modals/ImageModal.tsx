@@ -17,8 +17,8 @@ const ImageModal = () => {
 
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <Image alt="Image" height={300} width={600} src={viewImage?.image} />
+      <DialogContent className="min-w-[300px] min-h-[350px] max-w-[600px] max-h-[1000px]">
+        <Image className="object-fill" alt="Image" fill src={viewImage?.image} />
       </DialogContent>
     </Dialog>
   );

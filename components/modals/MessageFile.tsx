@@ -49,7 +49,7 @@ const MessageFileModal = () => {
   const { isOpen, onClose, type, data } = useModal();
   const { socket } = useSocket();
   const queryClient = useQueryClient();
-  const { userProfile } = useMain();
+  const { userProfile, dispatchConversations } = useMain();
 
   const isModalOpen = isOpen && type === 'messageFile';
 
@@ -90,7 +90,7 @@ const MessageFileModal = () => {
       const res = await axios.post(url, formData, options);
       const { fileUrl } = res.data;
 
-      let newMessage = {
+      const newMessage = {
         conversationId,
         messageId,
         sentAt: sentAt,
@@ -105,7 +105,7 @@ const MessageFileModal = () => {
         notReceived: true
       };
 
-      await queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
+      queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
         if (!prevData || !prevData.pages || prevData.pages.length === 0) {
           return {
             pages: [
@@ -165,8 +165,12 @@ const MessageFileModal = () => {
         );
       }
 
-      // @ts-ignore
-      form.setValue('file', undefined);
+      // Add the conversation to the top of the conversations list
+      dispatchConversations({
+        type: 'move',
+        payload: { moveInfo: { conversationId: newMessage.conversationId } }
+      });
+
       handleClose();
     } catch (error) {
       console.log(error);

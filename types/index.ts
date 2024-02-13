@@ -34,17 +34,14 @@ export type Session = {
 
 export type Conversation = {
   conversationId: string;
-  createdAt: string;
-  lastMessageAt: string;
   name: string | null;
-  image: string | null;
+  image?: string | null;
   isGroup: boolean;
   members: Member[];
-  messages: Message[];
+  messages?: Message[];
   otherMember?: Member;
   otherMembers?: Member[];
-  adminIds: string[];
-  unseenMessagesCount: number;
+  adminIds?: string[];
   hasInitialNextPage: boolean;
 };
 

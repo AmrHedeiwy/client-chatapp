@@ -61,7 +61,7 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
         <Avatar
           imageUrl={
             conversation.isGroup
-              ? conversation.image
+              ? (conversation.image as string)
               : (conversation.otherMember?.image as string)
           }
           withStatus

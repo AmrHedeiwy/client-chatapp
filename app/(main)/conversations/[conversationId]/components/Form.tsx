@@ -74,7 +74,7 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
     // The number of messages in the current page, set as 1 if there were no previous messages
     let pageMessagesLength = 1;
 
-    let newMessage = {
+    const newMessage = {
       conversationId,
       messageId,
       sentAt: sentAt,
@@ -92,34 +92,31 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
     form.reset();
 
     // Add the new message to the user's cache
-    await queryClient.setQueryData(
-      ['messages', newMessage.conversationId],
-      (prevData: any) => {
-        if (!prevData || !prevData.pages || prevData.pages.length === 0) {
-          return {
-            pages: [
-              {
-                items: [newMessage]
-              }
-            ],
-            unseenMessagesCount: 0
-          };
-        }
-
-        const newData = [...prevData.pages];
-
-        newData[0] = {
-          nextPage: newData[0].nextPage + 1,
-          items: [newMessage, ...newData[0].items]
-        };
-
+    queryClient.setQueryData(['messages', newMessage.conversationId], (prevData: any) => {
+      if (!prevData || !prevData.pages || prevData.pages.length === 0) {
         return {
-          pages: newData,
-          pageParams: prevData.pageParams,
-          unseenMessagesCount: prevData.unseenMessagesCount
+          pages: [
+            {
+              items: [newMessage]
+            }
+          ],
+          unseenMessagesCount: 0
         };
       }
-    );
+
+      const newData = [...prevData.pages];
+
+      newData[0] = {
+        nextPage: newData[0].nextPage + 1,
+        items: [newMessage, ...newData[0].items]
+      };
+
+      return {
+        pages: newData,
+        pageParams: prevData.pageParams,
+        unseenMessagesCount: prevData.unseenMessagesCount
+      };
+    });
 
     if (!!socket) {
       socket.emit(
@@ -137,6 +134,7 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
         () => {
           // Set the received status to true in the user's cache
           const updatedMessage = { ...newMessage, notReceived: false };
+
           queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
             if (!prevData || !prevData.pages || prevData.pages.length === 0) {
               return prevData;
@@ -162,8 +160,12 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
         }
       );
     }
+
     // Add the conversation to the top of the conversations list
-    dispatchConversations({ type: 'move', payload: { conversation } });
+    dispatchConversations({
+      type: 'move',
+      payload: { moveInfo: { conversationId: newMessage.conversationId } }
+    });
   };
 
   return (
