@@ -13,6 +13,7 @@ import RemoveMemberModal from '../modals/RemoveMemberModal';
 import SetAdminStatusModal from '../modals/SetAdminStatusModal';
 import LeaveConversationModal from '../modals/LeaveConversationModal';
 import DeleteConversationModal from '../modals/DeleteConversationModal';
+import UserProfileModal from '../modals/UserProfileModal';
 
 const UiProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -33,11 +34,12 @@ const UiProvider = () => {
       <DeleteMessageModal />
       <MessageFileModal />
       <ImageModal />
-      <ConversationSheet />
       <RemoveMemberModal />
       <SetAdminStatusModal />
       <LeaveConversationModal />
       <DeleteConversationModal />
+      <UserProfileModal />
+      <ConversationSheet />
     </>
   );
 };

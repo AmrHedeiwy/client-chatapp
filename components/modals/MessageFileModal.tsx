@@ -28,6 +28,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useMain } from '@/hooks/useMain';
 import { Message } from '@/types';
 import { toast } from '@/lib/utils';
+import useConversationParams from '@/hooks/useConversationParams';
 
 const isFileBlob = (value: unknown): value is Blob & File =>
   value instanceof Blob && value instanceof File;
@@ -49,6 +50,7 @@ const MessageFileModal = () => {
   const { socket } = useSocket();
   const queryClient = useQueryClient();
   const { userProfile, dispatchConversations } = useMain();
+  const { conversationId } = useConversationParams();
 
   const isModalOpen = isOpen && type === 'messageFile';
 
@@ -74,7 +76,7 @@ const MessageFileModal = () => {
 
     if (!messageFile) return onClose();
 
-    const { conversationId, intialMessageStatus } = messageFile;
+    const { intialMessageStatus } = messageFile;
     const messageId = uuidv4();
     const sentAt = Date.now();
     const { file } = values;

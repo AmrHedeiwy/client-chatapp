@@ -8,11 +8,12 @@ import { ModeToggle } from '@/components/ModeToggle';
 
 import DesktopItem from './DesktopItem';
 import Avatar from '../Avatar';
+import { useModal } from '@/hooks/useUI';
 
 const DesktopSidebar = () => {
   const routes = useRoutes();
   const { userProfile } = useMain();
-  const [isOpen, setIsOpen] = useState(false);
+  const { onOpen } = useModal();
 
   return (
     <div
@@ -51,7 +52,7 @@ const DesktopSidebar = () => {
       <nav className="pb-3 mt-auto flex items-center flex-col gap-y-4">
         <ModeToggle />
         <div
-          onClick={() => setIsOpen(true)}
+          onClick={() => onOpen('userProfile', { profile: userProfile })}
           className="cursor-pointer hover:opacity-75 transition"
         >
           {userProfile && <Avatar imageUrl={userProfile.image as string} current />}

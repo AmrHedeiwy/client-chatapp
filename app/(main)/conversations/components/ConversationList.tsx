@@ -16,11 +16,12 @@ import { MessagesSquare } from 'lucide-react';
 
 import ConversationBox from './ConversationBox';
 import { cn } from '@/lib/utils';
+import Avatar from '@/components/Avatar';
 
 const ConversationList = () => {
   const { onlineSockets } = useSocket();
   const { isOpen } = useConversationParams();
-  const { conversations } = useMain();
+  const { conversations, userProfile } = useMain();
   const { onOpen } = useModal();
 
   const topRef = useRef<ElementRef<'div'>>(null);
@@ -74,8 +75,16 @@ const ConversationList = () => {
       )}
     >
       <div className="px-3 mt-4 mb-6">
-        <div className="flex justify-between items-center h-10 mb-2 mx-2  ">
-          <h2 className="tracking-widest text-slate-900 dark:text-white text-xl">
+        <div className="flex justify-between items-center h-10 mb-2 mx-2">
+          <div
+            onClick={() => onOpen('userProfile', { profile: userProfile })}
+            className="lg:hidden"
+          >
+            {userProfile && (
+              <Avatar imageUrl={userProfile.image as string} current custom="w-10 h-10" />
+            )}
+          </div>
+          <h2 className="flex gap-x-2 tracking-widest text-slate-900 dark:text-white text-xl">
             Chats
           </h2>
           <MessagesSquare

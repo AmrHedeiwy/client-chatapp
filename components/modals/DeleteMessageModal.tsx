@@ -17,12 +17,14 @@ import { useSocket } from '@/hooks/useSocket';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import useConversationParams from '@/hooks/useConversationParams';
 
 const DeleteMessageModal = () => {
   const { isOpen, onClose, type, data } = useModal();
   const { socket } = useSocket();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { conversationId } = useConversationParams();
 
   const isModalOpen = isOpen && type === 'deleteMessage';
 
@@ -41,31 +43,28 @@ const DeleteMessageModal = () => {
           (error?: { message: string }) => {
             if (!!error) return toast('error', error.message);
 
-            queryClient.setQueryData(
-              ['messages', deleteMessage.conversationId],
-              (prevData: any) => {
-                const newData = prevData.pages.map((page: any) => {
-                  return {
-                    ...page,
-                    items: page.items.map((item: any) => {
-                      if (item.messageId === deleteMessage.messageId) {
-                        return {
-                          ...item,
-                          content: 'This message was deleted',
-                          deletedAt
-                        };
-                      }
-                      return item;
-                    })
-                  };
-                });
-
+            queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
+              const newData = prevData.pages.map((page: any) => {
                 return {
-                  ...prevData,
-                  pages: newData
+                  ...page,
+                  items: page.items.map((item: any) => {
+                    if (item.messageId === deleteMessage.messageId) {
+                      return {
+                        ...item,
+                        content: 'This message was deleted',
+                        deletedAt
+                      };
+                    }
+                    return item;
+                  })
                 };
-              }
-            );
+              });
+
+              return {
+                ...prevData,
+                pages: newData
+              };
+            });
           }
         );
     } catch (e: any) {

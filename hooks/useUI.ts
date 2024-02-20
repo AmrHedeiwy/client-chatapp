@@ -1,9 +1,9 @@
-import { Conversation, MessageStatus } from '@/types';
+import { CurrentUser, MessageStatus } from '@/types';
 import { create } from 'zustand';
 
 export type ModalType =
   | 'createGroupChat'
-  | 'updateUserProfile'
+  | 'userProfile'
   | 'messageFile'
   | 'removeContact'
   | 'messageStatus'
@@ -17,12 +17,13 @@ export type ModalType =
 type ModalData = {
   contact?: { username: string; contactId: string };
   messageStatus?: { status: MessageStatus[]; isGroup: boolean };
-  deleteMessage?: { conversationId: string; messageId: string };
-  messageFile?: { conversationId: string; intialMessageStatus: MessageStatus[] };
+  deleteMessage?: { messageId: string };
+  messageFile?: { intialMessageStatus: MessageStatus[] };
   viewImage?: { image: string };
   member?: { username: string; userId: string };
   adminStatus?: { setStatus: 'promote' | 'demote'; memberId: string; username: string };
   conversation?: { memberId: string; name: string; isGroup?: boolean };
+  profile?: CurrentUser;
 };
 
 type ModalStore = {
