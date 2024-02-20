@@ -1,6 +1,6 @@
 'use client';
 
-import { User } from '@/types/index';
+import { Profile } from '@/types/index';
 import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
 import UserBox from './UserBox';
 import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
@@ -47,8 +47,8 @@ const UserList: React.FC<UserListProps> = ({
         let i_group = i.toString();
         return (
           <Fragment key={i_group}>
-            {!!group?.items ? (
-              (group.items as User[]).map((user, i) => {
+            {!!group.items ? (
+              (group.items as Profile[]).map((user, i) => {
                 let i_user = i.toString();
                 let uniqueIndex = i_group + i_user;
                 return (

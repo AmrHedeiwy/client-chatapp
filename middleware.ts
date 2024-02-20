@@ -25,11 +25,11 @@ export async function middleware(req: NextRequest) {
     if (
       (pathname === '/contacts' || pathname.startsWith('/conversations')) &&
       user &&
-      user.lastVerifiedAt
+      user.isVerified
     )
       return NextResponse.next();
 
-    if (pathname === '/email/verify' && user && !user.lastVerifiedAt)
+    if (pathname === '/email/verify' && user && !user.isVerified)
       return NextResponse.next();
 
     if (pathname.startsWith('/cb') && isCallbackProvider) return NextResponse.next();

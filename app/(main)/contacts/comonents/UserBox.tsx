@@ -1,8 +1,15 @@
 'use client';
 
 import Avatar from '@/components/Avatar';
-import { Conversation, User } from '@/types/index';
-import { FormEventHandler, useState } from 'react';
+import { Conversation, Profile } from '@/types/index';
+import {
+  EventHandler,
+  FormEventHandler,
+  MouseEventHandler,
+  useCallback,
+  useMemo,
+  useState
+} from 'react';
 
 import {
   UserRoundPlus,
@@ -31,77 +38,82 @@ import {
 } from '@/components/ui/hover-card';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useModal } from '@/hooks/useModal';
+import { useModal } from '@/hooks/useUI';
 import { useMain } from '@/hooks/useMain';
 
 interface UserBoxProps {
   index: string;
-  data: User;
+  data: Profile;
   isActive: boolean;
   onInput: FormEventHandler<HTMLInputElement>;
 }
 
 const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => {
   const router = useRouter();
+  const { contacts, dispatchConversations, dispatchContacts } = useMain();
 
-  const [isContact, setIsContact] = useState(data.isContact); // Indicates whether this user is a contact of the logged-in user
+  const isContact = useMemo(() => {
+    return !!contacts && !!contacts[data.userId];
+  }, [contacts, data]);
 
-  const { dispatchConversations } = useMain();
   const { onOpen } = useModal();
 
-  const onClickChat = () => {
-    const url = `http://localhost:5000/conversations/create`;
+  const onClickChat = useCallback(async () => {
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/conversations/create`;
     const options: AxiosRequestConfig = {
       withCredentials: true,
       headers: { 'Content-Type': 'application/json' }
     };
 
-    axios
-      .post(url, { members: [data.userId], isGroup: false }, options)
-      .then(async (res) => {
-        const conversation = res.data.conversation as Conversation;
+    try {
+      const res = await axios.post(
+        url,
+        { memberIds: [data.userId], isGroup: false },
+        options
+      );
 
-        // Add the conversation to the list if it does not already exist
-        dispatchConversations({
-          type: 'add',
-          payload: { addInfo: { conversation, initMessages: true } }
-        });
+      const conversation = res.data.conversation as Conversation;
 
-        router.push(`/conversations/${conversation.conversationId}`);
-      })
-      .catch((e: AxiosError<ErrorProps>) => {
-        const error = e.response?.data.error;
-
-        toast('error', error?.message as string);
-
-        if (error?.redirect) router.push(error.redirect);
+      // Add the conversation to the list if it does not already exist
+      dispatchConversations({
+        type: 'add',
+        payload: { addInfo: { conversation, initMessages: true } }
       });
-  };
 
-  const onClickFriend = (action: 'add' | 'remove', e?: any) => {
-    e?.preventDefault();
+      router.push(`/conversations/${conversation.conversationId}`);
+    } catch (e: any) {
+      const error = e.response.data.error;
 
-    const url = `http://localhost:5000/contacts/manage`;
-    const options: AxiosRequestConfig = {
-      withCredentials: true,
-      headers: { 'Content-Type': 'application/json' }
-    };
+      toast('error', error.message);
 
-    axios
-      .post(url, { contactId: data.userId, action }, options)
-      .then((res: AxiosResponse) => {
-        const { isContact } = res.data;
+      if (error.redirect) router.push(error.redirect);
+    }
+  }, [data, dispatchConversations, router]);
 
-        setIsContact(isContact);
-      })
-      .catch((e: AxiosError<ErrorProps>) => {
-        const error = e.response?.data.error;
+  const onAddContact = useCallback(
+    async (e: any) => {
+      e.preventDefault();
 
-        toast('error', error?.message as string);
+      const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/contacts/${data.userId}`;
+      const config: AxiosRequestConfig = {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true
+      };
 
-        if (error?.redirect) router.push(error.redirect);
-      });
-  };
+      try {
+        await axios.post(url, { contactId: data.userId }, config);
+
+        dispatchContacts({ type: 'add', payload: { addInfo: { contact: data } } });
+      } catch (e: any) {
+        const error = e.response.data.error;
+
+        toast('error', error.message);
+
+        if (error.redirect) router.push(error.redirect);
+      }
+    },
+    [data, dispatchContacts, router]
+  );
 
   return (
     <HoverCard>
@@ -128,7 +140,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
           <DropdownMenu>
             <DropdownMenuTrigger>
               <MoreVertical
-                size={25}
+                size={20}
                 onClick={(e) => e.preventDefault()}
                 className="
                 text-slate-600
@@ -143,19 +155,19 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
             <DropdownMenuContent>
               <DropdownMenuGroup>
                 <DropdownMenuItem
-                  className="flex items-center gap-x-1 cursor-pointer"
+                  className="flex items-center gap-x-2 cursor-pointer"
                   onClick={onClickChat}
                 >
-                  <MessageCircle size={20} className="text-yellow-600" />
-                  <p className="font-bold">chat</p>
+                  <MessageCircle size={18} className="text-yellow-600" />
+                  <p>chat</p>
                 </DropdownMenuItem>
                 {!isContact && (
                   <DropdownMenuItem
-                    className="flex items-center gap-x-1 cursor-pointer"
-                    onClick={(e) => onClickFriend('add', e)}
+                    className="flex items-center gap-x-2 cursor-pointer"
+                    onClick={onAddContact}
                   >
-                    <UserRoundPlus size={20} className="text-green-500" />
-                    <p className="font-bold">add</p>
+                    <UserRoundPlus size={18} className="text-green-500" />
+                    <p>add</p>
                   </DropdownMenuItem>
                 )}
                 {isContact && (
@@ -165,7 +177,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
                       onOpen('removeContact', {
                         contact: {
                           username: data.username,
-                          confirm: onClickFriend
+                          contactId: data.userId
                         }
                       })
                     }
@@ -186,7 +198,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
             <p className="text-sm">Some user description.</p>
             <div className="flex items-center pt-2">
               <span className="flex gap-x-1 text-xs text-muted-foreground">
-                <CalendarRange /> Joined{' '}
+                <CalendarRange size={18} /> Joined{' '}
                 {data.createdAt
                   ? format(new Date(data.createdAt), 'dd MMMM yyy')
                   : 'server is acting sus today, idk why it does not want to load the date'}

@@ -4,7 +4,7 @@ import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from '@/config/file';
 
 import { useCallback } from 'react';
 import { FileRejection, useDropzone } from 'react-dropzone';
-import { useModal } from '@/hooks/useModal';
+import { useModal } from '@/hooks/useUI';
 
 function UploadDropzone({
   onChange,
@@ -30,7 +30,6 @@ function UploadDropzone({
 
         // For code 'too-many-files', use the default error message -> 'Too many files'
 
-        console.log(firstFileError);
         setError('file', { message: firstFileError.message });
       }
       acceptedFiles.forEach((file) => {

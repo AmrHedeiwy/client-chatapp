@@ -24,6 +24,9 @@ const Select: React.FC<SelectProps> = ({ onChange, options, disabled }) => {
       components={animatedComponents}
       classNamePrefix="select"
       closeMenuOnSelect={false}
+      noOptionsMessage={(obj) => {
+        return 'add more contacts';
+      }}
       styles={{
         menuPortal: (base) => ({ ...base, zIndex: 9999 }),
         control: (provided, state) => ({

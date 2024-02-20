@@ -19,6 +19,6 @@ export const toast = (
     pauseOnHover: true,
     draggable: true,
     progress: undefined,
-    theme: 'light'
+    className: 'bg-white dark:bg-zinc-800 dark:text-white'
   });
 };

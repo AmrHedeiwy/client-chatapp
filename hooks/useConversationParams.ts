@@ -1,7 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import { Conversation } from '../types';
+import { useMemo } from 'react';
 
 const useConversationParams = () => {
   const params = useParams();

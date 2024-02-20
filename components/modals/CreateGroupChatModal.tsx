@@ -28,37 +28,26 @@ import Select from '@/components/ui/select';
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { useQueryClient } from '@tanstack/react-query';
-import { useModal } from '@/hooks/useModal';
+import { useModal } from '@/hooks/useUI';
 import { useMain } from '@/hooks/useMain';
 
 import FileUpload from '../FileUpload';
-
-const isFileBlob = (value: unknown): value is Blob & File =>
-  value instanceof Blob && value instanceof File;
+import { toast } from '@/lib/utils';
 
 const formSchema = z.object({
-  name: z.string().min(1, {
-    message: 'Group name is required.'
+  name: z.string().min(2, {
+    message: 'The conversation name must be at least 2 characters long.'
   }),
-  file: z.custom<Blob & File>(
-    (value) => {
-      if (!isFileBlob(value)) {
-        return undefined;
-      }
-      return value;
-    },
-    { message: 'You must choose a picture for your group' }
-  ),
-  members: z.array(z.string()).min(1)
+  file: z.custom<(Blob & File) | undefined>(),
+  memberIds: z.array(z.string()).min(1, {
+    message: 'At least one member is required to initiate conversation.'
+  })
 });
 
-const GroupChatModal = () => {
+const CreateGroupChatModal = () => {
   const { type, isOpen, onClose } = useModal();
-  const { conversations } = useMain();
   const router = useRouter();
-  const { dispatchConversations } = useMain();
-  const queryClient = useQueryClient();
+  const { contacts, dispatchConversations } = useMain();
 
   const isModalOpen = isOpen && type === 'createGroupChat';
 
@@ -67,67 +56,74 @@ const GroupChatModal = () => {
     defaultValues: {
       name: '',
       file: undefined,
-      members: []
+      memberIds: []
     }
   });
 
-  const singleConversationsArray = useMemo(() => {
-    if (!conversations) return null;
+  const contactsArray = useMemo(() => {
+    if (!contacts) return null;
 
-    return Object.values(conversations).filter((conversation) => !conversation.isGroup);
-  }, [conversations]);
+    return Object.values(contacts);
+  }, [contacts]);
 
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const { file, memberIds, name } = values;
+
+    const conversationConfig: AxiosRequestConfig = {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    };
+    const fileConfig: AxiosRequestConfig = {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      withCredentials: true
+    };
+
+    const conversationUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/conversations/create`;
+
     try {
-      const { file, members, name } = values;
-      const formData = new FormData();
-
-      const conversationRouteUrl: string = `http://localhost:5000/conversations/create`;
-      const conversationRouteoptions: AxiosRequestConfig = {
-        withCredentials: true,
-        headers: { 'Content-Type': 'application/json' }
-      };
-
-      const conversationRouteRes = await axios.post(
-        conversationRouteUrl,
+      const res = await axios.post(
+        conversationUrl,
         {
           name,
-          members,
-          isGroup: true
+          memberIds,
+          isGroup: true,
+          isImage: !!file
         },
-        conversationRouteoptions
+        conversationConfig
       );
 
-      const { conversation } = conversationRouteRes.data;
-
-      const fileRouteUrl: string = `http://localhost:5000/file?conversationId=${conversation.conversationId}`;
-      const fileRouteoptions: AxiosRequestConfig = {
-        withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' }
-      };
-
-      formData.append('file', file);
-      const fileRouteRes = await axios.post(fileRouteUrl, formData, fileRouteoptions);
-
-      conversation.image = fileRouteRes.data.fileUrl;
-
+      const { conversation } = res.data;
       dispatchConversations({
         type: 'add',
         payload: { addInfo: { conversation, initMessages: true } }
       });
 
+      if (file) {
+        const fileUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/conversations/group/image`;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('conversationId', conversation.conversationId);
+        axios.post(fileUrl, formData, fileConfig).catch(() => {}); // error handled by the main provider if the image fails to upload
+      }
+
       handleClose();
       router.push(`/conversations/${conversation.conversationId}`);
-    } catch (error) {}
+    } catch (e: any) {
+      const error = e.response.data.error;
+
+      toast('error', error.message);
+
+      if (error.redirect) router.push(error.redirect);
+    }
   };
 
   const handleClose = () => {
     // @ts-ignore
     form.setValue('file', undefined);
     form.setValue('name', '');
-    form.setValue('members', []);
+    form.setValue('memberIds', []);
 
     onClose();
   };
@@ -183,7 +179,7 @@ const GroupChatModal = () => {
 
               <FormField
                 control={form.control}
-                name="members"
+                name="memberIds"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="uppercase text-xs font-bold">members</FormLabel>
@@ -191,10 +187,10 @@ const GroupChatModal = () => {
                       <Select
                         disabled={isLoading}
                         options={
-                          singleConversationsArray
-                            ? singleConversationsArray.map((conversation) => ({
-                                value: conversation.otherMember?.userId,
-                                label: conversation.otherMember?.username
+                          contactsArray
+                            ? contactsArray.map((contact) => ({
+                                value: contact.userId,
+                                label: contact.username
                               }))
                             : undefined
                         }
@@ -204,8 +200,17 @@ const GroupChatModal = () => {
                             const value = newValue[newValue.length - 1].value;
 
                             if (typeof value !== 'string') return;
-                            form.setValue('members', [...field.value, value]);
-                            console.log(field.value);
+                            field.onChange([...(field.value as string[]), value]);
+                          }
+
+                          if (actionMeta.action === 'clear') field.onChange([]);
+
+                          if (actionMeta.action === 'remove-value') {
+                            const filterdValues = field.value?.filter(
+                              // @ts-expect-error
+                              (value) => value !== actionMeta.removedValue.value
+                            );
+                            field.onChange(filterdValues);
                           }
                         }}
                       />
@@ -225,4 +230,4 @@ const GroupChatModal = () => {
   );
 };
 
-export default GroupChatModal;
+export default CreateGroupChatModal;

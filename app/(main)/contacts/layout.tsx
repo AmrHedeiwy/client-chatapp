@@ -1,10 +1,10 @@
 import React from 'react';
-import ContactMain from './comonents/ContactMain';
+import Main from './comonents/Main';
 
 export default function ConversationsLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-full">
-      <ContactMain />
+      <Main />
       {children}
     </div>
   );

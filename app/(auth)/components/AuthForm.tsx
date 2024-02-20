@@ -34,17 +34,7 @@ type Variant = 'LOGIN' | 'REGISTER';
 export default function AuthForm() {
   const router = useRouter();
   const [variant, setVariant] = useState<Variant>('LOGIN');
-  const [isLoading, setIsLoading] = useState(false);
   const session = useSession();
-
-  useEffect(() => {
-    if (!session) return;
-
-    const { user } = session;
-
-    if (user && !!user.lastVerifiedAt) router.push('/conversations');
-    if (user && !user.lastVerifiedAt) router.push('/email/verify');
-  }, [session, router]);
 
   const formSchema = z
     .object<FieldValues>({
@@ -85,6 +75,15 @@ export default function AuthForm() {
       }
     );
 
+  useEffect(() => {
+    if (!session) return;
+
+    const { user } = session;
+
+    if (user && user.isVerified) router.push('/conversations');
+    if (user && !user.isVerified) router.push('/email/verify');
+  }, [session, router]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     // resolver: zodResolver(formSchema),
     defaultValues: {
@@ -97,58 +96,44 @@ export default function AuthForm() {
     }
   });
 
+  const isLoading = form.formState.isSubmitting;
+
   const toggleVariant = useCallback(() => {
-    form.reset();
     if (variant === 'LOGIN') setVariant('REGISTER');
     else setVariant('LOGIN');
+
+    form.reset();
   }, [variant, form]);
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
-
-    const url: string = `http://localhost:5000/auth/${
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/${
       variant === 'LOGIN' ? 'sign-in' : 'register'
     }`;
-    const options: AxiosRequestConfig = {
-      withCredentials: true,
-      headers: { 'Content-Type': 'application/json' }
+    const config: AxiosRequestConfig = {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
     };
 
-    axios
-      .post(
-        url,
-        {
-          username: 'Emna',
-          email: 'amr.hedeiwy@gmail.com',
-          password: 'amr@AMR123',
-          confirmPassword: 'amr@AMR123',
-          rememberMe: true,
-          termsOfAgreement: true
-        },
-        options
-      )
-      .then((res: AxiosResponse<ResponseProps>) => {
-        const { message, redirect } = res.data;
+    try {
+      const res = await axios.post(url, data, config);
 
-        toast('success', message as string);
+      const { message, redirect } = res.data;
+      toast('success', message);
 
-        if (redirect) router.push(redirect);
-      })
-      .catch((e: AxiosError<ErrorProps>) => {
-        const error = e.response?.data.error;
-        if (error && error.name === 'JoiValidationError') {
-          (error.message as FormErrorProps[]).forEach(({ fieldName, fieldMessage }) => {
-            form.setError(fieldName, { message: fieldMessage, type: 'manual' });
-          });
-        } else {
-          toast('error', error?.message as string);
-        }
-      })
-      .finally(() => setTimeout(() => setIsLoading(false), 1000));
+      if (redirect) router.push(redirect);
+    } catch (e: any) {
+      const error = e.response.data.error;
+      if (error && error.name === 'JoiValidationError') {
+        (error.message as FormErrorProps[]).forEach(({ fieldName, fieldMessage }) => {
+          form.setError(fieldName, { message: fieldMessage });
+        });
+      } else {
+        toast('error', error.message);
+      }
+    }
   };
 
-  const socialAction = (action: 'google' | 'facebook') => {
-    setIsLoading(true);
+  const onOpenProvider = (action: 'google' | 'facebook') => {
     const width = window.innerWidth >= 768 ? 500 : window.innerWidth;
     const height = window.innerWidth >= 768 ? 600 : window.innerHeight;
 
@@ -157,7 +142,7 @@ export default function AuthForm() {
 
     let timer: NodeJS.Timeout | null = null;
     const providerWindow: Window | null = window.open(
-      `http://localhost:5000/auth/${action}`,
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/${action}`,
       '_blank',
       `width=${width},height=${height},left=${left},top=${top}`
     );
@@ -165,7 +150,6 @@ export default function AuthForm() {
     if (providerWindow) {
       timer = setInterval(() => {
         if (providerWindow.closed) {
-          setIsLoading(false);
           const res = localStorage.getItem(action);
 
           if (res === 'success') router.push('/conversations');
@@ -275,8 +259,30 @@ export default function AuthForm() {
             </Button>
           </div>
         )}
+        {variant === 'REGISTER' && (
+          <FormField
+            control={form.control}
+            name="termsOfAgreement"
+            render={({ field }) => (
+              <FormItem className="flex flex-col items-center justify-center">
+                <div className="flex gap-x-2">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="cursor-pointer">
+                      Accept terms and conditions
+                    </FormLabel>
+                  </div>
+                </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <Button className="w-full" disabled={isLoading}>
           {!isLoading ? (
             variant === 'LOGIN' ? (
               'Sign in'
@@ -298,8 +304,8 @@ export default function AuthForm() {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 mb-10">
-          <SocialButton provider="google" onClick={() => socialAction('google')} />
-          <SocialButton provider="facebook" onClick={() => socialAction('facebook')} />
+          <SocialButton provider="google" onClick={() => onOpenProvider('google')} />
+          <SocialButton provider="facebook" onClick={() => onOpenProvider('facebook')} />
         </div>
         <div className="flex justify-center items-center mt-6 ">
           <div className="text-sm text-gray-500 dark:text-gray-400">

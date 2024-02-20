@@ -1,12 +1,13 @@
 'use client';
 
 import React, { createContext, useEffect } from 'react';
-import { Conversation, Message, User } from '@/types';
+import { Conversation, Message } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSocket } from '@/hooks/useSocket';
 import useConversationParams from '@/hooks/useConversationParams';
 import { useRouter } from 'next/navigation';
 import { useMain } from '@/hooks/useMain';
+import { toast } from '@/lib/utils';
 
 type StatusMessageResponse = {
   conversationId: string;
@@ -21,14 +22,14 @@ export const MessagingContext = createContext(undefined);
 const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
   const { socket } = useSocket();
+  const router = useRouter();
   const { conversationId: activeConversationId } = useConversationParams();
   const { userProfile, conversations, dispatchConversations } = useMain();
 
   useEffect(() => {
     if (!socket) return;
 
-    // A user(sender) sent a message to the current user
-    socket.on('new_message', (newMessage: Message) => {
+    socket.on('new_message', async (newMessage: Message) => {
       const deliverAt = Date.now();
 
       if (!!conversations && !!conversations[newMessage.conversationId]) {
@@ -37,22 +38,29 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
           payload: { moveInfo: { conversationId: newMessage.conversationId } }
         });
       } else {
-        const { userId, username, image } = userProfile;
+        try {
+          const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/conversations/${newMessage.conversationId}`;
+          const options: RequestInit = {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+          };
 
-        const conversation = {
-          conversationId: newMessage.conversationId,
-          name: username,
-          members: [{ userId, username, image }, newMessage.sender],
-          otherMember: newMessage.sender,
-          isGroup: false,
-          hasInitialNextPage: false
-        };
+          const res = await fetch(url, options);
+          const data = await res.json();
 
-        dispatchConversations({
-          type: 'add',
-          // @ts-ignore
-          payload: { addInfo: { conversation, initMessages: false } }
-        });
+          dispatchConversations({
+            type: 'add',
+            payload: { addInfo: { conversation: data.conversation, initMessages: false } }
+          });
+        } catch (e: any) {
+          const error = e.response.data.error;
+
+          toast('error', error.message);
+
+          if (error.redirect) router.push(error.redirect);
+        }
       }
 
       queryClient.setQueryData(
@@ -111,7 +119,6 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    // The user(sender) sent a message to another user and it was delivered to them
     socket.on('set_status', (data: StatusMessageResponse, userId: string) => {
       queryClient.setQueryData(['messages', data.conversationId], (prevData: any) => {
         const newData = prevData.pages.map((page: any) => {
@@ -147,7 +154,6 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       });
     });
 
-    // The messages that the current user did not recieve
     socket.on('undelivered_messages', (data: Conversation[]) => {
       const deliverAt = Date.now();
 
@@ -213,8 +219,9 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       (data: {
         messageId: string;
         conversationId: string;
-        content: string;
-        updatedAt: string;
+        content?: string;
+        fileUpload?: string;
+        updatedAt?: string;
       }) => {
         queryClient.setQueryData(['messages', data.conversationId], (prevData: any) => {
           const newData = prevData.pages.map((page: any) => {
@@ -224,8 +231,12 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
                 if (item.messageId === data.messageId) {
                   return {
                     ...item,
-                    content: data.content,
-                    updatedAt: data.updatedAt
+                    ...(!!data.fileUpload
+                      ? { image: data.fileUpload } // This means the image was successfully saved to the cloud, it does not mean the message was updated. Image messages can not be updated by the user, only text messages
+                      : {
+                          content: data.content,
+                          updatedAt: data.updatedAt
+                        })
                   };
                 }
                 return item;
@@ -271,6 +282,7 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (!!activeConversationId) {
       const data = queryClient.getQueryData(['messages', activeConversationId]) as any;
+      if (!data) return;
 
       const unseenMessagesCount = data.unseenMessagesCount;
       if (unseenMessagesCount > 0 && !!socket) {
@@ -295,6 +307,8 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       socket?.off('new_message');
       socket?.off('set_status');
       socket?.off('undelivered_messages');
+      socket?.off('update_message');
+      socket?.off('remove_message');
     };
   }, [
     socket,
@@ -302,7 +316,8 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
     conversations,
     dispatchConversations,
     queryClient,
-    userProfile
+    userProfile,
+    router
   ]);
 
   return (

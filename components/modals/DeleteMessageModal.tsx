@@ -1,7 +1,6 @@
 'use client';
 
-import axios from 'axios';
-import { useState } from 'react';
+import { useCallback } from 'react';
 
 import {
   AlertDialog,
@@ -13,63 +12,70 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '../ui/alert-dialog';
-import { useModal } from '@/hooks/useModal';
-import { Button } from '@/components/ui/button';
+import { useModal } from '@/hooks/useUI';
 import { useSocket } from '@/hooks/useSocket';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 const DeleteMessageModal = () => {
   const { isOpen, onClose, type, data } = useModal();
   const { socket } = useSocket();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const isModalOpen = isOpen && type === 'deleteMessage';
 
-  const [isLoading, setIsLoading] = useState(false);
+  const onDelete = useCallback(async () => {
+    const { deleteMessage } = data;
 
-  const onClick = async () => {
+    if (!deleteMessage) return onClose();
+
+    const deletedAt = Date.now();
+
     try {
-      setIsLoading(true);
+      if (!!socket)
+        socket.emit(
+          'delete_message',
+          { ...deleteMessage, deletedAt },
+          (error?: { message: string }) => {
+            if (!!error) return toast('error', error.message);
 
-      const { deleteMessage } = data;
-      if (!deleteMessage) return onClose();
-
-      const deletedAt = Date.now();
-      queryClient.setQueryData(
-        ['messages', deleteMessage.conversationId],
-        (prevData: any) => {
-          const newData = prevData.pages.map((page: any) => {
-            return {
-              ...page,
-              items: page.items.map((item: any) => {
-                if (item.messageId === deleteMessage.messageId) {
+            queryClient.setQueryData(
+              ['messages', deleteMessage.conversationId],
+              (prevData: any) => {
+                const newData = prevData.pages.map((page: any) => {
                   return {
-                    ...item,
-                    content: 'This message was deleted',
-                    deletedAt
+                    ...page,
+                    items: page.items.map((item: any) => {
+                      if (item.messageId === deleteMessage.messageId) {
+                        return {
+                          ...item,
+                          content: 'This message was deleted',
+                          deletedAt
+                        };
+                      }
+                      return item;
+                    })
                   };
-                }
-                return item;
-              })
-            };
-          });
+                });
 
-          return {
-            ...prevData,
-            pages: newData
-          };
-        }
-      );
+                return {
+                  ...prevData,
+                  pages: newData
+                };
+              }
+            );
+          }
+        );
+    } catch (e: any) {
+      const error = e.response.data.error;
 
-      if (!!socket) socket.emit('delete_message', { ...deleteMessage, deletedAt });
+      toast('error', error.message);
 
-      onClose();
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
+      if (error.redirect) router.push(error.redirect);
     }
-  };
+  }, [data, queryClient, socket, router, onClose]);
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>
@@ -83,7 +89,7 @@ const DeleteMessageModal = () => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onClick}>Confirm</AlertDialogAction>
+          <AlertDialogAction onClick={onDelete}>Confirm</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

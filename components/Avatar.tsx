@@ -3,22 +3,26 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { Skeleton } from './ui/skeleton';
 
 interface AvatarProps {
   imageUrl: string | null;
   withStatus?: boolean;
   current?: boolean;
-  customSize?: string;
+  custom?: string;
   isOnline?: boolean;
 }
 
-const UserAvatar: React.FC<AvatarProps> = ({
+const Avatar: React.FC<AvatarProps> = ({
   imageUrl,
   withStatus,
   current,
-  customSize,
+  custom,
   isOnline
 }) => {
+  if (imageUrl === 'pending')
+    return <Skeleton className={cn('lg:h-14 lg:w-14 w-12 h-12 rounded-full', custom)} />;
+
   return (
     <div className="relative">
       <div
@@ -28,8 +32,12 @@ const UserAvatar: React.FC<AvatarProps> = ({
           inline-block
           rounded-full
           overflow-hidden
+          lg:h-14 
+          lg:w-14 
+          w-12 
+          h-12
           `,
-          customSize ? customSize : 'lg:h-14 lg:w-14 w-12 h-12',
+          custom,
           current && 'ring ring-white',
           !imageUrl && 'bg-white'
         )}
@@ -52,7 +60,7 @@ const UserAvatar: React.FC<AvatarProps> = ({
             rounded-full 
             ring-2 
             ring-white 
-            bottom-2 
+            bottom-2.5 
             right-1
             h-2 
             w-2`,
@@ -64,4 +72,4 @@ const UserAvatar: React.FC<AvatarProps> = ({
   );
 };
 
-export default UserAvatar;
+export default Avatar;

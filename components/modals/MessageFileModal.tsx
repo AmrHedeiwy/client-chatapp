@@ -1,6 +1,5 @@
 'use client';
 
-import axios, { AxiosRequestConfig } from 'axios';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -22,13 +21,13 @@ import {
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import FileUpload from '../FileUpload';
-import { useRouter } from 'next/navigation';
-import { useModal } from '@/hooks/useModal';
+import { useModal } from '@/hooks/useUI';
 import { useSocket } from '@/hooks/useSocket';
 import { useQueryClient } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 import { useMain } from '@/hooks/useMain';
 import { Message } from '@/types';
+import { toast } from '@/lib/utils';
 
 const isFileBlob = (value: unknown): value is Blob & File =>
   value instanceof Blob && value instanceof File;
@@ -69,89 +68,83 @@ const MessageFileModal = () => {
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      const { messageFile } = data;
+    if (!socket) return handleClose();
 
-      if (!messageFile) return onClose();
+    const { messageFile } = data;
 
-      const { conversationId, intialMessageStatus } = messageFile;
-      const messageId = uuidv4();
-      const sentAt = Date.now();
+    if (!messageFile) return onClose();
 
-      const formData = new FormData();
-      formData.append('file', values.file);
+    const { conversationId, intialMessageStatus } = messageFile;
+    const messageId = uuidv4();
+    const sentAt = Date.now();
+    const { file } = values;
+    const type = file.type.split('/').pop();
+    const size = file.size;
 
-      const url: string = `http://localhost:5000/file?messageId=${messageId}`;
-      const options: AxiosRequestConfig = {
-        withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' }
-      };
+    const reader = new FileReader();
 
-      const res = await axios.post(url, formData, options);
-      const { fileUrl } = res.data;
+    const newMessage = {
+      conversationId,
+      messageId,
+      sentAt: sentAt,
+      updatedAt: sentAt,
+      deletedAt: null,
+      sender: userProfile,
+      content: null,
+      fileUrl: 'pending.' + type,
+      seenCount: 0,
+      deliverCount: 0,
+      status: intialMessageStatus,
+      notReceived: true
+    };
 
-      const newMessage = {
-        conversationId,
-        messageId,
-        sentAt: sentAt,
-        updatedAt: sentAt,
-        deletedAt: null,
-        sender: userProfile,
-        content: null,
-        fileUrl,
-        seenCount: 0,
-        deliverCount: 0,
-        status: intialMessageStatus,
-        notReceived: true
-      };
-
-      queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
-        if (!prevData || !prevData.pages || prevData.pages.length === 0) {
-          return {
-            pages: [
-              {
-                items: [newMessage]
-              }
-            ],
-            unseenMessagesCount: 0
-          };
-        }
-
-        const newData = [...prevData.pages];
-
-        newData[0] = {
-          ...newData[0],
-          nextPage: newData[0].nextPage + 1,
-          items: [newMessage, ...newData[0].items]
-        };
-
+    queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
+      if (!prevData || !prevData.pages || prevData.pages.length === 0) {
         return {
-          ...prevData,
-          pages: newData
+          pages: [
+            {
+              items: [newMessage]
+            }
+          ],
+          unseenMessagesCount: 0
         };
-      });
+      }
 
-      if (!!socket) {
-        socket.emit(
-          'sendMessage',
-          { messageId, sentAt, fileUrl, ...messageFile }, // Callback when the message was received by the server
-          () => {
-            // Set the received status to true in the user's cache
-            const updatedMessage = { ...newMessage, notReceived: false };
+      const newData = [...prevData.pages];
+
+      newData[0] = {
+        ...newData[0],
+        nextPage: newData[0].nextPage + 1,
+        items: [newMessage, ...newData[0].items]
+      };
+
+      return {
+        ...prevData,
+        pages: newData
+      };
+    });
+
+    reader.onload = () => {
+      const fileData = reader.result; // This is the file data
+
+      socket.emit(
+        'send_message',
+        {
+          messageId,
+          sentAt,
+          file: { data: fileData, type, size },
+          ...messageFile
+        },
+        (data: { fileUrl?: string; error?: { message: string } }) => {
+          if (!!data.error) {
+            toast('error', data.error.message);
 
             queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
-              if (!prevData || !prevData.pages || prevData.pages.length === 0) {
-                return prevData;
-              }
-
               const newData = prevData.pages.map((page: any) => {
                 return {
                   ...page,
-                  items: page.items.map((message: Message) => {
-                    if (message.messageId === updatedMessage.messageId) {
-                      return updatedMessage;
-                    }
-                    return message;
+                  items: page.items.filter((item: any) => {
+                    if (item.messageId !== messageId) return { ...item };
                   })
                 };
               });
@@ -161,20 +154,48 @@ const MessageFileModal = () => {
                 pages: newData
               };
             });
+
+            return;
           }
-        );
-      }
 
-      // Add the conversation to the top of the conversations list
-      dispatchConversations({
-        type: 'move',
-        payload: { moveInfo: { conversationId: newMessage.conversationId } }
-      });
+          // Set the received status to true in the user's cache
+          const updatedMessage = {
+            ...newMessage,
+            fileUrl: data.fileUrl,
+            notReceived: false
+          };
 
-      handleClose();
-    } catch (error) {
-      console.log(error);
-    }
+          queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
+            const newData = prevData.pages.map((page: any) => {
+              return {
+                ...page,
+                items: page.items.map((message: Message) => {
+                  if (message.messageId === updatedMessage.messageId) {
+                    return updatedMessage;
+                  }
+                  return message;
+                })
+              };
+            });
+
+            return {
+              ...prevData,
+              pages: newData
+            };
+          });
+        }
+      );
+    };
+
+    reader.readAsDataURL(values.file);
+
+    // Add the conversation to the top of the conversations list
+    dispatchConversations({
+      type: 'move',
+      payload: { moveInfo: { conversationId: newMessage.conversationId } }
+    });
+
+    handleClose();
   };
 
   return (

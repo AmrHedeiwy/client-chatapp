@@ -1,20 +1,22 @@
 'use client';
 
-import { z } from 'zod';
+import { string, z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSocket } from '@/hooks/useSocket';
 import { Conversation, Member, Message, MessageStatus } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import useConversationParams from '@/hooks/useConversationParams';
 import { useMain } from '@/hooks/useMain';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { EmojiPicker } from '@/components/EmojiPicker';
-import { Textarea } from '@/components/ui/textarea';
+
 import { Plus, Send } from 'lucide-react';
-import { useModal } from '@/hooks/useModal';
+import { useModal } from '@/hooks/useUI';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/lib/utils';
 
 const formSchema = z.object({
   content: z.string().min(1)
@@ -30,7 +32,6 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
   const { userProfile, dispatchConversations } = useMain();
   const { socket } = useSocket();
   const { onOpen } = useModal();
-  const textArearRef = useRef<HTMLTextAreaElement | null>(null);
 
   const intialMessageStatus = useMemo<MessageStatus>(() => {
     const { isGroup, otherMember, otherMembers } = conversation;
@@ -39,12 +40,12 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
         [otherMember?.userId as string]: {
           deliverAt: null,
           seenAt: null,
-          user: otherMember
+          profile: otherMember?.profile
         }
       };
 
-    return (otherMembers as Member[]).reduce((acc: any, user) => {
-      acc[user.userId] = { deliverAt: null, seenAt: null, user };
+    return (otherMembers as Member[]).reduce((acc: any, member) => {
+      acc[member.userId] = { deliverAt: null, seenAt: null, profile: member.profile };
 
       return acc;
     }, {});
@@ -57,17 +58,20 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
     }
   });
 
-  const calculateHeight = useCallback(() => {
-    if (textArearRef.current) {
-      const scrollHeight = textArearRef.current.scrollHeight;
+  const onChange = useCallback((event: any) => {
+    const emoji = document.getElementById('emoji');
+    const textarea = event.target;
 
-      if (scrollHeight > 71) return textArearRef.current.scrollHeight + 'px';
-    } // Set new height
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
 
-    return '52px';
-  }, [textArearRef]);
+    if (!emoji) return;
+    emoji.style.height = 'auto';
+    emoji.style.height = textarea.scrollHeight + 'px';
+  }, []);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!socket) return;
     const messageId = uuidv4();
     const sentAt = Date.now();
 
@@ -118,36 +122,28 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
       };
     });
 
-    if (!!socket) {
-      socket.emit(
-        'sendMessage',
-        {
-          conversationId,
-          messageId,
-          pageMessagesLength: pageMessagesLength,
-          sentAt,
-          intialMessageStatus,
-          updatedAt: sentAt,
-          ...data
-        },
-        // Callback when the message was received by the server
-        () => {
-          // Set the received status to true in the user's cache
-          const updatedMessage = { ...newMessage, notReceived: false };
+    socket.emit(
+      'send_message',
+      {
+        conversationId,
+        messageId,
+        pageMessagesLength: pageMessagesLength,
+        sentAt,
+        intialMessageStatus,
+        updatedAt: sentAt,
+        ...data
+      },
+      // Callback when the message was received by the server
+      (data: { error?: { message: string } }) => {
+        if (!!data.error) {
+          toast('error', data.error.message);
 
           queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
-            if (!prevData || !prevData.pages || prevData.pages.length === 0) {
-              return prevData;
-            }
-
             const newData = prevData.pages.map((page: any) => {
               return {
                 ...page,
-                items: page.items.map((message: Message) => {
-                  if (message.messageId === updatedMessage.messageId) {
-                    return updatedMessage;
-                  }
-                  return message;
+                items: page.items.filter((item: any) => {
+                  if (item.messageId !== messageId) return { ...item };
                 })
               };
             });
@@ -157,9 +153,37 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
               pages: newData
             };
           });
+
+          return;
         }
-      );
-    }
+
+        // Set the received status to true in the user's cache
+        const updatedMessage = { ...newMessage, notReceived: false };
+
+        queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
+          if (!prevData || !prevData.pages || prevData.pages.length === 0) {
+            return prevData;
+          }
+
+          const newData = prevData.pages.map((page: any) => {
+            return {
+              ...page,
+              items: page.items.map((message: Message) => {
+                if (message.messageId === updatedMessage.messageId) {
+                  return updatedMessage;
+                }
+                return message;
+              })
+            };
+          });
+
+          return {
+            ...prevData,
+            pages: newData
+          };
+        });
+      }
+    );
 
     // Add the conversation to the top of the conversations list
     dispatchConversations({
@@ -197,13 +221,12 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
                       <Plus className="text-white dark:text-[#313338] lg:w-4 lg:h-4 w-3 h-3" />
                     </button>
                     <Textarea
-                      id="content"
-                      ref={textArearRef}
-                      contentEditable={true}
+                      rows={1}
                       className="block lg:pl-14 pl-10 py-4 max-h-[150px] lg:min-h-[52px] min-h-[40px] resize-none scrollable-content bg-zinc-200/90 dark:bg-zinc-700/75 border-none rounded-l-3xl focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
-                      placeholder={`Type your message`}
-                      style={{ height: `${calculateHeight()}` }}
+                      aria-label="Description"
+                      placeholder="Type your message..."
                       onChange={(event) => {
+                        onChange(event);
                         field.onChange(event.target.value);
                       }}
                       onBlur={field.onBlur}
@@ -213,8 +236,8 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
                     />
                   </div>
                   <div
-                    className="flex flex-col justify-end max-h-[150px] lg:min-h-[52px] min-h-[40px] lg:pb-4 pb-4 px-2 rounded-r-3xl bg-zinc-200/90 dark:bg-zinc-700/75 transition"
-                    style={{ height: `${calculateHeight()}` || '52px' }}
+                    id="emoji"
+                    className="flex flex-col justify-end max-h-[150px] min-h-[52px] lg:pb-4 pb-4 px-2 rounded-r-3xl bg-zinc-200/90 dark:bg-zinc-700/75 transition"
                   >
                     <EmojiPicker
                       onChange={(emoji: string) =>

@@ -5,8 +5,8 @@ const getContacts = async () => {
   const cookie = cookies().get('connect.sid');
   if (!cookie) return null;
 
-  const url = 'http://localhost:5000/contacts';
-  const options = {
+  const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/contacts`;
+  const options: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
       Cookie: `${cookie.name}=${cookie.value}`

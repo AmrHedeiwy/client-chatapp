@@ -8,7 +8,6 @@ import AuthProvider from '../components/provider/AuthProvider';
 import { ToastContainer } from 'react-toastify';
 import ThemeProvider from '../components/provider/ThemeProvider';
 import { cn } from '@/lib/utils';
-import { ModalProvider } from '../components/provider/ModalProvider';
 
 // export const fontSans = FontSans({
 //   subsets: ['latin'],

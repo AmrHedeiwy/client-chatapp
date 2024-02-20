@@ -1,7 +1,7 @@
 import { Session } from '@/types';
 
 const getSession = async () => {
-  const url = 'http://localhost:5000/auth/session';
+  const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/session`;
   const options: RequestInit = {
     headers: {
       'Content-Type': 'application/json'

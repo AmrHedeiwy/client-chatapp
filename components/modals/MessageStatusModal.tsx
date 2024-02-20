@@ -2,8 +2,8 @@ import React, { Fragment } from 'react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-import { useModal } from '@/hooks/useModal';
-import UserAvatar from '../Avatar';
+import { useModal } from '@/hooks/useUI';
+import Avatar from '../Avatar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -26,25 +26,25 @@ const MessageStatusModal = () => {
             messageStatus?.isGroup && 'overflow-y-scroll scrollable-content'
           )}
         >
-          {messageStatus?.status.map((statusUser) => {
-            const { user, deliverAt, seenAt } = statusUser;
+          {messageStatus?.status.map((statusUser, i) => {
+            const { profile, deliverAt, seenAt } = statusUser;
             return (
-              <Fragment key={user.userId}>
+              <Fragment key={i}>
                 <div className="flex gap-x-2 items-start p-4">
-                  {messageStatus?.isGroup && <UserAvatar imageUrl={user.image} />}
+                  {messageStatus?.isGroup && <Avatar imageUrl={profile.image} />}
                   <div className="flex flex-col gap-y-1">
                     {messageStatus?.isGroup && (
-                      <p className="font-semibold text-sm">{user.username}</p>
+                      <p className="font-semibold text-sm">{profile.username}</p>
                     )}
 
                     <p className="text-sm text-zinc-600 dark:text-zinc-300">
                       {deliverAt &&
                         !seenAt &&
                         'Delivered at ' +
-                          format(new Date(statusUser.deliverAt), 'dd MMM p')}
+                          format(new Date(statusUser.deliverAt), 'dd MMM, p')}
 
                       {seenAt &&
-                        'Seen at ' + format(new Date(statusUser.seenAt), 'dd MMM p')}
+                        'Seen at ' + format(new Date(statusUser.seenAt), 'dd MMMM, p')}
 
                       {!deliverAt && !seenAt && 'pending...'}
                     </p>

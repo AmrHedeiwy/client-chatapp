@@ -13,7 +13,7 @@ const ContactForm = () => {
   const { isOpen } = useConversationParams();
 
   const fetchUsers = async ({ pageParam = 0, searchQuery = '' }) => {
-    const url: string = `http://localhost:5000/contacts/search?search=${searchQuery}&page=${pageParam}`;
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/contacts/search?search=${searchQuery}&page=${pageParam}`;
     const config: RequestInit = {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'

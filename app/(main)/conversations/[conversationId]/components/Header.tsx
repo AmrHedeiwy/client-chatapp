@@ -7,6 +7,7 @@ import Avatar from '@/components/Avatar';
 import { Conversation } from '@/types';
 import { useSocket } from '@/hooks/useSocket';
 import { ArrowLeft, MoreVertical } from 'lucide-react';
+import { useSheet } from '@/hooks/useUI';
 
 interface HeaderProps {
   conversation: Conversation;
@@ -14,6 +15,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ conversation }) => {
   const { onlineSockets } = useSocket();
+  const { onOpen } = useSheet();
 
   // Check if the other user is online, ignored if the conversation is a group
   const isOnline = useMemo(
@@ -26,7 +28,8 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
       return `${conversation.members.length} members`;
     }
 
-    return isOnline ? 'active' : 'offline';
+    console.log(conversation);
+    return isOnline ? 'online' : 'offline';
   }, [conversation, isOnline]);
 
   return (
@@ -59,12 +62,8 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
           <ArrowLeft size={20} />
         </Link>
         <Avatar
-          imageUrl={
-            conversation.isGroup
-              ? (conversation.image as string)
-              : (conversation.otherMember?.image as string)
-          }
-          withStatus
+          imageUrl={conversation.image}
+          withStatus={!conversation.isGroup}
           isOnline={!!isOnline}
         />
         <div className="flex flex-col">
@@ -78,7 +77,13 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
       </div>
       <MoreVertical
         size={24}
-        onClick={() => {}}
+        onClick={() =>
+          onOpen('conversationProfile', {
+            conversationProfile: {
+              conversationId: conversation.conversationId
+            }
+          })
+        }
         className="
           text-slate-600
           dark:text-slate-100

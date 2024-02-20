@@ -1,15 +1,16 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useSocket } from './useSocket';
 
-interface ChatQueryProps {
+type ChatQueryProps = {
   queryKey: string;
-}
+  joinedAt: string | null;
+};
 
-export const useChatQuery = ({ queryKey }: ChatQueryProps) => {
+export const useChatQuery = ({ queryKey, joinedAt }: ChatQueryProps) => {
   const { socket } = useSocket();
 
   const fetchMessages = async ({ pageParam }: { pageParam: number }) => {
-    const url: string = `http://localhost:5000/conversations/messages?conversationId=${queryKey}&page=${pageParam}`;
+    const url: string = `http://localhost:5000/conversations/messages?conversationId=${queryKey}&page=${pageParam}&joinedAt=${joinedAt}`;
     const config: RequestInit = {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'

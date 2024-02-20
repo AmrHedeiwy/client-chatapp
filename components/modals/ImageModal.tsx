@@ -1,6 +1,6 @@
 'use client';
 
-import { useModal } from '@/hooks/useModal';
+import { useModal } from '@/hooks/useUI';
 import Image from 'next/image';
 import { Dialog, DialogContent } from '../ui/dialog';
 
@@ -17,7 +17,7 @@ const ImageModal = () => {
 
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
-      <DialogContent className="min-w-[300px] min-h-[350px] max-w-[600px] max-h-[1000px]">
+      <DialogContent className="flex items-center min-w-[300px] min-h-[350px] max-w-[600px] max-h-[1000px]">
         <Image className="object-fill" alt="Image" fill src={viewImage?.image} />
       </DialogContent>
     </Dialog>

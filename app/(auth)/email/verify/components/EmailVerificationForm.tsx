@@ -5,6 +5,7 @@ import React, {
   FormEvent,
   Fragment,
   KeyboardEvent,
+  useCallback,
   useEffect,
   useRef,
   useState
@@ -30,116 +31,128 @@ export default function EmailVerificationForm() {
   const [errors, setErrors] = useState<boolean[]>(new Array(6).fill(false));
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleOnChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
-    setErrors((orgErrors) => {
-      const updatedErrors = [...orgErrors];
-      updatedErrors[index] = false;
+  const handleOnChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>, index: number) => {
+      setErrors((orgErrors) => {
+        const updatedErrors = [...orgErrors];
+        updatedErrors[index] = false;
 
-      return updatedErrors;
-    });
+        return updatedErrors;
+      });
 
-    const { value } = e.target;
+      const { value } = e.target;
 
-    if (!value) return;
+      if (!value) return;
 
-    const newOTP: string[] = [...OTP];
-    newOTP[index] = value.substring(value.length - 1);
-
-    setOTP(newOTP);
-
-    setActiveInputRef(index + 1);
-  };
-
-  const handleOnKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (e.key === 'Backspace') {
       const newOTP: string[] = [...OTP];
-      if (newOTP[index].length !== 0) {
+      newOTP[index] = value.substring(value.length - 1);
+
+      setOTP(newOTP);
+
+      setActiveInputRef(index + 1);
+    },
+    [OTP]
+  );
+
+  const handleOnKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>, index: number) => {
+      if (e.key === 'Backspace') {
+        const newOTP: string[] = [...OTP];
+        if (newOTP[index].length !== 0) {
+          newOTP[index] = '';
+          setOTP(newOTP);
+          return;
+        }
+
         newOTP[index] = '';
+        if (index > 0) newOTP[index - 1] = '';
         setOTP(newOTP);
+
+        setActiveInputRef(index - 1);
+      }
+    },
+    [OTP]
+  );
+
+  const handleOnSubmit = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+
+      setIsLoading(true);
+
+      let isError: boolean = false;
+      OTP.forEach((value, index) => {
+        if (!value) {
+          setErrors((orgErrors) => {
+            const updatedErrors = [...orgErrors];
+            updatedErrors[index] = true;
+
+            return updatedErrors;
+          });
+          isError = true;
+        }
+      });
+
+      if (isError) {
+        setIsLoading(false);
         return;
       }
 
-      newOTP[index] = '';
-      if (index > 0) newOTP[index - 1] = '';
-      setOTP(newOTP);
+      const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/email/verify`;
+      const config: AxiosRequestConfig = {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      };
 
-      setActiveInputRef(index - 1);
-    }
-  };
+      try {
+        const res = await axios.patch(
+          url,
+          { verificationCode: OTP.toString().replaceAll(',', '') },
+          config
+        );
 
-  const handleOnSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    setIsLoading(true);
-
-    let isError: boolean = false;
-    OTP.forEach((value, index) => {
-      if (!value) {
-        setErrors((orgErrors) => {
-          const updatedErrors = [...orgErrors];
-          updatedErrors[index] = true;
-
-          return updatedErrors;
-        });
-        isError = true;
-      }
-    });
-
-    if (isError) {
-      setIsLoading(false);
-      return;
-    }
-
-    const url = 'http://localhost:5000/auth/verify-email';
-    const body: object = { verificationCode: OTP.toString().replaceAll(',', '') };
-    const config: AxiosRequestConfig = {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      withCredentials: true
-    };
-
-    axios
-      .post(url, JSON.stringify(body), config)
-      .then((res: AxiosResponse<ResponseProps>) => {
         const { message, redirect } = res.data;
 
-        toast('success', message as string);
+        toast('success', message);
 
         if (redirect) router.replace(redirect);
-      })
-      .catch((e: AxiosError<ErrorProps>) => {
-        const error = e.response?.data.error;
-        toast('error', error?.message as string);
+      } catch (e: any) {
+        const error = e.response.data.error;
+        toast('error', error.message);
 
-        if (error?.redirect) router.replace(error.redirect);
-      })
-      .finally(() => setTimeout(() => setIsLoading(false), 1000));
-  };
+        if (error.redirect) router.replace(error.redirect);
+      } finally {
+        setTimeout(() => setIsLoading(false), 1000);
+      }
+    },
+    [OTP, router]
+  );
 
-  const handleOnClick = () => {
+  const handleOnClick = useCallback(async () => {
     setIsLoading(true);
 
-    const url: string = 'http://localhost:5000/auth/verify-email-request';
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/email/verify/request`;
     const config: AxiosRequestConfig = {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true
     };
 
-    axios
-      .post(url, {}, config)
-      .then((res: AxiosResponse<ResponseProps>) => {
-        toast('success', res.data.message as string);
-      })
-      .catch((e: AxiosError<ErrorProps>) => {
-        const error = e.response?.data.error;
+    try {
+      const res = await axios.post(url, {}, config);
 
-        toast('error', error?.message as string);
+      toast('success', res.data.message);
+    } catch (e: any) {
+      const error = e.response.data.error;
 
-        if (error?.redirect) router.replace(error.redirect);
-      })
-      .finally(() => setIsLoading(false));
-  };
+      toast('error', error.message);
+
+      if (error.redirect) router.replace(error.redirect);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [router]);
 
   useEffect(() => {
     inputRef.current?.focus();

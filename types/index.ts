@@ -2,24 +2,21 @@ export type Profile = {
   userId: string;
   username: string;
   image: string | null;
+  createdAt?: string;
 };
 
 export type CurrentUser = Profile & {
   googleId: string | null;
   facebookId: string | null;
   email: string;
-  createdAt: string;
 };
 
-export type User = Profile & {
-  createdAt: string;
-  isContact: boolean;
-};
-
-export type Member = Profile & {
+export type Member = {
   conversationId: string;
   joinedAt: string;
   isAdmin: boolean;
+  userId: string;
+  profile: Profile;
 };
 
 export type Session = {
@@ -28,14 +25,16 @@ export type Session = {
   user: {
     userId: string;
     email: string;
-    lastVerifiedAt: string | null;
+    isVerified: boolean;
   } | null;
 };
 
 export type Conversation = {
   conversationId: string;
+  createdBy: string;
+  createdAt?: string;
   name: string | null;
-  image?: string | null;
+  image: string | null;
   isGroup: boolean;
   members: Member[];
   messages?: Message[];
@@ -63,13 +62,14 @@ export type Message = {
 export type MessageStatus = {
   deliverAt: string;
   seenAt: string;
-  user: Profile;
+  profile: Profile;
 };
 
 export type GroupedMessages = {
   [conversationId: string]: {
     messages: Message[];
     unseenMessagesCount: number;
+    joinedAt: string;
   };
 } | null;
 
@@ -78,5 +78,5 @@ export type GroupedConversations = {
 };
 
 export type GroupedContacts = {
-  [contactId: string]: User;
+  [contactId: string]: Profile;
 };

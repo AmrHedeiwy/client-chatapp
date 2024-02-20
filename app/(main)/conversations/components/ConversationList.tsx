@@ -9,7 +9,7 @@ import SearchBarInput from '@/components/SeachBarInput';
 import { useSocket } from '@/hooks/useSocket';
 import useConversationParams from '@/hooks/useConversationParams';
 import { useMain } from '@/hooks/useMain';
-import { useModal } from '@/hooks/useModal';
+import { useModal } from '@/hooks/useUI';
 import useListScroll from '@/hooks/useListScroll';
 
 import { MessagesSquare } from 'lucide-react';
@@ -29,11 +29,9 @@ const ConversationList = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const conversationsArray = useMemo(() => {
-    if (!!conversations) {
-      const array = Object.values(conversations);
-      return array;
-    }
-    return null;
+    if (!conversations) return null;
+
+    return Object.values(conversations);
   }, [conversations]);
 
   const [filteredItems, setFilteredItems] = useState<Conversation[] | null>(

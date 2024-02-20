@@ -1,21 +1,20 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-
 import { toast } from '@/lib/utils';
 
 const signOut = async () => {
-  const url = 'http://localhost:5000/auth/sign-out';
-  const config: AxiosRequestConfig = {
+  const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/sign-out`;
+  const options: RequestInit = {
     headers: {
       'Content-Type': 'application/json'
     },
-    withCredentials: true
+    credentials: 'include'
   };
 
-  axios
-    .post(url, undefined, config)
-    .then((res: AxiosResponse) => window.location.replace(res.data.redirect))
-    .catch((e: AxiosError) => {
-      console.error(e);
+  await fetch(url, options)
+    .then(async (res) => {
+      const data = await res.json();
+      location.replace(data.redirect);
+    })
+    .catch((e: any) => {
       toast(
         'error',
         'Oops, something went wrong. Please try again later or contact support if the problem persists.'

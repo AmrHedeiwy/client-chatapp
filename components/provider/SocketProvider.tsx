@@ -23,7 +23,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    const socketInstance = new (io as any)('http://localhost:5000', {
+    const socketInstance = new (io as any)(process.env.NEXT_PUBLIC_SERVER_URL!, {
       withCredentials: true
     });
 
@@ -36,6 +36,10 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         setOnlineSockets((prev) => {
           return prev.filter((userId) => !prev?.includes(userId));
         });
+    });
+
+    socketInstance.on('connect_error', (err: any) => {
+      if (err.message === 'authentication_error') router.replace('/');
     });
 
     setSocket(socketInstance);

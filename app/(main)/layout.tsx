@@ -9,8 +9,8 @@ import MessagingProvider from '../../components/provider/MessagingProvider';
 import { QueryClient, dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import MainProvider from '../../components/provider/MainProvider';
 import getCurrentUserProfile from '../../actions/getCurrentUserProfile';
-import { ModalProvider } from '../../components/provider/ModalProvider';
 import getContacts from '../../actions/getContacts';
+import UiProvider from '@/components/provider/UiProvider';
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const queryClient = new QueryClient();
@@ -32,7 +32,8 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           }
         ],
         pageParams: [count],
-        unseenMessagesCount: groupedMessage[1].unseenMessagesCount
+        unseenMessagesCount: groupedMessage[1].unseenMessagesCount,
+        joinedAt: groupedMessage[1].joinedAt // The date when the user joined the group, to only fetch the messages after the join date
       });
     });
   }
@@ -48,7 +49,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           >
             <MessagingProvider>
               <Sidebar>
-                <ModalProvider />
+                <UiProvider />
                 {children}
                 <ReactQueryDevtools buttonPosition="top-left" />
               </Sidebar>

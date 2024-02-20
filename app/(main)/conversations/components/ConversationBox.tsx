@@ -6,7 +6,7 @@ import { useMain } from '@/hooks/useMain';
 import { useSession } from '@/hooks/useSession';
 import { useSocket } from '@/hooks/useSocket';
 import { cn } from '@/lib/utils';
-import { Conversation, Message } from '@/types';
+import { Conversation, Member, Message } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
@@ -30,7 +30,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
   });
 
   const lastMessage = useMemo(() => {
-    return (data as any)?.pages[0].items[0] as Message;
+    return (data as any)?.pages[0].items[0] as Message | null;
   }, [data]);
 
   const unseenMessagesCount = useMemo(() => {
@@ -54,9 +54,16 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
   }, [userProfile.userId, lastMessage, unseenMessagesCount]);
 
   const lastMessageText = useMemo(() => {
-    if (!!lastMessage && !!lastMessage.deletedAt) return 'This message was deleted';
+    if (!lastMessage)
+      return `Say hi to ${
+        conversation.isGroup
+          ? conversation.name + ' members'
+          : (otherMember as Member).profile.username
+      }🫶🏼`;
 
-    if (lastMessage?.fileUrl) {
+    if (!!lastMessage.deletedAt) return 'This message was deleted';
+
+    if (lastMessage.fileUrl) {
       if (conversation.isGroup) {
         return lastMessage.sender.userId !== userProfile.userId
           ? `${lastMessage.sender.username}: sent an image`
@@ -65,18 +72,14 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
       return 'Sent an image';
     }
 
-    if (lastMessage?.content) {
+    if (lastMessage.content) {
       if (conversation.isGroup) {
         return lastMessage.sender.userId !== userProfile.userId
           ? `${lastMessage.sender.username}: ${lastMessage.content}`
           : `You: ${lastMessage.content}`;
       }
-      return lastMessage?.content;
+      return lastMessage.content;
     }
-
-    return `Say hi to ${
-      conversation.isGroup ? conversation.name + ' members' : otherMember?.username
-    }🫶🏼`;
   }, [lastMessage, conversation, otherMember, userProfile]);
 
   return (
@@ -100,11 +103,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
       )}
     >
       <Avatar
-        imageUrl={
-          conversation.isGroup
-            ? (conversation.image as string)
-            : (conversation.otherMember?.image as string)
-        }
+        imageUrl={conversation.image}
         withStatus={!conversation.isGroup}
         isOnline={isOnline}
       />
@@ -121,7 +120,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
               {conversation.name}
             </p>
 
-            {lastMessage?.sentAt && (
+            {lastMessage && lastMessage.sentAt && (
               <p
                 className="
                   text-xs 

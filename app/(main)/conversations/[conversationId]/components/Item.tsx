@@ -3,15 +3,24 @@
 import { MessageStatus, Profile } from '@/types';
 import Avatar from '@/components/Avatar';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, toast } from '@/lib/utils';
 import Image from 'next/image';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Check, CheckCheck, Edit, File, Info, ShieldAlert, Trash } from 'lucide-react';
+import {
+  Check,
+  CheckCheck,
+  Edit,
+  File,
+  Info,
+  ShieldCheck,
+  ShieldHalf,
+  Trash
+} from 'lucide-react';
 import { ActionTooltip } from '@/components/ActionTooltip';
-import { useModal } from '@/hooks/useModal';
+import { useModal } from '@/hooks/useUI';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -22,6 +31,8 @@ import {
 } from '@/components/ui/context-menu';
 import { useSocket } from '@/hooks/useSocket';
 import { useQueryClient } from '@tanstack/react-query';
+import { useMain } from '@/hooks/useMain';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ItemProps {
   messageId: string;
@@ -37,10 +48,9 @@ interface ItemProps {
   previousMessageSenderId: string | null;
   deleted: boolean;
   updated: boolean;
-  isOwn: boolean;
   isGroup: boolean;
-  isSenderAdmin: boolean;
-  isCurrentUserAdmin: boolean;
+  adminIds?: string[];
+  groupCreatedById: string | null;
 }
 
 const formSchema = z.object({
@@ -61,26 +71,15 @@ const Item = ({
   deleted,
   updated,
   isGroup,
-  isSenderAdmin,
   previousMessageSenderId,
-  isOwn,
-  isCurrentUserAdmin
+  adminIds,
+  groupCreatedById
 }: ItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const { onOpen } = useModal();
   const { socket } = useSocket();
   const queryClient = useQueryClient();
-
-  const textArearRef = useRef<HTMLTextAreaElement | null>(null);
-  const calculateHeight = useCallback(() => {
-    if (textArearRef.current) {
-      const scrollHeight = textArearRef.current.scrollHeight;
-
-      if (scrollHeight > 71) return textArearRef.current.scrollHeight + 'px';
-    } // Set new height
-
-    return '10px';
-  }, [textArearRef]);
+  const { userProfile } = useMain();
 
   useEffect(() => {
     const handleKeyDown = (event: any) => {
@@ -102,55 +101,61 @@ const Item = ({
 
   const isLoading = form.formState.isSubmitting;
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      const memberIds = status.map((userStatus) => userStatus.user.userId);
-      const updatedAt = new Date();
+  const onEdit = async (values: z.infer<typeof formSchema>) => {
+    const memberIds = status.map((userStatus) => userStatus.profile.userId);
+    const updatedAt = new Date();
 
-      queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
-        const newData = prevData.pages.map((page: any) => {
-          return {
-            ...page,
-            items: page.items.map((item: any) => {
-              if (item.messageId === messageId) {
-                return {
-                  ...item,
-                  ...values,
-                  updatedAt
-                };
-              }
-              return item;
-            })
-          };
-        });
-
-        return {
-          ...prevData,
-          pages: newData
-        };
-      });
-
-      if (!!socket) {
-        socket.emit('edit_message', {
+    if (!!socket) {
+      socket.emit(
+        'edit_message',
+        {
           messageId,
           ...values,
           updatedAt,
           memberIds,
           conversationId
-        });
-      }
+        },
+        (error?: { message: string }) => {
+          if (!!error) return toast('error', error.message);
 
-      form.reset();
-      setIsEditing(false);
-    } catch (error) {
-      console.log(error);
+          queryClient.setQueryData(['messages', conversationId], (prevData: any) => {
+            const newData = prevData.pages.map((page: any) => {
+              return {
+                ...page,
+                items: page.items.map((item: any) => {
+                  if (item.messageId === messageId) {
+                    return {
+                      ...item,
+                      ...values,
+                      updatedAt
+                    };
+                  }
+                  return item;
+                })
+              };
+            });
+
+            return {
+              ...prevData,
+              pages: newData
+            };
+          });
+        }
+      );
     }
+
+    form.reset();
+    setIsEditing(false);
   };
 
   const fileType = fileUrl?.split('.').pop();
 
-  const isGroupAdmin = isGroup && isCurrentUserAdmin;
-  const canDeleteMessage = !deleted && (isGroupAdmin || isOwn);
+  const isCurrentUserAdmin = isGroup && adminIds && adminIds.includes(socket?.id ?? ''); // The socket id contains the current user's userId
+  const isSenderAdmin = isGroup && adminIds && adminIds.includes(sender.userId);
+
+  const isOwn = userProfile.userId === sender.userId;
+  const isSenderGroupCreator = groupCreatedById === sender.userId;
+  const canDeleteMessage = !deleted && (isCurrentUserAdmin || isOwn);
   const canEditMessage = !deleted && isOwn && !fileUrl;
   const isPDF = fileType === 'pdf' && fileUrl;
   const isImage = !isPDF && fileUrl;
@@ -158,22 +163,35 @@ const Item = ({
   const isDelivered = deliverCount === status.length;
   const isSeen = seenCount === status.length;
 
-  const container = cn('flex gap-2 items-start w-full p-0.5', isOwn && 'justify-end');
-  const body = cn(
-    isOwn && 'items-end justify-end',
+  const container = cn(
+    'flex gap-2 items-start w-full m-0.5',
+    isOwn && 'justify-end',
     isGroup && !isOwn && isSameSenderFromPreviousMessage && 'lg:pl-12 pl-10'
   );
-  const avatar = cn(isOwn && 'order-2 cursor-pointer');
+  const avatar = cn(!isOwn && 'cursor-pointer hover:scale-105');
 
-  const messageInfo = (
-    <div
-      className={cn(
-        'flex text-xs justify-end mt-0.5',
-        updated && !deleted && 'justify-between'
+  const messageHeader = isGroup && !isOwn && (
+    <div className="flex justify-between h-5">
+      <p className="font-semibold text-slate-950 dark:text-slate-500 text-sm hover:underline cursor-pointer">
+        ~ {sender.username}
+      </p>
+      {isGroup && isSenderAdmin && (
+        <ActionTooltip label={isSenderGroupCreator ? 'Creator' : 'Admin'} side="right">
+          {isSenderGroupCreator ? (
+            <ShieldCheck size={16} className="text-indigo-500" />
+          ) : (
+            <ShieldHalf size={16} className="text-red-500" />
+          )}
+        </ActionTooltip>
       )}
+    </div>
+  );
+  const messageFooter = (
+    <div
+      className={cn('flex text-xs justify-end', updated && !deleted && 'justify-between')}
     >
       {updated && !deleted && (
-        <span className="text-[10px]  text-zinc-500 dark:text-zinc-400">(edited)</span>
+        <span className="text-[10px] text-zinc-500 dark:text-zinc-400">(edited)</span>
       )}
       <span className="flex gap-x-1 text-xs text-zinc-500 dark:text-zinc-400">
         <p>{format(new Date(sentAt), 'p')}</p>
@@ -188,134 +206,124 @@ const Item = ({
     </div>
   );
 
+  const messageContent = content && !isEditing && (
+    <div
+      className={cn(
+        'break-words whitespace-pre-wrap lg:max-w-[450px] max-w-[250px] min-w-[160px] flex flex-col p-2 bg-zinc-100 dark:bg-zinc-800 rounded-md',
+        isOwn && 'bg-green-50 dark:bg-emerald-950',
+        isOwn && isGroup && 'min-w-[130px]'
+      )}
+    >
+      {messageHeader}
+      <p
+        className={cn(
+          'text-sm text-zinc-600 dark:text-zinc-300',
+          deleted && 'italic text-zinc-500 dark:text-zinc-400 text-xs mt-1'
+        )}
+      >
+        {content}
+      </p>
+
+      {messageFooter}
+    </div>
+  );
+  const messageFile = fileUrl && (
+    <div
+      className={cn(
+        'flex flex-col bg-zinc-100 dark:bg-zinc-800 rounded-md',
+        isOwn && 'bg-green-50 dark:bg-emerald-950'
+      )}
+    >
+      {!isOwn && <div className="p-1">{messageHeader}</div>}
+      {fileUrl.startsWith('pending') ? (
+        <Skeleton className={cn('w-64 h-64 ', isPDF && 'w-56 h-14')} />
+      ) : (
+        <>
+          {isImage && (
+            <Image
+              alt="Image"
+              height="200"
+              width="250"
+              onClick={() => onOpen('viewImage', { viewImage: { image: fileUrl } })}
+              src={fileUrl}
+              className="border object-cover cursor-pointer transition translate"
+            />
+          )}
+
+          {isPDF && (
+            <div className="flex items-center w-44 pl-2">
+              <File className="h-10 fill-blue-200 stroke-blue-400" />
+
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                PDF File
+              </a>
+            </div>
+          )}
+          <div className="p-1">{messageFooter}</div>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div className={container} id={messageId}>
       {isGroup && !isOwn && !isSameSenderFromPreviousMessage && (
         <div className={avatar}>
-          <Avatar customSize="lg:w-10 lg:h-10 w-8 h-8" imageUrl={sender.image} />
+          <Avatar custom="lg:w-10 lg:h-10 w-8 h-8" imageUrl={sender.image} />
         </div>
       )}
       <ContextMenu>
         <ContextMenuTrigger>
-          <div className={body}>
-            {isImage && (
-              <div className="flex flex-col">
-                <Image
-                  alt="Image"
-                  height="200"
-                  width="250"
-                  onClick={() => onOpen('viewImage', { viewImage: { image: fileUrl } })}
-                  src={fileUrl}
-                  className="
-                    rounded-t-md 
-                    mt-2 
-                    border
-                    object-cover 
-                    cursor-pointer  
-                    transition 
-                    translate
-                  "
-                />
-                <div className="rounded-b-md bg-zinc-100 dark:bg-zinc-800 p-1">
-                  {messageInfo}
-                </div>
-              </div>
-            )}
+          {messageFile}
 
-            {isPDF && (
-              <div className="flex flex-col">
-                <div className="relative flex items-center p-2 mt-2 w-40 rounded-md bg-background/10">
-                  <File className="h-10  fill-blue-200 stroke-blue-400" />
-                  <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    PDF File
-                  </a>
-                </div>
-                {messageInfo}
-              </div>
-            )}
-
-            {!fileUrl && !isEditing && (
-              <div
-                className={cn(
-                  'break-words whitespace-pre-wrap lg:max-w-[450px] max-w-[250px] min-w-[160px] flex flex-col rounded-lg bg-zinc-100 dark:bg-zinc-800 p-2',
-                  isOwn && 'justify-end bg-green-50 dark:bg-emerald-950',
-                  isOwn && isGroup && 'min-w-[130px]'
-                )}
+          {messageContent}
+          {!fileUrl && isEditing && (
+            <Form {...form}>
+              <form
+                className="flex items-center w-full gap-x-2 pt-2"
+                onSubmit={form.handleSubmit(onEdit)}
               >
-                {isGroup && !isOwn && (
-                  <div className="flex justify-between">
-                    <p className="font-semibold text-slate-950 dark:text-slate-500 text-sm hover:underline cursor-pointer">
-                      ~ {sender.username}
-                    </p>
-                    {isGroup && isSenderAdmin && (
-                      <ActionTooltip label="Admin" side="right">
-                        <ShieldAlert className="h-4 w-4 ml-2 text-rose-500 mt-1 mr-1" />
-                      </ActionTooltip>
-                    )}
-                  </div>
-                )}
-
-                <p
-                  className={cn(
-                    'text-sm text-zinc-600 dark:text-zinc-300',
-                    deleted && 'italic text-zinc-500 dark:text-zinc-400 text-xs mt-1'
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <div className="relative w-full">
+                          <Textarea
+                            rows={1}
+                            className="bg-zinc-200/90 max-h-[150px] dark:bg-zinc-700/75 border-none focus:border-none rounded resize-none scrollable-content"
+                            placeholder={`Type your message`}
+                            onChange={(event) => {
+                              field.onChange(event.target.value);
+                              const textarea = event.target;
+                              textarea.style.height = 'auto';
+                              textarea.style.height = textarea.scrollHeight + 'px';
+                            }}
+                            onBlur={field.onBlur}
+                            disabled={field.disabled}
+                            name={field.name}
+                            value={field.value}
+                          />
+                        </div>
+                      </FormControl>
+                    </FormItem>
                   )}
-                >
-                  {content}
-                </p>
-
-                {messageInfo}
-              </div>
-            )}
-
-            {!fileUrl && isEditing && (
-              <Form {...form}>
-                <form
-                  className="flex items-center w-full gap-x-2 pt-2"
-                  onSubmit={form.handleSubmit(onSubmit)}
-                >
-                  <FormField
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <div className="relative w-full">
-                            <Textarea
-                              id="content"
-                              ref={textArearRef}
-                              contentEditable={true}
-                              className="bg-zinc-200/90 max-h-[150px] dark:bg-zinc-700/75 border-none focus:border-none rounded resize-none scrollable-content"
-                              placeholder={`Type your message`}
-                              style={{ height: `${calculateHeight()}` }}
-                              onChange={(event) => {
-                                field.onChange(event.target.value);
-                              }}
-                              onBlur={field.onBlur}
-                              disabled={field.disabled}
-                              name={field.name}
-                              value={field.value}
-                            />
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <Button disabled={isLoading} size="sm">
-                    Save
-                  </Button>
-                </form>
-                <span className="text-[10px] mt-1 text-zinc-400">
-                  Press escape to cancel, enter to save
-                </span>
-              </Form>
-            )}
-          </div>
+                />
+                <Button disabled={isLoading} size="sm">
+                  Save
+                </Button>
+              </form>
+              <span className="text-[10px] mt-1 text-zinc-400">
+                Press escape to cancel, enter to save
+              </span>
+            </Form>
+          )}
         </ContextMenuTrigger>
         {canDeleteMessage && (
           <ContextMenuContent className="w-fit">
@@ -345,7 +353,7 @@ const Item = ({
               }
             >
               <div className="flex gap-x-2">
-                <Trash size={18} className="text-red-600 dark:text-red-800" />
+                <Trash size={18} className="text-red-600" />
                 <span>delete</span>
               </div>
             </ContextMenuItem>

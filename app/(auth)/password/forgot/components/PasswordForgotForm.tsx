@@ -31,7 +31,6 @@ const formSchema = z.object<FieldValues>({
 });
 
 export default function PasswordForgotForm() {
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -41,35 +40,32 @@ export default function PasswordForgotForm() {
     }
   });
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    setIsLoading(true);
-
-    const url: string = `http://localhost:5000/auth/forgot-password`;
+  const isLoading = form.formState.isSubmitting;
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/password/forgot`;
     const options: AxiosRequestConfig = {
-      withCredentials: true,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
     };
 
-    axios
-      .post(url, data, options)
-      .then((res: AxiosResponse<ResponseProps>) => {
-        const { message, redirect } = res.data;
+    try {
+      const res = await axios.post(url, data, options);
 
-        toast('success', message as string);
+      const { message, redirect } = res.data;
 
-        if (redirect) router.push(redirect);
-      })
-      .catch((e: AxiosError<ErrorProps>) => {
-        const error = e.response?.data.error;
-        if (error && error.name === 'JoiValidationError') {
-          (error.message as FormErrorProps[]).forEach(({ fieldName, fieldMessage }) => {
-            form.setError(fieldName, { message: fieldMessage, type: 'manual' });
-          });
-        } else {
-          toast('error', error?.message as string);
-        }
-      })
-      .finally(() => setIsLoading(false));
+      toast('success', message);
+
+      if (redirect) router.push(redirect);
+    } catch (e: any) {
+      const error = e.response.data.error;
+      if (error && error.name === 'JoiValidationError') {
+        (error.message as FormErrorProps[]).forEach(({ fieldName, fieldMessage }) => {
+          form.setError(fieldName, { message: fieldMessage });
+        });
+      } else {
+        toast('error', error?.message);
+      }
+    }
   };
 
   return (

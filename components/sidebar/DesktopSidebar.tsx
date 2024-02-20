@@ -54,7 +54,7 @@ const DesktopSidebar = () => {
           onClick={() => setIsOpen(true)}
           className="cursor-pointer hover:opacity-75 transition"
         >
-          <Avatar imageUrl={userProfile.image as string} current />
+          {userProfile && <Avatar imageUrl={userProfile.image as string} current />}
         </div>
       </nav>
     </div>

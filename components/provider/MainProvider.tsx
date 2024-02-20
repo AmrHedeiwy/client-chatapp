@@ -7,10 +7,12 @@ import {
   CurrentUser,
   GroupedContacts,
   GroupedConversations,
-  User
+  Profile,
+  Member
 } from '@/types';
 import { useSocket } from '@/hooks/useSocket';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/lib/utils';
 
 type MainContextType = {
   userProfile: CurrentUser;
@@ -33,43 +35,50 @@ type conversationActionType = {
   payload: {
     addInfo?: { conversation: Conversation; initMessages: boolean };
     moveInfo?: { conversationId: string };
-    updateInfo?: { conversationId: string; data: any };
+    updateInfo?: { conversationId: string; field: string; action?: string; data: any };
     removeInfo?: { conversationId: string };
   };
 };
 type contactActionType = {
   type: 'add' | 'update' | 'remove' | null;
-  payload: any;
+  payload: {
+    addInfo?: { contact: Profile };
+    removeInfo?: { contactId: string };
+  };
 };
 
 function contactsReducer(contacts: GroupedContacts | null, action: contactActionType) {
-  const contact = action.payload.contact as User;
+  const { addInfo, removeInfo } = action.payload;
 
   switch (action.type) {
     case 'add':
+      if (!addInfo || !addInfo.contact) return contacts;
+
+      const { contact } = addInfo;
+
       if (!contacts) return { [contact.userId]: contact };
 
-      let contactsArray = Object.values(contacts);
+      const addedContact = { ...contacts, [contact.userId]: contact };
 
-      let sortedArray = contactsArray.sort(
+      let contactsArray = Object.values(addedContact);
+      contactsArray.sort(
         (contacta, contactb) =>
           parseInt(contacta.username.charAt(0)) - parseInt(contactb.username.charAt(0))
       );
 
-      return sortedArray.reduce((acc: GroupedContacts, contact) => {
+      return contactsArray.reduce((acc: GroupedContacts, contact) => {
         acc[contact.userId] = contact;
         return acc;
       }, {});
     case 'update':
-      if (!contacts) return { [contact.userId]: contact };
-
-      contacts[contact.userId] = contact;
-      break;
+      return contacts;
     case 'remove':
-      if (!contacts) return contacts;
+      if (!contacts || !removeInfo) return contacts;
 
-      delete contacts[contact.userId];
-      break;
+      const updatedContacts = { ...contacts };
+      delete updatedContacts[removeInfo.contactId];
+
+      return updatedContacts;
   }
   return contacts;
 }
@@ -87,51 +96,124 @@ const MainProvider = ({
     conversations: GroupedConversations | null,
     action: conversationActionType
   ) {
-    const { addInfo, moveInfo, updateInfo } = action.payload;
+    const { addInfo, moveInfo, updateInfo, removeInfo } = action.payload;
 
     switch (action.type) {
       case 'add':
         if (!addInfo || !addInfo.conversation) return conversations;
 
-        const { conversation, initMessages } = addInfo;
+        const { conversation: conversationToAdd, initMessages } = addInfo;
 
         // Initialize the messages for the conversation in the user's cache
         if (initMessages) {
-          queryClient.setQueryData(['messages', conversation.conversationId], {
+          queryClient.setQueryData(['messages', conversationToAdd.conversationId], {
             pages: [{ items: [], nextPage: 0 }],
             pageParams: 0,
             unseenMessagesCount: 0
           });
         }
 
-        if (!conversations || !conversations[conversation.conversationId]) {
-          return { [conversation.conversationId]: conversation, ...conversations };
+        if (!conversations || !conversations[conversationToAdd.conversationId]) {
+          return {
+            [conversationToAdd.conversationId]: conversationToAdd,
+            ...conversations
+          };
         }
         return conversations;
       case 'move':
         if (!conversations || !moveInfo) return conversations;
 
-        const { conversationId } = moveInfo;
+        if (!conversations[moveInfo.conversationId]) return conversations;
 
-        if (!conversations[conversationId]) return conversations;
-
-        const moveConversation = conversations[conversationId];
-
-        return { [moveConversation.conversationId]: moveConversation, ...conversations };
-      case 'update':
-        if (!updateInfo || !conversations) return conversations;
+        const conversationToMove = conversations[moveInfo.conversationId];
 
         return {
-          ...conversations,
-          [updateInfo.conversationId]: {
-            ...conversations[updateInfo.conversationId],
-            ...updateInfo.data
-          }
+          [conversationToMove.conversationId]: conversationToMove,
+          ...conversations
         };
+      case 'update':
+        if (
+          !updateInfo ||
+          !conversations ||
+          !conversations[updateInfo.conversationId] ||
+          !updateInfo.data
+        )
+          return conversations;
+
+        const { conversationId, field, action, data } = updateInfo;
+        const conversation = conversations[conversationId];
+
+        if (field === 'name' || field === 'image') {
+          return {
+            ...conversations,
+            [conversationId]: {
+              ...conversation,
+              ...data
+            }
+          };
+        }
+
+        if (field === 'members' && conversation.isGroup) {
+          if (action === 'addMembers')
+            return {
+              ...conversations,
+              [conversationId]: {
+                ...conversation,
+                members: [...conversation.members, ...data.members],
+                otherMembers: [...(conversation.otherMembers || []), ...data.members]
+              }
+            };
+
+          if (action === 'removeMember')
+            return {
+              ...conversations,
+              [conversationId]: {
+                ...conversation,
+                members: conversation.members.filter(
+                  (member) => member.userId !== data.memberId
+                ),
+                otherMembers: conversation.otherMembers?.filter(
+                  (member) => member.userId !== data.memberId
+                ),
+                adminIds: conversation.adminIds?.filter(
+                  (adminId) => adminId !== data.memberId
+                ) // remove the member from the admin list if it exits
+              }
+            };
+        }
+
+        if (field === 'adminIds' && conversation.isGroup) {
+          if (action === 'promote')
+            return {
+              ...conversations,
+              [conversationId]: {
+                ...conversation,
+                adminIds: [...(conversation.adminIds as string[]), data.memberId]
+              }
+            };
+
+          if (action === 'demote')
+            return {
+              ...conversations,
+              [conversationId]: {
+                ...conversation,
+                adminIds: (conversation.adminIds as string[]).filter(
+                  (adminId) => adminId !== data.memberId
+                )
+              }
+            };
+        }
+
+        return conversations;
       case 'remove':
-        break;
+        if (!conversations || !removeInfo || !removeInfo.conversationId)
+          return conversations;
+
+        const updatedConversations = { ...conversations };
+        delete updatedConversations[removeInfo.conversationId];
+
+        return updatedConversations;
     }
-    return conversations;
   }
 
   const [userProfile, setUserProfile] = useState<CurrentUser>(currentUserProfile);
@@ -145,12 +227,6 @@ const MainProvider = ({
     if (!socket) return;
 
     socket.on('new_group_chat', async (data: { conversation: Conversation }) => {
-      await queryClient.setQueryData(['messages', data.conversation.conversationId], {
-        pages: [{ items: [], nextPage: 0 }],
-        pageParams: 0,
-        unseenMessagesCount: 0
-      });
-
       data.conversation.otherMembers = data.conversation.members.filter(
         (member) => member.userId !== userProfile.userId
       );
@@ -163,7 +239,12 @@ const MainProvider = ({
 
     socket.on(
       'update_conversation',
-      (updatedData: { conversationId: string; data: any }) => {
+      (updatedData: {
+        conversationId: string;
+        field: string;
+        action: string;
+        data: any;
+      }) => {
         dispatchConversations({
           type: 'update',
           payload: { updateInfo: updatedData }
@@ -171,11 +252,49 @@ const MainProvider = ({
       }
     );
 
+    socket.on('remove_conversation', (data: { conversationId: string }) => {
+      dispatchConversations({
+        type: 'remove',
+        payload: { removeInfo: { conversationId: data.conversationId } }
+      });
+    });
+
+    socket.on(
+      'upload_fail',
+      (data: {
+        key: 'messageId' | 'conversationId' | 'userId';
+        value: string;
+        publisherId: string;
+      }) => {
+        if (data.key === 'conversationId') {
+          dispatchConversations({
+            type: 'update',
+            payload: {
+              updateInfo: {
+                conversationId: data.value,
+                field: 'image',
+                data: { image: null }
+              }
+            }
+          });
+
+          if (data.publisherId === userProfile.userId)
+            toast('error', 'Image failed to upload, please try again later.');
+        }
+      }
+    );
+
     return () => {
       socket?.off('new_group_chat');
       socket?.off('update_conversation');
+      socket?.off('remove_conversation');
+      socket?.off('upload_fail');
     };
   }, [socket, queryClient, userProfile]);
+
+  useEffect(() => {
+    console.log(conversations);
+  }, [conversations]);
 
   return (
     <MainContext.Provider

@@ -18,17 +18,20 @@ const Body = ({ conversation }: BodyProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const { userProfile } = useMain();
 
-  const { conversationId, adminIds, hasInitialNextPage, isGroup, name } = conversation;
+  const { conversationId, adminIds, hasInitialNextPage, isGroup, name, members } =
+    conversation;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useChatQuery({
-    queryKey: conversationId
+    queryKey: conversationId,
+    joinedAt:
+      members.find((member) => member.userId === userProfile.userId)?.joinedAt ?? null
   });
 
   useChatScroll({
     chatRef,
     bottomRef,
     loadMore: fetchNextPage,
-    shouldLoadMore: !isFetchingNextPage && !!hasNextPage,
+    shouldLoadMore: hasInitialNextPage && !isFetchingNextPage && !!hasNextPage,
     count: data?.pages?.[0]?.items?.length ?? 0
   });
 
@@ -102,17 +105,7 @@ const Body = ({ conversation }: BodyProps) => {
                               ? group.items[i + 1].sender.userId
                               : null
                           }
-                          isSenderAdmin={
-                            isGroup
-                              ? (adminIds as string[]).includes(message.sender.userId)
-                              : false
-                          }
-                          isCurrentUserAdmin={
-                            isGroup
-                              ? (adminIds as string[]).includes(userProfile.userId)
-                              : false
-                          }
-                          isOwn={userProfile.userId === message.sender.userId}
+                          adminIds={adminIds}
                           isGroup={isGroup}
                           isNotReceived={!!message.notReceived}
                           deliverCount={message.deliverCount || 0}
@@ -120,6 +113,7 @@ const Body = ({ conversation }: BodyProps) => {
                           status={Object.values(message.status || {})}
                           updated={message.sentAt !== message.updatedAt}
                           deleted={!!message.deletedAt}
+                          groupCreatedById={isGroup ? conversation.createdBy : null}
                         />
                       </Fragment>
                     );
