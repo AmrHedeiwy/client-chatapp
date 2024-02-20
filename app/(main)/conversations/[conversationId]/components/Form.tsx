@@ -250,7 +250,7 @@ const ChatInput: React.FC<FormProps> = ({ conversation }) => {
             </FormItem>
           )}
         />
-        <button className=" bg-slate-300 dark:bg-slate-500 mx-2 rounded-full lg:p-3 p-2">
+        <button className=" bg-zinc-300 dark:bg-zinc-500 mx-2 rounded-full lg:p-3 p-2">
           <Send className="lg:w-5 lg:h-5 w-4 h-4" />
         </button>
       </form>

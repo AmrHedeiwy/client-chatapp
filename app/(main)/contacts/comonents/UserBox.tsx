@@ -2,14 +2,7 @@
 
 import Avatar from '@/components/Avatar';
 import { Conversation, Profile } from '@/types/index';
-import {
-  EventHandler,
-  FormEventHandler,
-  MouseEventHandler,
-  useCallback,
-  useMemo,
-  useState
-} from 'react';
+import { useCallback, useMemo } from 'react';
 
 import {
   UserRoundPlus,
@@ -19,10 +12,9 @@ import {
   MoreVertical
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { cn, toast } from '@/lib/utils';
+import axios, { AxiosRequestConfig } from 'axios';
+import { toast } from '@/lib/utils';
 import { format } from 'date-fns';
-import { ErrorProps } from '@/types/Axios';
 
 import {
   DropdownMenu,
@@ -37,18 +29,10 @@ import {
   HoverCardTrigger
 } from '@/components/ui/hover-card';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { useModal } from '@/hooks/useUI';
 import { useMain } from '@/hooks/useMain';
 
-interface UserBoxProps {
-  index: string;
-  data: Profile;
-  isActive: boolean;
-  onInput: FormEventHandler<HTMLInputElement>;
-}
-
-const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => {
+const UserBox = ({ data }: { data: Profile }) => {
   const router = useRouter();
   const { contacts, dispatchConversations, dispatchContacts } = useMain();
 
@@ -118,20 +102,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <div
-          className={cn(
-            `
-            flex
-            justify-between
-            items-center
-            w-full
-            p-4
-            rounded-lg
-            cursor-default
-            select-none
-            bg-transparent`
-          )}
-        >
+        <div className="flex justify-between items-center w-full p-4 cursor-default select-none">
           <div className="flex items-center space-x-3 collapse-title">
             <Avatar imageUrl={data.image} />
             <p className="text-sm font-medium">{data.username}</p>
@@ -142,14 +113,7 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
               <MoreVertical
                 size={20}
                 onClick={(e) => e.preventDefault()}
-                className="
-                text-slate-600
-                dark:text-slate-100
-                  cursor-pointer
-                hover:text-slate-800
-                dark:hover:text-slate-300
-                  transition
-                "
+                className="text-slate-600 dark:text-slate-100 cursor-pointer hover:text-slate-800 dark:hover:text-slate-300 transition"
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -195,7 +159,6 @@ const UserBox: React.FC<UserBoxProps> = ({ index, data, isActive, onInput }) => 
         <div className="flex justify-between space-x-4">
           <div className="space-y-1">
             <h4 className="text-sm font-semibold">@{data.username}</h4>
-            <p className="text-sm">Some user description.</p>
             <div className="flex items-center pt-2">
               <span className="flex gap-x-1 text-xs text-muted-foreground">
                 <CalendarRange size={18} /> Joined{' '}

@@ -2,10 +2,13 @@
 
 import SearchBarInput from '@/components/SeachBarInput';
 import { useRef, useState } from 'react';
-import UserList from './UserList';
+import SearchList from './SearchList';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import useConversationParams from '@/hooks/useConversationParams';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CircleUserRound, UserRoundSearch } from 'lucide-react';
+import ContactList from './ContactList';
 
 const ContactForm = () => {
   const [search, setSearch] = useState('');
@@ -64,15 +67,32 @@ const ContactForm = () => {
         />
       </div>
 
-      <UserList
-        searchQuery={inputRef.current?.value || ''}
-        data={data}
-        isFetching={isFetching}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={isFetchingNextPage}
-        isError={isError}
-      />
+      <Tabs defaultValue="search" className="w-full">
+        <TabsList className="w-full justify-evenly bg-transparent">
+          <TabsTrigger className="w-full gap-x-2 focus:dark:bg-zinc-900" value="search">
+            <UserRoundSearch />
+            Search
+          </TabsTrigger>
+          <TabsTrigger className="w-full gap-x-2 focus:dark:bg-zinc-900" value="contacts">
+            <CircleUserRound />
+            Contacts
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="search">
+          <SearchList
+            searchQuery={inputRef.current?.value || ''}
+            data={data}
+            isFetching={isFetching}
+            hasNextPage={hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            isError={isError}
+          />
+        </TabsContent>
+        <TabsContent value="contacts">
+          <ContactList />
+        </TabsContent>
+      </Tabs>
     </aside>
   );
 };

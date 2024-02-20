@@ -44,21 +44,13 @@ const UserList: React.FC<UserListProps> = ({
   return (
     <div ref={topRef} className="overflow-y-auto scrollable-content px-2">
       {data?.pages.map((group, i) => {
-        let i_group = i.toString();
         return (
-          <Fragment key={i_group}>
+          <Fragment key={i}>
             {!!group.items ? (
               (group.items as Profile[]).map((user, i) => {
-                let i_user = i.toString();
-                let uniqueIndex = i_group + i_user;
                 return (
-                  <Fragment key={i_user}>
-                    <UserBox
-                      index={uniqueIndex}
-                      data={user}
-                      isActive={uniqueIndex === activeIndex}
-                      onInput={() => onInput(uniqueIndex)}
-                    />
+                  <Fragment key={i}>
+                    <UserBox data={user} />
                   </Fragment>
                 );
               })
