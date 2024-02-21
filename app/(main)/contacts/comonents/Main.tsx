@@ -69,17 +69,11 @@ const ContactForm = () => {
 
       <Tabs defaultValue="search" className="w-full">
         <TabsList className="w-full justify-evenly bg-transparent">
-          <TabsTrigger
-            className="w-full gap-x-2 focus-within:dark:bg-zinc-900"
-            value="search"
-          >
+          <TabsTrigger className="w-full gap-x-2" value="search">
             <UserRoundSearch />
             Search
           </TabsTrigger>
-          <TabsTrigger
-            className="w-full gap-x-2 focus-within:dark:bg-zinc-900"
-            value="contacts"
-          >
+          <TabsTrigger className="w-full gap-x-2" value="contacts">
             <CircleUserRound />
             Contacts
           </TabsTrigger>

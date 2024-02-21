@@ -37,7 +37,6 @@ const DesktopItem: React.FC<DesktopItemProps> = ({
           text-gray-400
           hover:bg-neutral-100
           dark:hover:bg-neutral-700
-          
           `,
           active && ' text-green-500'
         )}

@@ -13,16 +13,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
     <button
       type="button"
       onClick={onClick}
-      className={cn(
-        `py-2 
-        rounded-xl 
-        ring-1 
-        bg-slate-700 
-        hover:bg-slate-600 
-        dark:bg-slate-50
-        dark:hover:bg-slate-200
-        ring-gray-300 `
-      )}
+      className="py-2 rounded-xl bg-slate-700 hover:bg-slate-600 dark:bg-slate-50 dark:hover:bg-slate-200"
     >
       <div className="flex gap-4 justify-center">
         <Image

@@ -1,8 +1,7 @@
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import useConversationParams from './useConversationParams';
-import signOut from '../actions/signOut';
-import { LogOut, MessageCircle, UsersRound } from 'lucide-react';
+import { MessageCircle, UsersRound } from 'lucide-react';
 
 const useRoutes = () => {
   const pathname = usePathname();
@@ -22,12 +21,6 @@ const useRoutes = () => {
         href: '/contacts',
         icon: UsersRound,
         active: pathname === '/contacts'
-      },
-      {
-        label: 'Logout',
-        href: '#',
-        onClick: () => signOut(),
-        icon: LogOut
       }
     ],
     [pathname, conversationId]

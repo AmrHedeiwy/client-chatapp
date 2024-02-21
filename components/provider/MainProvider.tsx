@@ -292,10 +292,6 @@ const MainProvider = ({
     };
   }, [socket, queryClient, userProfile]);
 
-  useEffect(() => {
-    console.log(conversations);
-  }, [conversations]);
-
   return (
     <MainContext.Provider
       value={{

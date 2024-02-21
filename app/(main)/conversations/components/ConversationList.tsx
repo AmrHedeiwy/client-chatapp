@@ -17,6 +17,7 @@ import { MessagesSquare } from 'lucide-react';
 import ConversationBox from './ConversationBox';
 import { cn } from '@/lib/utils';
 import Avatar from '@/components/Avatar';
+import SettingsToggle from '@/components/SettingsToggle';
 
 const ConversationList = () => {
   const { onlineSockets } = useSocket();
@@ -76,13 +77,8 @@ const ConversationList = () => {
     >
       <div className="px-3 mt-4 mb-6">
         <div className="flex justify-between items-center h-10 mb-2 mx-2">
-          <div
-            onClick={() => onOpen('userProfile', { profile: userProfile })}
-            className="lg:hidden"
-          >
-            {userProfile && (
-              <Avatar imageUrl={userProfile.image as string} current custom="w-10 h-10" />
-            )}
+          <div className="lg:hidden">
+            <SettingsToggle />
           </div>
           <h2 className="flex gap-x-2 tracking-widest text-slate-900 dark:text-white text-xl">
             Chats
