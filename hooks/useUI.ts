@@ -12,7 +12,8 @@ export type ModalType =
   | 'removeMember'
   | 'confirmAdminStatus'
   | 'removeConversation'
-  | 'deleteConversation';
+  | 'deleteConversation'
+  | 'deleteAccount';
 
 type ModalData = {
   contact?: { username: string; contactId: string };

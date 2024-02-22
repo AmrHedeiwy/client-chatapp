@@ -317,8 +317,9 @@ const MainProvider = ({
 
     socket.on(
       'update_user',
-      (data: { userId: string; image?: string; name?: string }) => {
+      (data: { userId: string; image?: string; username?: string }) => {
         const { userId, ...updatefields } = data;
+        console.log('call', data);
 
         if (contacts && contacts[userId]) {
           dispatchContacts({
@@ -345,7 +346,7 @@ const MainProvider = ({
                   conversationId: conversation.conversationId,
                   field: 'members',
                   action: 'updateMemberProfile',
-                  data: updatefields
+                  data: { ...data }
                 }
               }
             });

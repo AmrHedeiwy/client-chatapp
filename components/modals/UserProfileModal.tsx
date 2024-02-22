@@ -237,6 +237,8 @@ const UserProfileModal = () => {
 
   const isModalOpen = isOpen && type === 'userProfile';
 
+  if (!userProfile) return null;
+
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
       <DialogContent className="">
@@ -352,11 +354,7 @@ const UserProfileModal = () => {
                                 <Input
                                   type="email"
                                   placeholder="Email"
-                                  disabled={
-                                    field.disabled ||
-                                    !!userProfile.googleId ||
-                                    !!userProfile.facebookId
-                                  }
+                                  disabled={field.disabled}
                                   name={field.name}
                                   onChange={field.onChange}
                                   onBlur={field.onBlur}

@@ -3,6 +3,7 @@ export type Profile = {
   username: string;
   image: string | null;
   createdAt?: string;
+  deletedAt?: string | null;
 };
 
 export type CurrentUser = Profile & {

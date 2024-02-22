@@ -3,7 +3,6 @@
 import Avatar from '@/components/Avatar';
 import useConversationParams from '@/hooks/useConversationParams';
 import { useMain } from '@/hooks/useMain';
-import { useSession } from '@/hooks/useSession';
 import { useSocket } from '@/hooks/useSocket';
 import { cn } from '@/lib/utils';
 import { Conversation, Member, Message } from '@/types';
@@ -118,7 +117,10 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
           <div className="flex justify-between items-center mb-1">
             <p
               className={cn(
-                `text-md font-medium text-gray-900 dark:text-gray-100 transition`
+                `text-md font-medium text-gray-900 dark:text-gray-100 transition`,
+                !conversation.isGroup &&
+                  !!conversation.otherMember?.profile.deletedAt &&
+                  'italic text-zinc-500 dark:text-zinc-400 '
               )}
             >
               {conversation.isGroup

@@ -8,6 +8,7 @@ import { Conversation } from '@/types';
 import { useSocket } from '@/hooks/useSocket';
 import { ArrowLeft, MoreVertical } from 'lucide-react';
 import { useSheet } from '@/hooks/useUI';
+import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   conversation: Conversation;
@@ -69,7 +70,14 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
           isOnline={!!isOnline}
         />
         <div className="flex flex-col">
-          <div className="text-md font-medium text-gray-900 dark:text-gray-100 transition">
+          <div
+            className={cn(
+              'text-md font-medium text-gray-900 dark:text-gray-100 transition',
+              !conversation.isGroup &&
+                !!conversation.otherMember?.profile.deletedAt &&
+                'italic text-zinc-500 dark:text-zinc-400 '
+            )}
+          >
             {conversation.isGroup
               ? conversation.name
               : conversation.otherMember?.profile.username}

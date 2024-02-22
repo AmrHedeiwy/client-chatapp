@@ -14,6 +14,7 @@ import SetAdminStatusModal from '../modals/SetAdminStatusModal';
 import LeaveConversationModal from '../modals/LeaveConversationModal';
 import DeleteConversationModal from '../modals/DeleteConversationModal';
 import UserProfileModal from '../modals/UserProfileModal';
+import DeleteAccountModal from '../modals/DeleteAccountModal';
 
 const UiProvider = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -39,6 +40,7 @@ const UiProvider = () => {
       <LeaveConversationModal />
       <DeleteConversationModal />
       <UserProfileModal />
+      <DeleteAccountModal />
       <ConversationSheet />
     </>
   );

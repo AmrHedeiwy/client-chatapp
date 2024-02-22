@@ -56,12 +56,12 @@ const UserBox = ({ data }: { data: Profile }) => {
         options
       );
 
-      const conversation = res.data.conversation as Conversation;
+      const { conversation, exists } = res.data;
 
       // Add the conversation to the list if it does not already exist
       dispatchConversations({
         type: 'add',
-        payload: { addInfo: { conversation, initMessages: true } }
+        payload: { addInfo: { conversation, initMessages: !exists } }
       });
 
       router.push(`/conversations/${conversation.conversationId}`);

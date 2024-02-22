@@ -362,7 +362,7 @@ const ConversationSheet = () => {
           <div className="relative mt-6 flex-1 px-4 sm:px-6">
             <div className="flex flex-col items-center ">
               <button
-                className="relative"
+                className={cn('relative', !isGroup && 'cursor-default')}
                 type="button"
                 onClick={() => {
                   if (isGroup)
@@ -384,7 +384,15 @@ const ConversationSheet = () => {
                   </span>
                 )}
               </button>
-              <div>{isGroup ? name : otherMember?.profile.username}</div>
+              <div
+                className={cn(
+                  !isGroup &&
+                    !!otherMember?.profile.deletedAt &&
+                    'italic text-zinc-500 dark:text-zinc-400 '
+                )}
+              >
+                {isGroup ? name : otherMember?.profile.username}
+              </div>
               <div className="text-sm text-gray-500">{statusText}</div>
               <div className="flex gap-x-3 my-10">
                 <div

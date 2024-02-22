@@ -36,7 +36,10 @@ const SettingsToggle = () => {
           <DropdownMenuItem className="gap-x-1" onClick={() => signOut()}>
             <LogOut className="h-[1.2rem] w-[1.2rem]" /> log out
           </DropdownMenuItem>
-          <DropdownMenuItem className="gap-x-1 hover:dark:bg-rose-900">
+          <DropdownMenuItem
+            className="gap-x-1 hover:dark:bg-rose-900"
+            onClick={() => onOpen('deleteAccount', {})}
+          >
             <Trash className="h-[1.2rem] w-[1.2rem]" />
             Delete account
           </DropdownMenuItem>
