@@ -12,7 +12,7 @@ import { toast } from '@/lib/utils';
 import { FieldValues, useForm } from 'react-hook-form';
 import { useSession } from '@/hooks/useSession';
 import { useRouter } from 'next/navigation';
-import { ErrorProps, FormErrorProps, ResponseProps } from '@/types/Axios';
+import { FormErrorProps } from '@/types/Axios';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -42,14 +42,17 @@ export default function AuthForm() {
         .string()
         .trim()
         .min(1, { message: 'Email is required' })
-        .email('Invalid email'),
+        .email('Please enter a valid email address in the format example@example.com.'),
       password: z.string().trim().min(1, { message: 'Password is required' }),
       ...(variant === 'REGISTER' && {
         username: z
           .string()
           .trim()
           .min(1, { message: 'Username is required' })
-          .regex(/^[A-Za-z\d_-]{3,20}$/, { message: 'Invalid username' }),
+          .regex(/^[A-Za-z\d_-]{3,20}$/, {
+            message:
+              'Username can only contain letters, digits, underscores, and hyphens, and must be between 3 and 20 characters long.'
+          }),
         confirmPassword: z
           .string()
           .min(1, { message: 'Confirm Password is required' })
@@ -219,7 +222,7 @@ export default function AuthForm() {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>Confirm password</FormLabel>
                 <FormControl>
                   <Input placeholder="Confirm the secret word" {...field} />
                 </FormControl>

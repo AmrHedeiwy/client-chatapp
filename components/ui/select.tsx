@@ -39,7 +39,7 @@ const Select: React.FC<SelectProps> = ({ onChange, options, disabled }) => {
           ...base,
           backgroundColor: 'none'
         }),
-        option: (base, props) => ({
+        option: (base, _) => ({
           ...base,
           backgroundColor: 'none'
         })

@@ -5,7 +5,7 @@ import { FileIcon, X } from 'lucide-react';
 
 type FileUploadProps = {
   onChange: (file?: File) => void;
-  value: (Blob & File) | undefined;
+  value: (Blob & File) | null;
   setError: any;
   isModalOpen: boolean;
 };
@@ -18,7 +18,7 @@ function FileUpload({ onChange, value, setError, isModalOpen }: FileUploadProps)
   if (!isModalOpen && (value || preview)) {
     if (preview) URL.revokeObjectURL(preview);
     preview = null;
-    value = undefined;
+    value = null;
   }
 
   if (preview && fileType !== 'pdf') {

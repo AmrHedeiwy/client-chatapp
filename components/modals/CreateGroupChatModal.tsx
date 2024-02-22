@@ -33,12 +33,13 @@ import { useMain } from '@/hooks/useMain';
 
 import FileUpload from '../FileUpload';
 import { toast } from '@/lib/utils';
+import { FormErrorProps } from '@/types/Axios';
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: 'The conversation name must be at least 2 characters long.'
   }),
-  file: z.custom<(Blob & File) | undefined>(),
+  file: z.custom<Blob & File>().nullable(),
   memberIds: z.array(z.string()).min(1, {
     message: 'At least one member is required to initiate conversation.'
   })
@@ -55,7 +56,7 @@ const CreateGroupChatModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      file: undefined,
+      file: null,
       memberIds: []
     }
   });
@@ -73,10 +74,6 @@ const CreateGroupChatModal = () => {
 
     const conversationConfig: AxiosRequestConfig = {
       headers: { 'Content-Type': 'application/json' },
-      withCredentials: true
-    };
-    const fileConfig: AxiosRequestConfig = {
-      headers: { 'Content-Type': 'multipart/form-data' },
       withCredentials: true
     };
 
@@ -100,8 +97,13 @@ const CreateGroupChatModal = () => {
         payload: { addInfo: { conversation, initMessages: true } }
       });
 
-      if (file) {
+      if (!!file) {
         const fileUrl = `${process.env.NEXT_PUBLIC_SERVER_URL}/conversations/group/image`;
+        const fileConfig: AxiosRequestConfig = {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          withCredentials: true
+        };
+
         const formData = new FormData();
         formData.append('file', file);
         formData.append('conversationId', conversation.conversationId);
@@ -112,8 +114,14 @@ const CreateGroupChatModal = () => {
       router.push(`/conversations/${conversation.conversationId}`);
     } catch (e: any) {
       const error = e.response.data.error;
-
-      toast('error', error.message);
+      if (error && error.name === 'JoiValidationError') {
+        (error.message as FormErrorProps[]).forEach(({ fieldName, fieldMessage }) => {
+          // @ts-ignore
+          form.setError(fieldName, { message: fieldMessage });
+        });
+      } else {
+        toast('error', error.message);
+      }
 
       if (error.redirect) router.push(error.redirect);
     }
@@ -121,10 +129,7 @@ const CreateGroupChatModal = () => {
 
   const handleClose = () => {
     // @ts-ignore
-    form.setValue('file', undefined);
-    form.setValue('name', '');
-    form.setValue('memberIds', []);
-
+    form.reset();
     onClose();
   };
 
@@ -170,7 +175,14 @@ const CreateGroupChatModal = () => {
                   <FormItem>
                     <FormLabel className="uppercase text-xs font-bold">name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter group name" {...field} />
+                      <Input
+                        placeholder="Enter group name"
+                        disabled={field.disabled}
+                        name={field.name}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -200,7 +212,7 @@ const CreateGroupChatModal = () => {
                             const value = newValue[newValue.length - 1].value;
 
                             if (typeof value !== 'string') return;
-                            field.onChange([...(field.value as string[]), value]);
+                            field.onChange([...(field.value ?? []), value]);
                           }
 
                           if (actionMeta.action === 'clear') field.onChange([]);

@@ -60,13 +60,19 @@ const Header: React.FC<HeaderProps> = ({ conversation }) => {
           <ArrowLeft size={20} />
         </Link>
         <Avatar
-          imageUrl={conversation.image}
+          imageUrl={
+            conversation.isGroup
+              ? conversation.image
+              : (conversation.otherMember?.profile.image as string | null)
+          }
           withStatus={!conversation.isGroup}
           isOnline={!!isOnline}
         />
         <div className="flex flex-col">
           <div className="text-md font-medium text-gray-900 dark:text-gray-100 transition">
-            {conversation.name}
+            {conversation.isGroup
+              ? conversation.name
+              : conversation.otherMember?.profile.username}
           </div>
           <div className="text-sm font-light text-neutral-500 dark:text-neutral-400">
             {statusText}

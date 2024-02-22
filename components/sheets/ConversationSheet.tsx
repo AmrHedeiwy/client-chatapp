@@ -66,26 +66,26 @@ const ConversationSheet = () => {
   const formSchema = z.object({
     name: z
       .string()
-      .refine((value) => edit.field !== 'name' || value.length > 1, {
+      .refine((value) => value === null || edit.field !== 'name' || value.length > 1, {
         message: 'The conversation name must be at least 2 characters long.'
       })
-      .optional(),
-    file: z.custom<(Blob & File) | undefined>(
-      (value) => edit.field !== 'file' || isFileBlob(value),
-      { message: 'Please add a image.' }
-    ),
+      .nullable(),
+    file: z
+      .custom<Blob & File>((value) => edit.field !== 'file' || isFileBlob(value), {
+        message: 'Please add a image.'
+      })
+      .nullable(),
     memberIds: z
       .array(z.string())
       .refine(
         (value) => {
-          console.log(value.length >= 1);
-          return edit.field !== 'memberIds' || value.length > 0;
+          return value === null || edit.field !== 'memberIds' || value.length > 0;
         },
         {
           message: 'At least one member is required to initiate conversation.'
         }
       )
-      .optional()
+      .nullable()
   });
 
   const conversation = useMemo(() => {
@@ -116,14 +116,14 @@ const ConversationSheet = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      file: undefined,
-      memberIds: []
+      name: null,
+      file: null,
+      memberIds: null
     }
   });
 
   const handleCloseForm = () => {
-    if (!!edit.field) form.setValue(edit.field, undefined);
+    form.reset();
     setEdit({ isEditing: false, field: null, action: null });
   };
 
@@ -134,6 +134,8 @@ const ConversationSheet = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const { file, memberIds, name } = values;
+
+    if (!file && !memberIds && !name) return;
 
     const config: AxiosRequestConfig = {
       headers: { 'Content-Type': !!file ? 'multipart/form-data' : 'application/json' },
@@ -150,7 +152,7 @@ const ConversationSheet = () => {
         await axios.post(url, formData, config);
       }
 
-      if (edit.field === 'name') {
+      if (edit.field === 'name' && !!name) {
         const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/conversations/group/name`;
 
         await axios.patch(url, { conversationId, name }, config);
@@ -161,7 +163,7 @@ const ConversationSheet = () => {
         });
       }
 
-      if (edit.field === 'memberIds') {
+      if (edit.field === 'memberIds' && !!memberIds) {
         const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/conversations/group/members`;
 
         const res = await axios.post(url, { conversationId, memberIds }, config);
@@ -257,7 +259,15 @@ const ConversationSheet = () => {
                           name
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter group name" {...field} />
+                          <Input
+                            defaultValue={conversation.name as string}
+                            placeholder="Enter group name"
+                            disabled={field.disabled}
+                            name={field.name}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            ref={field.ref}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -354,12 +364,15 @@ const ConversationSheet = () => {
               <button
                 className="relative"
                 type="button"
-                onClick={() =>
-                  setEdit({ isEditing: true, field: 'file', action: 'changeImage' })
-                }
+                onClick={() => {
+                  if (isGroup)
+                    setEdit({ isEditing: true, field: 'file', action: 'changeImage' });
+                }}
               >
                 <Avatar
-                  imageUrl={conversation.image}
+                  imageUrl={
+                    isGroup ? image : (otherMember?.profile.image as string | null)
+                  }
                   custom={cn(
                     'lg:w-24 lg:h-24 w-24 h-24',
                     isGroup && isCurrentUserAdmin && 'hover:opacity-60 cursor-pointer'
@@ -371,7 +384,7 @@ const ConversationSheet = () => {
                   </span>
                 )}
               </button>
-              <div>{name}</div>
+              <div>{isGroup ? name : otherMember?.profile.username}</div>
               <div className="text-sm text-gray-500">{statusText}</div>
               <div className="flex gap-x-3 my-10">
                 <div

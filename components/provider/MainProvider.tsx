@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Dispatch, useEffect, useReducer } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useReducer } from 'react';
 import { createContext, useState } from 'react';
 import {
   Conversation,
@@ -16,6 +16,7 @@ import { toast } from '@/lib/utils';
 
 type MainContextType = {
   userProfile: CurrentUser;
+  setUserProfile: Dispatch<SetStateAction<CurrentUser>>;
   conversations: GroupedConversations | null;
   dispatchConversations: Dispatch<conversationActionType>;
   contacts: GroupedContacts | null;
@@ -153,7 +154,7 @@ const MainProvider = ({
           };
         }
 
-        if (field === 'members' && conversation.isGroup) {
+        if (field === 'members') {
           if (action === 'addMembers')
             return {
               ...conversations,
@@ -178,6 +179,52 @@ const MainProvider = ({
                 adminIds: conversation.adminIds?.filter(
                   (adminId) => adminId !== data.memberId
                 ) // remove the member from the admin list if it exits
+              }
+            };
+
+          if (action === 'updateMemberProfile')
+            return {
+              ...conversations,
+              [conversationId]: {
+                ...conversation,
+                members: conversation.members.map((member) => {
+                  if (member.userId === data.userId) {
+                    return {
+                      ...member,
+                      profile: {
+                        ...member.profile,
+                        ...data
+                      }
+                    };
+                  }
+                  return member;
+                }),
+                ...(conversation.isGroup
+                  ? {
+                      otherMembers: (conversation.otherMembers as Member[]).map(
+                        (member) => {
+                          if (member.userId === data.userId) {
+                            return {
+                              ...member,
+                              profile: {
+                                ...member.profile,
+                                ...data
+                              }
+                            };
+                          }
+                          return member;
+                        }
+                      )
+                    }
+                  : {
+                      otherMember: {
+                        ...(conversation.otherMember as Member),
+                        profile: {
+                          ...(conversation.otherMember as Member).profile,
+                          ...data
+                        }
+                      }
+                    })
               }
             };
         }
@@ -260,6 +307,38 @@ const MainProvider = ({
     });
 
     socket.on(
+      'update_user',
+      (data: { userId: string; image?: string; name?: string }) => {
+        const { userId } = data;
+
+        if (!conversations) return;
+
+        const conversationsArray = Object.values(conversations);
+        conversationsArray.forEach((conversation: Conversation) => {
+          const isMember = conversation.isGroup
+            ? !!(conversation.otherMembers as Member[]).find(
+                (member) => member.userId === userId
+              )
+            : (conversation.otherMember as Member).userId === userId;
+
+          if (isMember) {
+            dispatchConversations({
+              type: 'update',
+              payload: {
+                updateInfo: {
+                  conversationId: conversation.conversationId,
+                  field: 'members',
+                  action: 'updateMemberProfile',
+                  data: { ...data }
+                }
+              }
+            });
+          }
+        });
+      }
+    );
+
+    socket.on(
       'upload_fail',
       (data: {
         key: 'messageId' | 'conversationId' | 'userId';
@@ -288,6 +367,7 @@ const MainProvider = ({
       socket?.off('new_group_chat');
       socket?.off('update_conversation');
       socket?.off('remove_conversation');
+      socket?.off('update_user');
       socket?.off('upload_fail');
     };
   }, [socket, queryClient, userProfile]);
@@ -296,6 +376,7 @@ const MainProvider = ({
     <MainContext.Provider
       value={{
         userProfile,
+        setUserProfile,
         conversations,
         dispatchConversations,
         contacts,

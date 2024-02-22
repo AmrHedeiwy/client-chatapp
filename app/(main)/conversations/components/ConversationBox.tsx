@@ -103,7 +103,11 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
       )}
     >
       <Avatar
-        imageUrl={conversation.image}
+        imageUrl={
+          conversation.isGroup
+            ? conversation.image
+            : (conversation.otherMember?.profile.image as string | null)
+        }
         withStatus={!conversation.isGroup}
         isOnline={isOnline}
       />
@@ -117,7 +121,9 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
                 `text-md font-medium text-gray-900 dark:text-gray-100 transition`
               )}
             >
-              {conversation.name}
+              {conversation.isGroup
+                ? conversation.name
+                : conversation.otherMember?.profile.username}
             </p>
 
             {lastMessage && lastMessage.sentAt && (
