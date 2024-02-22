@@ -45,11 +45,12 @@ type contactActionType = {
   payload: {
     addInfo?: { contact: Profile };
     removeInfo?: { contactId: string };
+    updateInfo?: { contactId: string; data: any };
   };
 };
 
 function contactsReducer(contacts: GroupedContacts | null, action: contactActionType) {
-  const { addInfo, removeInfo } = action.payload;
+  const { addInfo, updateInfo, removeInfo } = action.payload;
 
   switch (action.type) {
     case 'add':
@@ -72,7 +73,15 @@ function contactsReducer(contacts: GroupedContacts | null, action: contactAction
         return acc;
       }, {});
     case 'update':
-      return contacts;
+      if (!contacts || !updateInfo) return contacts;
+
+      return {
+        ...contacts,
+        [updateInfo.contactId]: {
+          ...contacts[updateInfo.contactId],
+          ...updateInfo.data
+        }
+      };
     case 'remove':
       if (!contacts || !removeInfo) return contacts;
 
@@ -309,7 +318,14 @@ const MainProvider = ({
     socket.on(
       'update_user',
       (data: { userId: string; image?: string; name?: string }) => {
-        const { userId } = data;
+        const { userId, ...updatefields } = data;
+
+        if (contacts && contacts[userId]) {
+          dispatchContacts({
+            type: 'update',
+            payload: { updateInfo: { contactId: data.userId, data: updatefields } }
+          });
+        }
 
         if (!conversations) return;
 
@@ -329,7 +345,7 @@ const MainProvider = ({
                   conversationId: conversation.conversationId,
                   field: 'members',
                   action: 'updateMemberProfile',
-                  data: { ...data }
+                  data: updatefields
                 }
               }
             });

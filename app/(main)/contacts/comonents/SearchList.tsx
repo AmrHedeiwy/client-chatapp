@@ -29,16 +29,6 @@ const UserList: React.FC<UserListProps> = ({
 }) => {
   const topRef = useRef<ElementRef<'div'>>(null);
 
-  // Indicates which user box is selected
-  const [activeIndex, setActiveIndex] = useState<string | null>(null);
-
-  const onInput = (index: string) => {
-    if (index === activeIndex) return setActiveIndex(null);
-    setActiveIndex(index);
-  };
-
-  useEffect(() => setActiveIndex(null), [searchQuery]);
-
   useListScroll(topRef, { fetchNextPage, isFetchingNextPage, hasNextPage });
 
   return (
