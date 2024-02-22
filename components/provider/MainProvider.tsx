@@ -387,7 +387,7 @@ const MainProvider = ({
       socket?.off('update_user');
       socket?.off('upload_fail');
     };
-  }, [socket, queryClient, userProfile]);
+  }, [socket, contacts, conversations, userProfile, queryClient]);
 
   return (
     <MainContext.Provider

@@ -1,14 +1,14 @@
 'use client';
 
 import { Profile } from '@/types/index';
-import React, { ElementRef, Fragment, useEffect, useRef, useState } from 'react';
+import React, { ElementRef, Fragment, useRef } from 'react';
 import UserBox from './UserBox';
 import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
 import { ShieldAlert } from 'lucide-react';
 import useListScroll from '@/hooks/useListScroll';
 import { Button } from '@/components/ui/button';
 
-interface UserListProps {
+interface SearchListProps {
   searchQuery: string;
   data: InfiniteData<any> | undefined;
   isFetching: boolean;
@@ -18,7 +18,7 @@ interface UserListProps {
   isError: boolean;
 }
 
-const UserList: React.FC<UserListProps> = ({
+const SearchList: React.FC<SearchListProps> = ({
   searchQuery,
   data,
   isFetching,
@@ -82,4 +82,4 @@ const UserList: React.FC<UserListProps> = ({
   );
 };
 
-export default UserList;
+export default SearchList;

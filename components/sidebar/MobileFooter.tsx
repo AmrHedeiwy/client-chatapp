@@ -34,7 +34,6 @@ const MobileFooter = () => {
               href={route.href}
               icon={route.icon}
               active={route.active}
-              onClick={route.onClick}
             />
           );
         })}

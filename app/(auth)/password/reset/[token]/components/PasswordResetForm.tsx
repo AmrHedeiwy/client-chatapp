@@ -1,7 +1,7 @@
 'use client';
 
-import { ErrorProps, FormErrorProps, ResponseProps } from '@/types/Axios';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { FormErrorProps } from '@/types/Axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 import { Loader2 } from 'lucide-react';
 import { toast } from '@/lib/utils';
@@ -22,7 +22,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { FieldValues, useForm } from 'react-hook-form';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 const formSchema = z
@@ -66,7 +66,7 @@ export default function PasswordResetForm() {
   }, [router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    // resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       password: '',
       confirmPassword: ''

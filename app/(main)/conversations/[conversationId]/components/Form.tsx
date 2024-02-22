@@ -1,6 +1,6 @@
 'use client';
 
-import { string, z } from 'zod';
+import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSocket } from '@/hooks/useSocket';

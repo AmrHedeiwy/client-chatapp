@@ -34,9 +34,8 @@ const useListScroll = (
         if (!topDiv) return;
 
         const distanceFromBottom =
-          topDiv?.scrollHeight - topDiv?.scrollTop - topDiv?.clientHeight;
+          topDiv?.scrollHeight - topDiv?.scrollTop - topDiv?.clientHeight - 1;
 
-        console.log(distanceFromBottom);
         if (distanceFromBottom <= 0 && !isFetchingNextPage && hasNextPage) {
           fetchNextPage();
         }

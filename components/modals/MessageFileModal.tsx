@@ -34,15 +34,9 @@ const isFileBlob = (value: unknown): value is Blob & File =>
   value instanceof Blob && value instanceof File;
 
 const formSchema = z.object({
-  file: z.custom<Blob & File>(
-    (value) => {
-      if (!isFileBlob(value)) {
-        return undefined;
-      }
-      return value;
-    },
-    { message: 'Atachment is required' }
-  )
+  file: z.custom<Blob & File>((value) => isFileBlob(value), {
+    message: 'Please add an Image or PDF.'
+  })
 });
 
 const MessageFileModal = () => {
@@ -62,8 +56,7 @@ const MessageFileModal = () => {
   });
 
   const handleClose = () => {
-    // @ts-ignore
-    form.setValue('file', undefined);
+    form.reset();
     onClose();
   };
 

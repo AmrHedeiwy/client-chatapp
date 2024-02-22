@@ -28,6 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 
 import SocialButton from '@/app/(auth)/components/SocialButton';
+import createFakeAccount from '@/actions/createFakeAccount';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
@@ -88,7 +89,7 @@ export default function AuthForm() {
   }, [session, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    // resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       username: '',
       email: '',
@@ -224,7 +225,11 @@ export default function AuthForm() {
               <FormItem>
                 <FormLabel>Confirm password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Confirm the secret word" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="Confirm the secret word"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -319,6 +324,11 @@ export default function AuthForm() {
           </Button>
         </div>
       </form>
+      <div className="flex justify-center mt-8">
+        <Button className="" variant={'outline'} onClick={() => createFakeAccount()}>
+          Create a fake account?
+        </Button>
+      </div>
     </Form>
   );
 }

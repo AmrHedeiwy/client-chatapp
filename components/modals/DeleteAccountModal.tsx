@@ -13,11 +13,8 @@ import {
   AlertDialogTitle
 } from '../ui/alert-dialog';
 import { useModal } from '@/hooks/useUI';
-import { useSocket } from '@/hooks/useSocket';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import useConversationParams from '@/hooks/useConversationParams';
 import axios, { AxiosRequestConfig } from 'axios';
 
 const DeleteMessageModal = () => {
@@ -40,11 +37,13 @@ const DeleteMessageModal = () => {
 
       router.replace('/');
     } catch (e: any) {
+      const error = e.response.data.error;
+
+      toast('error', error.message);
+
+      if (error.redirect) router.push(error.redirect);
+
       onClose();
-      toast(
-        'error',
-        'Oops, something went wrong. Please try again later or contact support if the problem persists.'
-      );
     }
   }, [router, onClose]);
 

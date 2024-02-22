@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AuthForm from './components/AuthForm';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (

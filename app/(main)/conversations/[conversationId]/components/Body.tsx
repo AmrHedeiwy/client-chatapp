@@ -18,8 +18,15 @@ const Body = ({ conversation }: BodyProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const { userProfile } = useMain();
 
-  const { conversationId, adminIds, hasInitialNextPage, isGroup, name, members } =
-    conversation;
+  const {
+    conversationId,
+    adminIds,
+    hasInitialNextPage,
+    isGroup,
+    name,
+    members,
+    otherMember
+  } = conversation;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useChatQuery({
     queryKey: conversationId,
@@ -60,7 +67,10 @@ const Body = ({ conversation }: BodyProps) => {
     >
       {(!hasInitialNextPage || !hasNextPage) && <div className="flex-1" />}
       {(!hasInitialNextPage || !hasNextPage) && (
-        <Welcome isGroup={isGroup as boolean} name={name as string} />
+        <Welcome
+          isGroup={isGroup as boolean}
+          name={(isGroup ? name : otherMember?.profile.username) as string}
+        />
       )}
       {hasInitialNextPage && hasNextPage && (
         <div className="flex justify-center">

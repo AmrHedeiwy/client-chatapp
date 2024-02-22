@@ -46,7 +46,7 @@ function UploadDropzone({
         ? { 'application/pdf': ALLOWED_FILE_TYPES.application } // allow pdfs when sending messages
         : {})
     },
-    maxFiles: type === 'messageFile' ? 5 : 1,
+    maxFiles: 1,
     maxSize: MAX_FILE_SIZE,
     onDrop
   });

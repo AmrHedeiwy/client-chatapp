@@ -13,8 +13,7 @@ import React, {
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ErrorProps, ResponseProps } from '@/types/Axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 import { toast } from '@/lib/utils';
 
@@ -130,7 +129,7 @@ export default function EmailVerificationForm() {
     [OTP, router]
   );
 
-  const handleOnClick = useCallback(async () => {
+  const handleOnResend = useCallback(async () => {
     setIsLoading(true);
 
     const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/email/verify/request`;
@@ -198,7 +197,7 @@ export default function EmailVerificationForm() {
               className="pl-1"
               variant={'link'}
               type="button"
-              onClick={handleOnClick}
+              onClick={handleOnResend}
               disabled={isLoading}
             >
               Resend

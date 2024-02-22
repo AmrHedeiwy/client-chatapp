@@ -1,8 +1,8 @@
 'use client';
 
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import { FormErrorProps, ResponseProps, ErrorProps } from '@/types/Axios';
+import axios, { AxiosRequestConfig } from 'axios';
+import { FieldValues, useForm } from 'react-hook-form';
+import { FormErrorProps } from '@/types/Axios';
 
 import { Loader2 } from 'lucide-react';
 
@@ -23,7 +23,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { toast } from '@/lib/utils';
 
-import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object<FieldValues>({
@@ -41,7 +40,7 @@ export default function PasswordForgotForm() {
   });
 
   const isLoading = form.formState.isSubmitting;
-  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/password/forgot`;
     const options: AxiosRequestConfig = {
       headers: { 'Content-Type': 'application/json' },

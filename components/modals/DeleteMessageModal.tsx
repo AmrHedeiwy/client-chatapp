@@ -74,7 +74,7 @@ const DeleteMessageModal = () => {
 
       if (error.redirect) router.push(error.redirect);
     }
-  }, [data, queryClient, socket, router, onClose]);
+  }, [data, conversationId, queryClient, socket, router, onClose]);
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>

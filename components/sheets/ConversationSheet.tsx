@@ -10,7 +10,9 @@ import {
   ChevronDown,
   ShieldAlert,
   UserRoundMinus,
-  ArrowLeft
+  ArrowLeft,
+  ShieldHalf,
+  ShieldCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Member } from '@/types';
@@ -430,15 +432,23 @@ const ConversationSheet = () => {
                 <div className="w-full pb-5 pt-5 sm:px-0 sm:pt-0">
                   {(members as Member[]).map((member, i) => {
                     const isMemberCurrentUser = member.userId === userProfile.userId;
-                    const isOtherMemberAdmin =
-                      !isMemberCurrentUser && adminIds?.includes(member.userId);
+                    const isMemberAdmin = adminIds?.includes(member.userId);
+
+                    const isMemberGroupCreator = createdBy === member.userId;
+
                     return (
                       <Fragment key={i}>
                         <div className="flex justify-between items-center">
-                          <div className="flex gap-x-2 items-start p-2">
+                          <div className="flex gap-x-2 items-start p-2 ">
                             {<Avatar imageUrl={member.profile.image} />}
-                            <div className="flex flex-col gap-y-1">
-                              <p className="font-semibold text-sm">
+                            <div className="flex flex-col gap-y-1 ">
+                              <p className="font-semibold text-sm flex gap-x-1">
+                                {isMemberAdmin && !isMemberGroupCreator && (
+                                  <ShieldHalf size={16} className="text-red-500" />
+                                )}
+                                {isMemberGroupCreator && (
+                                  <ShieldCheck size={16} className="text-indigo-500" />
+                                )}
                                 {userProfile.userId !== member.userId
                                   ? member.profile.username
                                   : 'You'}
@@ -453,7 +463,7 @@ const ConversationSheet = () => {
 
                           {isCurrentUserAdmin &&
                             !isMemberCurrentUser &&
-                            (!isOtherMemberAdmin || isCurrentUserGroupCreator) && (
+                            (!isMemberAdmin || isCurrentUserGroupCreator) && (
                               <DropdownMenu>
                                 <DropdownMenuTrigger>
                                   <ChevronDown
@@ -468,7 +478,7 @@ const ConversationSheet = () => {
                                       onClick={() =>
                                         onOpen('confirmAdminStatus', {
                                           adminStatus: {
-                                            setStatus: isOtherMemberAdmin
+                                            setStatus: isMemberAdmin
                                               ? 'demote'
                                               : 'promote',
                                             memberId: member.userId,
@@ -479,7 +489,7 @@ const ConversationSheet = () => {
                                     >
                                       <ShieldAlert size={18} className="text-red-600 " />
                                       <p>
-                                        {isOtherMemberAdmin
+                                        {isMemberAdmin
                                           ? 'Demote to member'
                                           : 'Promote to admin'}
                                       </p>

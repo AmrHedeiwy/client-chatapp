@@ -1,17 +1,13 @@
 'use client';
 
-import { Profile } from '@/types/index';
-import React, { ElementRef, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ElementRef, Fragment, useMemo, useRef } from 'react';
 import UserBox from './UserBox';
-import { InfiniteData, InfiniteQueryObserverResult } from '@tanstack/react-query';
-import { ShieldAlert } from 'lucide-react';
 import useListScroll from '@/hooks/useListScroll';
-import { Button } from '@/components/ui/button';
 import { useMain } from '@/hooks/useMain';
 
 const ContactList = () => {
   const topRef = useRef<ElementRef<'div'>>(null);
-  const { contacts, dispatchContacts } = useMain();
+  const { contacts } = useMain();
 
   const contactsArray = useMemo(() => {
     if (!contacts) return null;

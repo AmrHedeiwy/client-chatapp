@@ -1,7 +1,6 @@
 'use client';
 
 import { useModal } from '@/hooks/useUI';
-import Image from 'next/image';
 import { Dialog, DialogContent } from '../ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -202,6 +201,28 @@ const UserProfileModal = () => {
     }
   };
 
+  const onResetPassword = async () => {
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/password/forgot`;
+    const options: AxiosRequestConfig = {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    };
+
+    try {
+      const res = await axios.post(url, { email: userProfile.email }, options);
+
+      const { message, redirect } = res.data;
+
+      toast('success', message);
+
+      if (redirect) router.push(redirect);
+    } catch (e: any) {
+      const error = e.response.data.error;
+
+      toast('error', error?.message);
+    }
+  };
+
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
       if (rejectedFiles.length !== 0) {
@@ -224,7 +245,7 @@ const UserProfileModal = () => {
         setPreview(url);
       });
     },
-    [type]
+    [accountForm]
   );
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -257,7 +278,7 @@ const UserProfileModal = () => {
               <CardHeader>
                 <CardTitle>Account</CardTitle>
                 <CardDescription>
-                  Make changes to your account here. Click save when you're done.
+                  {`Make changes to your account here. Click save when you're done.`}
                 </CardDescription>
               </CardHeader>
               <Form {...accountForm}>
@@ -382,7 +403,10 @@ const UserProfileModal = () => {
               <CardHeader>
                 <CardTitle>Password</CardTitle>
                 <CardDescription>
-                  Change your password here. After saving, you'll be logged out.
+                  {`Change your password here. After saving, you'll be logged out.`}
+                  <br />
+                  Please note that if your account is regitered with a social media
+                  account, you need to initiate a password reset request.
                 </CardDescription>
               </CardHeader>
 
@@ -396,7 +420,11 @@ const UserProfileModal = () => {
                         <FormItem>
                           <FormLabel>Current Password</FormLabel>
                           <FormControl>
-                            <Input placeholder="Current Password" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Current Password"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -409,15 +437,29 @@ const UserProfileModal = () => {
                         <FormItem>
                           <FormLabel>New password</FormLabel>
                           <FormControl>
-                            <Input placeholder="New password" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="New password"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </CardContent>
-                  <CardFooter>
-                    <Button disabled={isLoadingPassword}>Save password</Button>
+                  <CardFooter className="justify-between">
+                    <Button type="submit" disabled={isLoadingPassword}>
+                      Save password
+                    </Button>
+                    <Button
+                      type="button"
+                      disabled={isLoadingPassword}
+                      variant={'outline'}
+                      onClick={() => onResetPassword()}
+                    >
+                      Reset password
+                    </Button>
                   </CardFooter>
                 </form>
               </Form>

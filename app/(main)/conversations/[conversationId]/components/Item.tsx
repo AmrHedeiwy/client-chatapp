@@ -234,7 +234,7 @@ const Item = ({
         isOwn && 'bg-green-50 dark:bg-emerald-950'
       )}
     >
-      {!isOwn && <div className="p-1">{messageHeader}</div>}
+      {!isOwn && <div className={cn(isGroup && 'p-1')}>{messageHeader}</div>}
       {fileUrl.startsWith('pending') ? (
         <Skeleton className={cn('w-64 h-64 ', isPDF && 'w-56 h-14')} />
       ) : (
