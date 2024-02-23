@@ -7,7 +7,7 @@ export async function middleware(req: NextRequest) {
   const cookie = cookies().get('connect.sid');
   if (!cookie) return NextResponse.redirect(new URL('/', req.url));
 
-  const url = 'http://localhost:5000/auth/session';
+  const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/session`;
   const options = {
     headers: {
       'Content-Type': 'application/json',
