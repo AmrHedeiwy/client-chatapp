@@ -8,9 +8,9 @@ export default function EmailVerificationMaskedEmail() {
   const [maskedEmail, setMaskedEmail] = useState<string>('');
 
   useEffect(() => {
-    if (!session || !session.user) return;
+    if (!session || !session.data || !session.data.user) return;
 
-    const email = session.user.email as string;
+    const email = session.data.user.email as string;
 
     // Extract the username and domain from the email
     const [username, domain] = email.split('@');
