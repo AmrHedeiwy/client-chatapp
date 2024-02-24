@@ -28,15 +28,14 @@ const Avatar: React.FC<AvatarProps> = ({
       <div
         className={cn(
           `
-          relative
-          inline-block
-          rounded-full
-          overflow-hidden
-          lg:h-14 
-          lg:w-14 
-          w-12 
-          h-12
-          `,
+            relative
+            inline-block
+            rounded-full
+            overflow-hidden
+            lg:h-14 
+            lg:w-14 
+            w-12 
+            h-12`,
           custom,
           current && 'ring ring-white',
           !imageUrl && 'bg-white'

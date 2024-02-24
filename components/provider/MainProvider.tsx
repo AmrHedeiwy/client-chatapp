@@ -319,7 +319,6 @@ const MainProvider = ({
       'update_user',
       (data: { userId: string; image?: string; username?: string }) => {
         const { userId, ...updatefields } = data;
-        console.log('call', data);
 
         if (contacts && contacts[userId]) {
           dispatchContacts({
