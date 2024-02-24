@@ -19,7 +19,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
         <Image
           src={`/images/${provider}.png`}
           alt={provider}
-          width={provider === 'google' ? 20 : 11}
+          width={provider === 'google' ? 20 : 20}
           height={1}
         />
 
