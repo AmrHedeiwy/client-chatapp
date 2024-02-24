@@ -7,7 +7,7 @@ import { useSocket } from '@/hooks/useSocket';
 import { cn } from '@/lib/utils';
 import { Conversation, Member, Message } from '@/types';
 import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useMemo } from 'react';
 
@@ -81,6 +81,23 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
     }
   }, [lastMessage, conversation, otherMember, userProfile]);
 
+  const lastMessageSentAt = useMemo(() => {
+    if (!lastMessage) return;
+
+    const date = new Date(lastMessage.sentAt);
+
+    if (isToday(date)) {
+      // If the message was sent today, format the time
+      return format(date, 'p');
+    } else if (isYesterday(date)) {
+      // If the message was sent yesterday, display "Yesterday"
+      return 'Yesterday';
+    } else {
+      // Otherwise, display the date
+      return format(date, 'dd/MM/yyy');
+    }
+  }, [lastMessage]);
+
   return (
     <div
       onClick={handleClick}
@@ -137,7 +154,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
                   font-light
                 "
               >
-                {format(new Date(lastMessage.sentAt), 'p')}
+                {lastMessageSentAt}
               </p>
             )}
           </div>
