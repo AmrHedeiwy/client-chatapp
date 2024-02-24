@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 interface SocialButtonProps {
-  provider: 'facebook' | 'google';
+  provider: 'google' | 'github';
   onClick: () => void;
   disabled: boolean;
 }

@@ -163,7 +163,7 @@ export default function AuthForm() {
     }
   };
 
-  const onOpenProvider = (action: 'google' | 'facebook') => {
+  const onOpenProvider = (action: 'google' | 'github') => {
     const width = window.innerWidth >= 768 ? 500 : window.innerWidth;
     const height = window.innerWidth >= 768 ? 600 : window.innerHeight;
 
@@ -337,16 +337,11 @@ export default function AuthForm() {
           </span>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 mb-10">
+        <div className="grid gap-6 sm:grid-cols-1 mb-10">
           <SocialButton
             disabled={isLoading}
             provider="google"
             onClick={() => onOpenProvider('google')}
-          />
-          <SocialButton
-            disabled={isLoading}
-            provider="facebook"
-            onClick={() => onOpenProvider('facebook')}
           />
         </div>
         <div className="flex justify-center items-center mt-6 ">

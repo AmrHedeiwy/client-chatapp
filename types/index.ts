@@ -8,7 +8,7 @@ export type Profile = {
 
 export type CurrentUser = Profile & {
   googleId: string | null;
-  facebookId: string | null;
+  githubId: string | null;
   email: string;
 };
 
