@@ -5,13 +5,22 @@ import Image from 'next/image';
 
 import { cn } from '@/lib/utils';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useSession } from '@/hooks/useSession';
 
 export default function CallBackPage() {
   const { provider, type } = useParams<{
     provider: 'google' | 'facebook';
     type: 'success' | 'error';
   }>();
+  const session = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!session) return router.replace('/');
+
+    if (session.data && !session.data.isCallbackProvider) window.close();
+  }, [session, router]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;

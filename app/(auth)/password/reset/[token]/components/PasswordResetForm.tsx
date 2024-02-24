@@ -24,6 +24,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FieldValues, useForm } from 'react-hook-form';
 import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from '@/hooks/useSession';
 
 const formSchema = z
   .object<FieldValues>({
@@ -50,20 +51,15 @@ const formSchema = z
 
 export default function PasswordResetForm() {
   const { token } = useParams<{ token: string }>();
+  const session = useSession();
 
   const router = useRouter();
 
   useEffect(() => {
-    (async () => {
-      const res = await fetch('http://localhost:5000/auth/session', {
-        credentials: 'include'
-      });
+    if (!session) return router.replace('/');
 
-      const { isPasswordReset } = await res.json();
-
-      if (!isPasswordReset) router.replace('/password/forgot');
-    })();
-  }, [router]);
+    if (session.data && !session.data.isPasswordReset) router.replace('/');
+  }, [session, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
