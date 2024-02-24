@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface SocialButtonProps {
   provider: 'facebook' | 'google';
@@ -10,31 +10,28 @@ interface SocialButtonProps {
 
 const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
   return (
-    <button
+    <Button
       type="button"
+      variant={'outline'}
       onClick={onClick}
-      className="py-2 rounded-xl bg-slate-700 hover:bg-slate-600 dark:bg-slate-50 dark:hover:bg-slate-200"
+      className="py-2 rounded-xl "
     >
       <div className="flex gap-4 justify-center">
         <Image
-          src={`/images/${provider}.png`}
+          src={`https://res.cloudinary.com/dco59dd66/image/upload/v1708780631/providers/${provider}.png`}
           alt={provider}
-          width={provider === 'google' ? 20 : 20}
+          width={provider === 'google' ? 30 : 11}
           height={1}
         />
 
         <span
           id="google"
-          className={cn(
-            `flex items-center font-medium text-sm tracking-wider `,
-            provider === 'google' && ' text-white dark:text-blue-500',
-            provider === 'facebook' && 'text-white dark:text-blue-700'
-          )}
+          className="flex items-center font-medium text-sm tracking-wider"
         >
           {provider}
         </span>
       </div>
-    </button>
+    </Button>
   );
 };
 
