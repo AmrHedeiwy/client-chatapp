@@ -6,7 +6,7 @@ Features:
 
 - Real-time messaging using Socket.io
 - Send attachments as messages
-- Delete & Edit messages in real time for all users
+- Messages can be edited, deleted, and viewed for status in real time for all users (Desktop only)
 - 1:1 conversation and group conversations
 - Member management (Remove, Role change member / Admin)
 - Infinite loading for messages in batches of 20 (tanstack/query)
@@ -24,19 +24,27 @@ Features:
 
 ### Cloning the repository
 
-`git clone https://github.com/AmrHedeiwy/client-chatapp`
+```
+git clone https://github.com/AmrHedeiwy/client-chatapp
+```
 
 ### Install packages
 
-`npm i`
+```
+npm i
+```
 
 ### Setup .env file
 
-`NEXT_PUBLIC_SERVER_URL`
+```
+NEXT_PUBLIC_SERVER_URL
+```
 
 ### Start the app
 
-`npm run dev`
+```
+npm run dev
+```
 
 ### Available commands
 
