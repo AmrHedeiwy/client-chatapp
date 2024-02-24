@@ -2,6 +2,8 @@
 
 This is a repository for Frontend Chat App: Next.js 13, React, Socket.io, Tailwind
 
+[Backend repository](https://github.com/AmrHedeiwy/server-chatapp)
+
 Features:
 
 - Real-time messaging using Socket.io
