@@ -16,14 +16,18 @@ import { useModal } from '@/hooks/useUI';
 import { toast } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosRequestConfig } from 'axios';
+import { useMain } from '@/hooks/useMain';
+import { useSession } from '@/hooks/useSession';
 
 const DeleteMessageModal = () => {
   const { isOpen, onClose, type } = useModal();
   const router = useRouter();
+  const session = useSession();
 
   const isModalOpen = isOpen && type === 'deleteAccount';
 
   const onDelete = useCallback(async () => {
+    if (!session) return;
     const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/users/delete`;
     const config: AxiosRequestConfig = {
       headers: {
@@ -35,6 +39,7 @@ const DeleteMessageModal = () => {
     try {
       await axios.delete(url, config);
 
+      session.setSession(null);
       router.replace('/');
     } catch (e: any) {
       const error = e.response.data.error;
@@ -45,7 +50,7 @@ const DeleteMessageModal = () => {
     } finally {
       onClose();
     }
-  }, [router, onClose]);
+  }, [router, onClose, session]);
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>

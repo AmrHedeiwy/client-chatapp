@@ -45,12 +45,12 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
       return false;
     }
 
-    if (!userProfile.userId) {
+    if (!userProfile) {
       return false;
     }
 
     return unseenMessagesCount === 0 || lastMessage.sender.userId === userProfile.userId;
-  }, [userProfile.userId, lastMessage, unseenMessagesCount]);
+  }, [userProfile, lastMessage, unseenMessagesCount]);
 
   const lastMessageText = useMemo(() => {
     if (!lastMessage)

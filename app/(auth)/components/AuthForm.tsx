@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -81,10 +81,10 @@ export default function AuthForm() {
   useEffect(() => {
     if (!session) return;
 
-    const { user } = session;
+    const { data } = session;
 
-    if (user && user.isVerified) router.push('/conversations');
-    if (user && !user.isVerified) router.push('/email/verify');
+    if (!!data && !!data.user && data.user.isVerified) router.push('/conversations');
+    if (!!data && !!data.user && !data.user.isVerified) router.push('/email/verify');
   }, [session, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({

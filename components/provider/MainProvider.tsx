@@ -23,7 +23,7 @@ type MainContextType = {
   dispatchContacts: Dispatch<contactActionType>;
 };
 
-type SocketProviderProps = {
+type MainProviderProps = {
   intialConversations: GroupedConversations | null;
   intialContacts: GroupedContacts | null;
   currentUserProfile: CurrentUser;
@@ -98,7 +98,7 @@ const MainProvider = ({
   intialContacts,
   currentUserProfile,
   children
-}: SocketProviderProps) => {
+}: MainProviderProps) => {
   const { socket } = useSocket();
   const queryClient = useQueryClient();
 
@@ -280,7 +280,7 @@ const MainProvider = ({
   const [contacts, dispatchContacts] = useReducer(contactsReducer, intialContacts);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !userProfile) return;
 
     socket.on('new_group_chat', async (data: { conversation: Conversation }) => {
       data.conversation.otherMembers = data.conversation.members.filter(
