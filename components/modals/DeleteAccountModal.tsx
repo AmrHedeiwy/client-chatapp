@@ -42,7 +42,7 @@ const DeleteMessageModal = () => {
       toast('error', error.message);
 
       if (error.redirect) router.push(error.redirect);
-
+    } finally {
       onClose();
     }
   }, [router, onClose]);
