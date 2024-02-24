@@ -35,6 +35,7 @@ export default function AuthForm() {
   const router = useRouter();
   const [variant, setVariant] = useState<Variant>('LOGIN');
   const session = useSession();
+  const [isLoading, setIsLoading] = useState(false);
 
   const formSchema = z
     .object<FieldValues>({
@@ -98,8 +99,6 @@ export default function AuthForm() {
       termsOfAgreement: false
     }
   });
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const toggleVariant = useCallback(() => {
     if (variant === 'LOGIN') setVariant('REGISTER');
@@ -339,8 +338,16 @@ export default function AuthForm() {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 mb-10">
-          <SocialButton provider="google" onClick={() => onOpenProvider('google')} />
-          <SocialButton provider="facebook" onClick={() => onOpenProvider('facebook')} />
+          <SocialButton
+            disabled={isLoading}
+            provider="google"
+            onClick={() => onOpenProvider('google')}
+          />
+          <SocialButton
+            disabled={isLoading}
+            provider="facebook"
+            onClick={() => onOpenProvider('facebook')}
+          />
         </div>
         <div className="flex justify-center items-center mt-6 ">
           <div className="text-sm text-gray-500 dark:text-gray-400">

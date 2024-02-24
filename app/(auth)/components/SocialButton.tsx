@@ -6,15 +6,17 @@ import { Button } from '@/components/ui/button';
 interface SocialButtonProps {
   provider: 'facebook' | 'google';
   onClick: () => void;
+  disabled: boolean;
 }
 
-const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
+const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick, disabled }) => {
   return (
     <Button
       type="button"
       variant={'outline'}
+      className="rounded-xl"
       onClick={onClick}
-      className="py-2 rounded-xl "
+      disabled={disabled}
     >
       <div className="flex gap-4 justify-center">
         <Image
