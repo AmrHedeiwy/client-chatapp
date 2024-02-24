@@ -22,6 +22,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
           width={provider === 'google' ? 20 : 11}
           height={1}
         />
+
         <span
           id="google"
           className={cn(

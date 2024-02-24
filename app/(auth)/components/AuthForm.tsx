@@ -99,7 +99,7 @@ export default function AuthForm() {
     }
   });
 
-  const isLoading = form.formState.isSubmitting;
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleVariant = useCallback(() => {
     if (variant === 'LOGIN') setVariant('REGISTER');
@@ -109,6 +109,7 @@ export default function AuthForm() {
   }, [variant, form]);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
     const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/${
       variant === 'LOGIN' ? 'sign-in' : 'register'
     }`;
@@ -133,10 +134,13 @@ export default function AuthForm() {
       } else {
         toast('error', error.message);
       }
+    } finally {
+      setTimeout(() => setIsLoading(false), 2000);
     }
   };
 
   const onCreateFakeAccount = async () => {
+    setIsLoading(true);
     const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/createFakeAccount`;
     const config: AxiosRequestConfig = {
       headers: { 'Content-Type': 'application/json' },
@@ -147,6 +151,7 @@ export default function AuthForm() {
       const res = await axios.post(url, {}, config);
 
       toast('success', res.data.message);
+
       if (res.data.redirect) router.push(res.data.redirect);
     } catch (e: any) {
       const error = e.response.data.error;
@@ -154,6 +159,8 @@ export default function AuthForm() {
       toast('error', error.message);
 
       if (error.redirect) router.push(error.redirect);
+    } finally {
+      setTimeout(() => setIsLoading(false), 2000);
     }
   };
 
@@ -345,8 +352,19 @@ export default function AuthForm() {
         </div>
       </form>
       <div className="flex justify-center mt-8">
-        <Button className="" variant={'outline'} onClick={() => onCreateFakeAccount()}>
-          Create a fake account?
+        <Button
+          variant={'outline'}
+          onClick={() => onCreateFakeAccount()}
+          disabled={isLoading}
+        >
+          {!isLoading ? (
+            ' Create a fake account?'
+          ) : (
+            <>
+              <Loader2 className="h-6 w-6 text-black dark:text-white animate-spin my-4 mr-1" />
+              <p>Please wait</p>
+            </>
+          )}
         </Button>
       </div>
     </Form>
