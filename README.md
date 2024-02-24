@@ -24,17 +24,19 @@ Features:
 
 ### Cloning the repository
 
+`git clone https://github.com/AmrHedeiwy/client-chatapp`
+
 ### Install packages
 
-npm i
+`npm i`
 
 ### Setup .env file
 
-NEXT_PUBLIC_SERVER_URL
+`NEXT_PUBLIC_SERVER_URL`
 
 ### Start the app
 
-npm run dev
+`npm run dev`
 
 ### Available commands
 
