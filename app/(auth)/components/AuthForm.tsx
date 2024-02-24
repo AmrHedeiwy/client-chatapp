@@ -28,7 +28,6 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 
 import SocialButton from '@/app/(auth)/components/SocialButton';
-import createFakeAccount from '@/actions/createFakeAccount';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
@@ -134,6 +133,27 @@ export default function AuthForm() {
       } else {
         toast('error', error.message);
       }
+    }
+  };
+
+  const onCreateFakeAccount = async () => {
+    const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/createFakeAccount`;
+    const config: AxiosRequestConfig = {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    };
+
+    try {
+      const res = await axios.post(url, {}, config);
+
+      toast('success', res.data.message);
+      if (res.data.redirect) router.push(res.data.redirect);
+    } catch (e: any) {
+      const error = e.response.data.error;
+
+      toast('error', error.message);
+
+      if (error.redirect) router.push(error.redirect);
     }
   };
 
@@ -325,7 +345,7 @@ export default function AuthForm() {
         </div>
       </form>
       <div className="flex justify-center mt-8">
-        <Button className="" variant={'outline'} onClick={() => createFakeAccount()}>
+        <Button className="" variant={'outline'} onClick={() => onCreateFakeAccount()}>
           Create a fake account?
         </Button>
       </div>
