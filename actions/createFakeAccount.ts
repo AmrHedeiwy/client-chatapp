@@ -11,9 +11,9 @@ const createFakeAccount = async () => {
   try {
     const res = await axios.post(url, {}, config);
 
-    toast('success', res.data.message);
-
     if (res.data.redirect) location.href = res.data.redirect;
+
+    toast('success', res.data.message);
   } catch (e: any) {
     const error = e.response.data.error;
 

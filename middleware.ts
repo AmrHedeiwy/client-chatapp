@@ -8,7 +8,7 @@ export async function middleware(req: NextRequest) {
   if (!cookie) return NextResponse.redirect(new URL('/', req.url));
 
   const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/session`;
-  const options = {
+  const options: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
       Cookie: `${cookie.name}=${cookie.value}`

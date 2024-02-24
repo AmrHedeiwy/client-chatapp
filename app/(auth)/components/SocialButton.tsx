@@ -17,7 +17,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
     >
       <div className="flex gap-4 justify-center">
         <Image
-          src={`/images/${provider}.png`}
+          src={`/images/google.png`}
           alt={provider}
           width={provider === 'google' ? 20 : 11}
           height={1}
