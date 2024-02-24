@@ -120,7 +120,7 @@ const ConversationList = () => {
           <>
             {!conversationsArray || conversationsArray?.length === 0 ? (
               <p className="text-xs text-center italic font-semibold my-4">
-                Looks like you don't have any chats, find users to chat with in the{' '}
+                {`Looks like you don't have any chats, find users to chat with in the `}
                 {
                   <a
                     className="underline text-blue-500 cursor-pointer"
