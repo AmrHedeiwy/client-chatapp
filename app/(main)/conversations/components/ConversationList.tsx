@@ -16,14 +16,16 @@ import { MessagesSquare } from 'lucide-react';
 
 import ConversationBox from './ConversationBox';
 import { cn } from '@/lib/utils';
-import Avatar from '@/components/Avatar';
 import SettingsToggle from '@/components/SettingsToggle';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 const ConversationList = () => {
   const { onlineSockets } = useSocket();
   const { isOpen } = useConversationParams();
-  const { conversations, userProfile } = useMain();
+  const { conversations } = useMain();
   const { onOpen } = useModal();
+  const router = useRouter();
 
   const topRef = useRef<ElementRef<'div'>>(null);
 
@@ -45,7 +47,11 @@ const ConversationList = () => {
       setFilteredItems(() => {
         return (
           conversationsArray?.filter((conversation) => {
-            const conversationName = (conversation.name as string).toLowerCase();
+            const conversationName = (
+              (conversation.isGroup
+                ? conversation.name
+                : conversation.otherMember?.profile.username) as string
+            ).toLowerCase();
 
             return conversationName.startsWith(search.toLowerCase());
           }) ?? null
@@ -111,7 +117,26 @@ const ConversationList = () => {
             );
           })
         ) : (
-          <p className="flex justify-center items-center text-xs my-4">No chats found</p>
+          <>
+            {!conversationsArray || conversationsArray?.length === 0 ? (
+              <p className="text-xs text-center italic font-semibold my-4">
+                Looks like you don't have any chats, find users to chat with in the{' '}
+                {
+                  <a
+                    className="underline text-blue-500 cursor-pointer"
+                    onClick={() => router.push('/contacts')}
+                  >
+                    contacts
+                  </a>
+                }{' '}
+                page
+              </p>
+            ) : (
+              <p className="flex justify-center items-center text-xs my-4">
+                No chats found
+              </p>
+            )}
+          </>
         )}
       </div>
     </div>
