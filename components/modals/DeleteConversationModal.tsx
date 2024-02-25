@@ -18,12 +18,14 @@ import { AlertTriangle } from 'lucide-react';
 import useConversationParams from '@/hooks/useConversationParams';
 import { useMain } from '@/hooks/useMain';
 import { toast } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 
 const DeleteConversationModal = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { isOpen, type, onClose, data } = useModal();
   const { conversationId } = useConversationParams();
   const { dispatchConversations } = useMain();
+  const queryclient = useQueryClient();
   const router = useRouter();
 
   const isModalOpen = isOpen && type === 'deleteConversation';
@@ -50,6 +52,12 @@ const DeleteConversationModal = () => {
         type: 'remove',
         payload: { removeInfo: { conversationId } }
       });
+
+      queryclient.removeQueries({ queryKey: ['messages', conversationId] });
+
+      conversation?.onCloseSheet();
+
+      router.replace('/conversations');
     } catch (e: any) {
       const error = e.response.data.error;
 
@@ -59,7 +67,7 @@ const DeleteConversationModal = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [conversation, conversationId, dispatchConversations, router]);
+  }, [conversation, conversationId, dispatchConversations, onClose, router]);
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>

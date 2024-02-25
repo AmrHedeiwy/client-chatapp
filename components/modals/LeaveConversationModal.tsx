@@ -18,6 +18,7 @@ import { AlertTriangle } from 'lucide-react';
 import useConversationParams from '@/hooks/useConversationParams';
 import { useMain } from '@/hooks/useMain';
 import { toast } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 
 const RemoveConversationModal = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,6 +26,7 @@ const RemoveConversationModal = () => {
   const { isOpen, type, onClose, data } = useModal();
   const { conversationId } = useConversationParams();
   const { dispatchConversations } = useMain();
+  const queryclient = useQueryClient();
 
   const isModalOpen = isOpen && type === 'removeConversation';
 
@@ -47,6 +49,12 @@ const RemoveConversationModal = () => {
           removeInfo: { conversationId }
         }
       });
+
+      queryclient.removeQueries({ queryKey: ['messages', conversationId] });
+
+      conversation?.onCloseSheet();
+
+      router.replace('/conversations');
     } catch (e: any) {
       const error = e.response.data.error;
 

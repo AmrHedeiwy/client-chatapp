@@ -23,7 +23,12 @@ type ModalData = {
   viewImage?: { image: string };
   member?: { username: string; userId: string };
   adminStatus?: { setStatus: 'promote' | 'demote'; memberId: string; username: string };
-  conversation?: { memberId: string; name: string; isGroup?: boolean };
+  conversation?: {
+    memberId: string;
+    name: string;
+    isGroup?: boolean;
+    onCloseSheet: () => void;
+  };
 };
 
 type ModalStore = {

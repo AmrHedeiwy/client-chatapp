@@ -328,7 +328,7 @@ const ConversationSheet = () => {
             </Form>
           </>
         )}
-        {!edit.isEditing && isGroup && (
+        {!edit.isEditing && isGroup && isCurrentUserAdmin && (
           <DropdownMenu>
             <DropdownMenuTrigger>
               <MoreVertical
@@ -367,7 +367,7 @@ const ConversationSheet = () => {
                 className={cn('relative', !isGroup && 'cursor-default')}
                 type="button"
                 onClick={() => {
-                  if (isGroup)
+                  if (isGroup && isCurrentUserAdmin)
                     setEdit({ isEditing: true, field: 'file', action: 'changeImage' });
                 }}
               >
@@ -403,13 +403,15 @@ const ConversationSheet = () => {
                       ? onOpen('deleteConversation', {
                           conversation: {
                             name: conversation.name,
-                            isGroup
+                            isGroup,
+                            onCloseSheet: onClose
                           }
                         })
                       : onOpen('removeConversation', {
                           conversation: {
                             memberId: userProfile.userId,
-                            name: conversation.name
+                            name: conversation.name,
+                            onCloseSheet: onClose
                           }
                         })
                   }

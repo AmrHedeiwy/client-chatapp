@@ -209,7 +209,7 @@ const Item = ({
   const messageContent = content && !isEditing && (
     <div
       className={cn(
-        'break-words whitespace-pre-wrap lg:max-w-[450px] max-w-[250px] min-w-[160px] flex flex-col p-2 bg-zinc-100 dark:bg-zinc-800 rounded-md',
+        'break-words select-none whitespace-pre-wrap lg:max-w-[450px] max-w-[250px] min-w-[160px] flex flex-col p-2 bg-zinc-100 dark:bg-zinc-800 rounded-md',
         isOwn && 'bg-green-50 dark:bg-emerald-950',
         isOwn && isGroup && 'min-w-[130px]'
       )}

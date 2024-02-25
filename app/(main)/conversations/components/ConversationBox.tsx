@@ -6,7 +6,7 @@ import { useMain } from '@/hooks/useMain';
 import { useSocket } from '@/hooks/useSocket';
 import { cn } from '@/lib/utils';
 import { Conversation, Member, Message } from '@/types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, isToday, isYesterday } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useMemo } from 'react';
@@ -22,6 +22,7 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
   const otherMember = !conversation.isGroup ? conversation.otherMember : null;
   const { conversationId: activeConversationId } = useConversationParams();
   const { socket } = useSocket();
+  const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: ['messages', conversation.conversationId],
@@ -38,6 +39,31 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
 
   const handleClick = useCallback(() => {
     router.push(`/conversations/${conversation.conversationId}`);
+    const data = queryClient.getQueryData([
+      'messages',
+      conversation.conversationId
+    ]) as any;
+
+    const unseenMessagesCount = data.unseenMessagesCount;
+    if (unseenMessagesCount > 0 && !!socket) {
+      const messages = data.pages[0].items;
+
+      socket.emit('update_status', {
+        type: 'seen',
+        messages: messages.slice(0, unseenMessagesCount),
+        seenAt: Date.now()
+      });
+
+      queryClient.setQueryData(
+        ['messages', conversation.conversationId],
+        (prevData: any) => {
+          return {
+            ...prevData,
+            unseenMessagesCount: 0
+          };
+        }
+      );
+    }
   }, [conversation, router]);
 
   const hasSeen = useMemo(() => {

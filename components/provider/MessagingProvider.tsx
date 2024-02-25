@@ -280,29 +280,6 @@ const MessagingProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    if (!!activeConversationId) {
-      const data = queryClient.getQueryData(['messages', activeConversationId]) as any;
-      if (!data) return;
-
-      const unseenMessagesCount = data.unseenMessagesCount;
-      if (unseenMessagesCount > 0 && !!socket) {
-        const messages = data.pages[0].items;
-
-        socket.emit('update_status', {
-          type: 'seen',
-          messages: messages.slice(0, unseenMessagesCount),
-          seenAt: Date.now()
-        });
-
-        queryClient.setQueryData(['messages', activeConversationId], (prevData: any) => {
-          return {
-            ...prevData,
-            unseenMessagesCount: 0
-          };
-        });
-      }
-    }
-
     return () => {
       socket?.off('new_message');
       socket?.off('set_status');
