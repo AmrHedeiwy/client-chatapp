@@ -67,7 +67,7 @@ const DeleteConversationModal = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [conversation, conversationId, dispatchConversations, onClose, router]);
+  }, [conversation, conversationId, dispatchConversations, queryclient, onClose, router]);
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={onClose}>

@@ -39,31 +39,6 @@ const ConversationBox: React.FC<ConversationBoxProps> = ({ conversation, isOnlin
 
   const handleClick = useCallback(() => {
     router.push(`/conversations/${conversation.conversationId}`);
-    const data = queryClient.getQueryData([
-      'messages',
-      conversation.conversationId
-    ]) as any;
-
-    const unseenMessagesCount = data.unseenMessagesCount;
-    if (unseenMessagesCount > 0 && !!socket) {
-      const messages = data.pages[0].items;
-
-      socket.emit('update_status', {
-        type: 'seen',
-        messages: messages.slice(0, unseenMessagesCount),
-        seenAt: Date.now()
-      });
-
-      queryClient.setQueryData(
-        ['messages', conversation.conversationId],
-        (prevData: any) => {
-          return {
-            ...prevData,
-            unseenMessagesCount: 0
-          };
-        }
-      );
-    }
   }, [conversation, router]);
 
   const hasSeen = useMemo(() => {
