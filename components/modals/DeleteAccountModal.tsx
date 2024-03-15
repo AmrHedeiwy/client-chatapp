@@ -16,7 +16,6 @@ import { useModal } from '@/hooks/useUI';
 import { toast } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import axios, { AxiosRequestConfig } from 'axios';
-import { useMain } from '@/hooks/useMain';
 import { useSession } from '@/hooks/useSession';
 
 const DeleteMessageModal = () => {

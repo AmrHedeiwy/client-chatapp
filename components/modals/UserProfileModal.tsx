@@ -106,6 +106,8 @@ const UserProfileModal = () => {
   const isLoadingAccount = accountForm.formState.isSubmitting;
   const isLoadingPassword = passwordForm.formState.isSubmitting;
 
+  const isFakeAccount = userProfile.email.includes('@faker.com');
+
   const onSubmitAccount = async (values: z.infer<typeof accountSchema>) => {
     const { file, username, email } = values;
 
@@ -263,12 +265,24 @@ const UserProfileModal = () => {
   return (
     <Dialog open={isModalOpen} onOpenChange={onClose}>
       <DialogContent className="">
+        {isFakeAccount && (
+          <div className="flex justify-center mt-2">
+            <p className="text-sm text-muted-foreground">
+              Important: Fake accounts are unable to change their password. You must
+              change your email first in order to change your password.
+            </p>
+          </div>
+        )}
         <Tabs defaultValue={activeTab} className="mt-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="account" onClick={() => setActiveTab('account')}>
               Account
             </TabsTrigger>
-            <TabsTrigger value="password" onClick={() => setActiveTab('password')}>
+            <TabsTrigger
+              value="password"
+              onClick={() => setActiveTab('password')}
+              disabled={isFakeAccount}
+            >
               Password
             </TabsTrigger>
           </TabsList>
