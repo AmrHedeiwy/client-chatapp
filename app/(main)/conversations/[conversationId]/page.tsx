@@ -35,7 +35,6 @@ const ConversationId = () => {
     if (unseenMessagesCount > 0 && !!socket) {
       const messages = data.pages[0].items;
 
-      console.log(messages.slice(0, unseenMessagesCount))
       socket.emit('update_status', {
         type: 'seen',
         messages: messages.slice(0, unseenMessagesCount),
