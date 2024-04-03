@@ -63,10 +63,7 @@ function contactsReducer(contacts: GroupedContacts | null, action: contactAction
       const addedContact = { ...contacts, [contact.userId]: contact };
 
       let contactsArray = Object.values(addedContact);
-      contactsArray.sort(
-        (contacta, contactb) =>
-          parseInt(contacta.username.charAt(0)) - parseInt(contactb.username.charAt(0))
-      );
+      contactsArray.sort((a, b) => a.username.localeCompare(b.username));
 
       return contactsArray.reduce((acc: GroupedContacts, contact) => {
         acc[contact.userId] = contact;
