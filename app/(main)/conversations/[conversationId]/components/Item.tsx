@@ -5,7 +5,7 @@ import Avatar from '@/components/Avatar';
 import { format } from 'date-fns';
 import { cn, toast } from '@/lib/utils';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -33,6 +33,7 @@ import { useSocket } from '@/hooks/useSocket';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMain } from '@/hooks/useMain';
 import { Skeleton } from '@/components/ui/skeleton';
+import useOnClickOutside from '@/hooks/useOnClickOutside';
 
 interface ItemProps {
   messageId: string;
@@ -80,9 +81,10 @@ const Item = ({
   const { socket } = useSocket();
   const queryClient = useQueryClient();
   const { userProfile } = useMain();
+  const messageRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const handleKeyDown = (event: any) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' || event.keyCode === 27) {
         setIsEditing(false);
       }
@@ -90,8 +92,10 @@ const Item = ({
 
     window.addEventListener('keydown', handleKeyDown);
 
-    return () => window.removeEventListener('keyDown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  useOnClickOutside(messageRef, () => setIsEditing(false));
 
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
@@ -271,7 +275,7 @@ const Item = ({
   );
 
   return (
-    <div className={container} id={messageId}>
+    <div className={container} id={messageId} ref={messageRef}>
       {isGroup && !isOwn && !isSameSenderFromPreviousMessage && (
         <div className={avatar}>
           <Avatar custom="lg:w-10 lg:h-10 w-8 h-8" imageUrl={sender.image} />
@@ -319,9 +323,6 @@ const Item = ({
                   Save
                 </Button>
               </form>
-              <span className="text-[10px] mt-1 text-zinc-400">
-                Press escape to cancel, enter to save
-              </span>
             </Form>
           )}
         </ContextMenuTrigger>

@@ -3,7 +3,6 @@ import React from 'react';
 import { SocketProvider } from '../../components/provider/SocketProvider';
 
 import { QueryProvider } from '@/components/provider/QueryProvider';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import getConversations from '../../actions/getConversations';
 import MessagingProvider from '../../components/provider/MessagingProvider';
 import { QueryClient, dehydrate, HydrationBoundary } from '@tanstack/react-query';
