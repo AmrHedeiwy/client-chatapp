@@ -121,7 +121,7 @@ const ConversationList = () => {
           <>
             {!conversationsArray || conversationsArray?.length === 0 ? (
               <p className="text-xs text-center italic font-semibold my-4">
-                page Looks like you don&apos;t have any chats, start chatting with people{' '}
+                Looks like you don&apos;t have any chats, start chatting with people{' '}
                 <Link
                   href="/contacts"
                   className="text-blue-600 hover:text-blue-500 hover:underline"
