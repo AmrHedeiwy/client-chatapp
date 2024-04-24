@@ -1,12 +1,12 @@
 import './globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 
-import type { Metadata } from 'next';
-
 import AuthProvider from '../components/provider/AuthProvider';
 import { ToastContainer } from 'react-toastify';
 import ThemeProvider from '../components/provider/ThemeProvider';
-import { cn } from '@/lib/utils';
+import { cn, constructMetadata } from '@/lib/utils';
+
+export const metadata = constructMetadata();
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (

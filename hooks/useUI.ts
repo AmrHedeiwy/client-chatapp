@@ -15,7 +15,7 @@ export type ModalType =
   | 'deleteConversation'
   | 'deleteAccount';
 
-type ModalData = {
+interface ModalData {
   contact?: { username: string; contactId: string };
   messageStatus?: { status: MessageStatus[]; isGroup: boolean };
   deleteMessage?: { messageId: string };
@@ -29,31 +29,31 @@ type ModalData = {
     isGroup?: boolean;
     onCloseSheet: () => void;
   };
-};
+}
 
-type ModalStore = {
+interface ModalStore {
   type: ModalType | null;
   data: ModalData;
   isOpen: boolean;
   onOpen: (type: ModalType, data?: any) => void;
   onClose: () => void;
-};
+}
 
 export type SheetType = 'conversationProfile';
 
-type SheetData = {
+interface SheetData {
   conversationProfile?: {
     conversationId: string;
   };
-};
+}
 
-type SheetStore = {
+interface SheetStore {
   type: SheetType | null;
   data: SheetData;
   isOpen: boolean;
   onOpen: (type: SheetType, data?: any) => void;
   onClose: () => void;
-};
+}
 
 export const useModal = create<ModalStore>((set) => ({
   type: null,
