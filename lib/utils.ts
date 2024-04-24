@@ -27,8 +27,8 @@ export const toast = (
 export function constructMetadata({
   title = 'Orozo - chat in peace',
   description = 'Orozo is a user-friendly chat application designed for seamless communication and collaboration.',
-  image = '/thumbnail.png',
-  icons = '/favicon.ico',
+  image = '/images/thumbnail.png',
+  icons = '/images/favicon.ico',
   noIndex = false
 }: {
   title?: string;

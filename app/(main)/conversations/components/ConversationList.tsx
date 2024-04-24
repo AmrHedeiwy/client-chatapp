@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import SettingsToggle from '@/components/SettingsToggle';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const ConversationList = () => {
   const { onlineSockets } = useSocket();
@@ -120,16 +121,13 @@ const ConversationList = () => {
           <>
             {!conversationsArray || conversationsArray?.length === 0 ? (
               <p className="text-xs text-center italic font-semibold my-4">
-                {`Looks like you don't have any chats, find users to chat with in the `}
-                {
-                  <a
-                    className="underline text-blue-500 cursor-pointer"
-                    onClick={() => router.push('/contacts')}
-                  >
-                    contacts
-                  </a>
-                }{' '}
-                page
+                page Looks like you don&apos;t have any chats, start chatting with people{' '}
+                <Link
+                  href="/contacts"
+                  className="text-blue-600 hover:text-blue-500 hover:underline"
+                >
+                  now
+                </Link>
               </p>
             ) : (
               <p className="flex justify-center items-center text-xs my-4">
